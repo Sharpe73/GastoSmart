@@ -32,17 +32,19 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// 🔹 Rutas base (luego las moveremos a /routes)
+// 🔹 Ruta base
 app.get("/", (req, res) => {
   res.send("Bienvenido a GastoSmart API 🚀");
 });
 
-// 🔹 Importar rutas (aún vacías, las crearemos después)
+// 🔹 Importar rutas
 const authRoutes = require("./routes/authRoutes");
 const gastoRoutes = require("./routes/gastoRoutes");
+const categoriaRoutes = require("./routes/categoriaRoutes");
 
 app.use("/auth", authRoutes);
 app.use("/gastos", gastoRoutes);
+app.use("/categorias", categoriaRoutes);
 
 // 🔹 Iniciar servidor
 const PORT = process.env.PORT || 3000;
