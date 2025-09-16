@@ -3,17 +3,19 @@ const pool = require("../models/db");
 // Crear un gasto
 async function crearGasto(req, res) {
   try {
-    const { usuario_id, descripcion, monto, fecha, categoria } = req.body;
+    const { usuario_id, descripcion, monto, fecha, categoria_id } = req.body;
 
-    if (!usuario_id || !descripcion || !monto || !fecha) {
-      return res.status(400).json({ mensaje: "Todos los campos obligatorios deben ser enviados" });
+    if (!usuario_id || !descripcion || !monto) {
+      return res
+        .status(400)
+        .json({ mensaje: "usuario_id, descripción y monto son obligatorios" });
     }
 
     const nuevoGasto = await pool.query(
-      `INSERT INTO gastos (usuario_id, descripcion, monto, fecha, categoria)
+      `INSERT INTO gastos (usuario_id, descripcion, monto, fecha, categoria_id)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [usuario_id, descripcion, monto, fecha, categoria || null]
+      [usuario_id, descripcion, monto, fecha || new Date(), categoria_id || null]
     );
 
     res.status(201).json({
@@ -32,11 +34,17 @@ async function listarGastos(req, res) {
     const { usuario_id } = req.params;
 
     if (!usuario_id) {
-      return res.status(400).json({ mensaje: "El usuario_id es obligatorio" });
+      return res
+        .status(400)
+        .json({ mensaje: "El usuario_id es obligatorio" });
     }
 
     const gastos = await pool.query(
-      "SELECT * FROM gastos WHERE usuario_id = $1 ORDER BY fecha DESC",
+      `SELECT g.*, c.nombre AS categoria_nombre
+       FROM gastos g
+       LEFT JOIN categorias c ON g.categoria_id = c.id
+       WHERE g.usuario_id = $1
+       ORDER BY g.fecha DESC`,
       [usuario_id]
     );
 
@@ -55,7 +63,7 @@ async function listarGastos(req, res) {
 async function actualizarGasto(req, res) {
   try {
     const { id } = req.params;
-    const { descripcion, monto, fecha, categoria } = req.body;
+    const { descripcion, monto, fecha, categoria_id } = req.body;
 
     const gasto = await pool.query("SELECT * FROM gastos WHERE id = $1", [id]);
     if (gasto.rows.length === 0) {
@@ -64,9 +72,9 @@ async function actualizarGasto(req, res) {
 
     const actualizado = await pool.query(
       `UPDATE gastos 
-       SET descripcion = $1, monto = $2, fecha = $3, categoria = $4
+       SET descripcion = $1, monto = $2, fecha = $3, categoria_id = $4
        WHERE id = $5 RETURNING *`,
-      [descripcion, monto, fecha, categoria, id]
+      [descripcion, monto, fecha || new Date(), categoria_id || null, id]
     );
 
     res.json({
