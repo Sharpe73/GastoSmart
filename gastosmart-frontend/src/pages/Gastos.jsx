@@ -14,7 +14,8 @@ import {
   Alert,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
-import { useLocation } from "react-router-dom"; // 👈 para saber desde qué categoría entramos
+import { useLocation } from "react-router-dom"; 
+import { jwtDecode } from "jwt-decode"; // 👈 importar para obtener usuario del token
 import API from "../api";
 
 function Gastos() {
@@ -27,7 +28,7 @@ function Gastos() {
 
   const token = localStorage.getItem("token");
   const location = useLocation();
-  const categoriaSeleccionada = location.state?.categoriaId || ""; // 👈 recibimos la categoría al navegar
+  const categoriaSeleccionada = location.state?.categoriaId || "";
 
   // 🔹 Cargar categorías y gastos
   useEffect(() => {
@@ -42,9 +43,10 @@ function Gastos() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Si venimos de una categoría específica, filtramos
         if (categoriaSeleccionada) {
-          setGastos(gastoRes.data.filter(g => g.categoria_id === categoriaSeleccionada));
+          setGastos(
+            gastoRes.data.filter((g) => g.categoria_id === categoriaSeleccionada)
+          );
           setCategoriaId(categoriaSeleccionada);
         } else {
           setGastos(gastoRes.data);
@@ -65,9 +67,16 @@ function Gastos() {
     }
 
     try {
+      const decoded = jwtDecode(token); // 👈 obtenemos usuario_id
       const res = await API.post(
         "/gastos",
-        { descripcion, monto, categoria_id: categoriaId },
+        {
+          usuario_id: decoded.id,
+          descripcion,
+          monto,
+          categoria_id: categoriaId,
+          fecha: new Date().toISOString().split("T")[0], // 👈 YYYY-MM-DD
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
