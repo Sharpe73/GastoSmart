@@ -17,54 +17,74 @@ import {
   Alert,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
-import API from "../api";
+import {
+  getCategorias,
+  createCategoria,
+  updateCategoria,
+  deleteCategoria,
+} from "../services/categoriaService";
 
 function Categorias() {
   const [categorias, setCategorias] = useState([]);
   const [open, setOpen] = useState(false);
   const [nuevaCategoria, setNuevaCategoria] = useState("");
+  const [editando, setEditando] = useState(null);
   const [error, setError] = useState("");
-
-  const token = localStorage.getItem("token");
 
   // 🔹 Obtener categorías reales al cargar
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
-        const res = await API.get("/categorias", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCategorias(res.data);
+        const data = await getCategorias();
+        setCategorias(data);
       } catch (err) {
         setError("Error al cargar categorías");
       }
     };
-
     fetchCategorias();
-  }, [token]);
+  }, []);
 
   // 🔹 Abrir/Cerrar modal
-  const handleOpen = () => setOpen(true);
+  const handleOpen = (categoria = null) => {
+    setEditando(categoria);
+    setNuevaCategoria(categoria ? categoria.nombre : "");
+    setOpen(true);
+  };
   const handleClose = () => {
     setOpen(false);
     setNuevaCategoria("");
+    setEditando(null);
   };
 
-  // 🔹 Crear categoría real
-  const handleAddCategoria = async () => {
+  // 🔹 Crear o editar categoría
+  const handleSaveCategoria = async () => {
     if (nuevaCategoria.trim() === "") return;
 
     try {
-      const res = await API.post(
-        "/categorias",
-        { nombre: nuevaCategoria },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setCategorias([res.data, ...categorias]); // agregar a la lista
+      if (editando) {
+        // editar
+        const updated = await updateCategoria(editando.id, nuevaCategoria);
+        setCategorias(
+          categorias.map((cat) => (cat.id === updated.id ? updated : cat))
+        );
+      } else {
+        // crear
+        const nueva = await createCategoria(nuevaCategoria);
+        setCategorias([nueva, ...categorias]);
+      }
       handleClose();
     } catch (err) {
-      setError("Error al crear categoría");
+      setError("Error al guardar categoría");
+    }
+  };
+
+  // 🔹 Eliminar categoría
+  const handleDeleteCategoria = async (id) => {
+    try {
+      await deleteCategoria(id);
+      setCategorias(categorias.filter((cat) => cat.id !== id));
+    } catch (err) {
+      setError("Error al eliminar categoría");
     }
   };
 
@@ -84,7 +104,7 @@ function Categorias() {
         variant="contained"
         color="primary"
         sx={{ mb: 3 }}
-        onClick={handleOpen}
+        onClick={() => handleOpen()}
       >
         Agregar Categoría
       </Button>
@@ -97,10 +117,13 @@ function Categorias() {
                 <Typography variant="h6">{cat.nombre}</Typography>
               </CardContent>
               <CardActions>
-                <IconButton color="primary">
+                <IconButton color="primary" onClick={() => handleOpen(cat)}>
                   <Edit />
                 </IconButton>
-                <IconButton color="error">
+                <IconButton
+                  color="error"
+                  onClick={() => handleDeleteCategoria(cat.id)}
+                >
                   <Delete />
                 </IconButton>
               </CardActions>
@@ -109,9 +132,11 @@ function Categorias() {
         ))}
       </Grid>
 
-      {/* Modal para nueva categoría */}
+      {/* Modal para crear/editar categoría */}
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Agregar Nueva Categoría</DialogTitle>
+        <DialogTitle>
+          {editando ? "Editar Categoría" : "Agregar Nueva Categoría"}
+        </DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -126,11 +151,7 @@ function Categorias() {
           <Button onClick={handleClose} color="secondary">
             Cancelar
           </Button>
-          <Button
-            onClick={handleAddCategoria}
-            variant="contained"
-            color="primary"
-          >
+          <Button onClick={handleSaveCategoria} variant="contained" color="primary">
             Guardar
           </Button>
         </DialogActions>
