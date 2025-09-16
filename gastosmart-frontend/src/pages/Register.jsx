@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Container, TextField, Button, Typography, Box } from "@mui/material";
-import axios from "axios";
+import { Container, TextField, Button, Typography, Box, Alert } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import API from "../api";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -10,6 +11,8 @@ function Register() {
   });
 
   const [mensaje, setMensaje] = useState("");
+  const [tipoMensaje, setTipoMensaje] = useState("success");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -21,27 +24,39 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "https://authentic-reprieve-production.up.railway.app/auth/register",
-        formData
-      );
+      await API.post("/auth/register", formData);
+      setTipoMensaje("success");
       setMensaje("✅ Registro exitoso, ahora puedes iniciar sesión");
+      
+      // Redirigir después de 2 segundos
+      setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
-      setMensaje("❌ Error en el registro: " + error.response?.data?.mensaje);
+      setTipoMensaje("error");
+      setMensaje("❌ Error en el registro: " + (error.response?.data?.mensaje || "Intenta de nuevo"));
     }
   };
 
   return (
-    <Container maxWidth="sm" style={{ marginTop: "50px" }}>
-      <Typography variant="h4" gutterBottom>
+    <Container maxWidth="sm" sx={{ mt: 8 }}>
+      <Typography variant="h4" gutterBottom align="center">
         Registro - GastoSmart
       </Typography>
-      <Box component="form" onSubmit={handleSubmit}>
+
+      {mensaje && (
+        <Alert severity={tipoMensaje} sx={{ mb: 2 }}>
+          {mensaje}
+        </Alert>
+      )}
+
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 3 }}
+      >
         <TextField
           label="Nombre"
           name="nombre"
           fullWidth
-          margin="normal"
           value={formData.nombre}
           onChange={handleChange}
           required
@@ -51,7 +66,6 @@ function Register() {
           name="email"
           type="email"
           fullWidth
-          margin="normal"
           value={formData.email}
           onChange={handleChange}
           required
@@ -61,7 +75,6 @@ function Register() {
           name="password"
           type="password"
           fullWidth
-          margin="normal"
           value={formData.password}
           onChange={handleChange}
           required
@@ -70,11 +83,6 @@ function Register() {
           Registrarse
         </Button>
       </Box>
-      {mensaje && (
-        <Typography variant="body2" style={{ marginTop: "20px", color: "red" }}>
-          {mensaje}
-        </Typography>
-      )}
     </Container>
   );
 }
