@@ -12,10 +12,14 @@ import {
   IconButton,
   MenuItem,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
-import { useLocation } from "react-router-dom"; 
-import { jwtDecode } from "jwt-decode"; // 👈 importar para obtener usuario del token
+import { useLocation } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import API from "../api";
 
 function Gastos() {
@@ -25,6 +29,10 @@ function Gastos() {
   const [monto, setMonto] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
   const [error, setError] = useState("");
+
+  // Estado para edición
+  const [openEdit, setOpenEdit] = useState(false);
+  const [gastoEdit, setGastoEdit] = useState(null);
 
   const token = localStorage.getItem("token");
   const location = useLocation();
@@ -67,7 +75,7 @@ function Gastos() {
     }
 
     try {
-      const decoded = jwtDecode(token); // 👈 obtenemos usuario_id
+      const decoded = jwtDecode(token);
       const res = await API.post(
         "/gastos",
         {
@@ -75,18 +83,70 @@ function Gastos() {
           descripcion,
           monto,
           categoria_id: categoriaId,
-          fecha: new Date().toISOString().split("T")[0], // 👈 YYYY-MM-DD
+          fecha: new Date().toISOString().split("T")[0],
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setGastos([res.data, ...gastos]);
+      setGastos([res.data.gasto, ...gastos]);
       setDescripcion("");
       setMonto("");
       setCategoriaId(categoriaSeleccionada || "");
       setError("");
     } catch (err) {
       setError("Error al agregar gasto");
+    }
+  };
+
+  // 🔹 Eliminar gasto
+  const handleDeleteGasto = async (id) => {
+    try {
+      await API.delete(`/gastos/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setGastos(gastos.filter((g) => g.id !== id));
+    } catch (err) {
+      setError("Error al eliminar gasto");
+    }
+  };
+
+  // 🔹 Abrir modal de edición
+  const handleOpenEdit = (gasto) => {
+    setGastoEdit(gasto);
+    setOpenEdit(true);
+  };
+
+  const handleCloseEdit = () => {
+    setOpenEdit(false);
+    setGastoEdit(null);
+  };
+
+  // 🔹 Guardar cambios en edición
+  const handleUpdateGasto = async () => {
+    if (!gastoEdit.descripcion || !gastoEdit.monto || !gastoEdit.categoria_id) {
+      setError("Todos los campos son obligatorios");
+      return;
+    }
+
+    try {
+      const res = await API.put(
+        `/gastos/${gastoEdit.id}`,
+        {
+          descripcion: gastoEdit.descripcion,
+          monto: gastoEdit.monto,
+          categoria_id: gastoEdit.categoria_id,
+          fecha: new Date().toISOString().split("T")[0],
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setGastos(
+        gastos.map((g) => (g.id === gastoEdit.id ? res.data.gasto : g))
+      );
+      handleCloseEdit();
+    } catch (err) {
+      setError("Error al actualizar gasto");
     }
   };
 
@@ -158,10 +218,13 @@ function Gastos() {
                 </Typography>
               </CardContent>
               <CardActions>
-                <IconButton color="primary">
+                <IconButton color="primary" onClick={() => handleOpenEdit(gasto)}>
                   <Edit />
                 </IconButton>
-                <IconButton color="error">
+                <IconButton
+                  color="error"
+                  onClick={() => handleDeleteGasto(gasto.id)}
+                >
                   <Delete />
                 </IconButton>
               </CardActions>
@@ -169,6 +232,56 @@ function Gastos() {
           </Grid>
         ))}
       </Grid>
+
+      {/* Modal de edición */}
+      <Dialog open={openEdit} onClose={handleCloseEdit}>
+        <DialogTitle>Editar Gasto</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Descripción"
+            fullWidth
+            value={gastoEdit?.descripcion || ""}
+            onChange={(e) =>
+              setGastoEdit({ ...gastoEdit, descripcion: e.target.value })
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Monto"
+            type="number"
+            fullWidth
+            value={gastoEdit?.monto || ""}
+            onChange={(e) =>
+              setGastoEdit({ ...gastoEdit, monto: e.target.value })
+            }
+          />
+          <TextField
+            select
+            margin="dense"
+            label="Categoría"
+            fullWidth
+            value={gastoEdit?.categoria_id || ""}
+            onChange={(e) =>
+              setGastoEdit({ ...gastoEdit, categoria_id: Number(e.target.value) })
+            }
+          >
+            {categorias.map((cat) => (
+              <MenuItem key={cat.id} value={cat.id}>
+                {cat.nombre}
+              </MenuItem>
+            ))}
+          </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEdit} color="secondary">
+            Cancelar
+          </Button>
+          <Button onClick={handleUpdateGasto} variant="contained" color="primary">
+            Guardar Cambios
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

@@ -18,9 +18,18 @@ async function crearGasto(req, res) {
       [usuario_id, descripcion, monto, fecha || new Date(), categoria_id || null]
     );
 
+    // 🔹 Traer también el nombre de la categoría
+    const gastoConCategoria = await pool.query(
+      `SELECT g.*, c.nombre AS categoria_nombre
+       FROM gastos g
+       LEFT JOIN categorias c ON g.categoria_id = c.id
+       WHERE g.id = $1`,
+      [nuevoGasto.rows[0].id]
+    );
+
     res.status(201).json({
       mensaje: "✅ Gasto creado exitosamente",
-      gasto: nuevoGasto.rows[0],
+      gasto: gastoConCategoria.rows[0],
     });
   } catch (error) {
     console.error("❌ Error al crear gasto:", error);
@@ -70,11 +79,20 @@ async function actualizarGasto(req, res) {
       return res.status(404).json({ mensaje: "Gasto no encontrado" });
     }
 
-    const actualizado = await pool.query(
+    await pool.query(
       `UPDATE gastos 
        SET descripcion = $1, monto = $2, fecha = $3, categoria_id = $4
-       WHERE id = $5 RETURNING *`,
+       WHERE id = $5`,
       [descripcion, monto, fecha || new Date(), categoria_id || null, id]
+    );
+
+    // 🔹 Devolver actualizado con nombre de categoría
+    const actualizado = await pool.query(
+      `SELECT g.*, c.nombre AS categoria_nombre
+       FROM gastos g
+       LEFT JOIN categorias c ON g.categoria_id = c.id
+       WHERE g.id = $1`,
+      [id]
     );
 
     res.json({
@@ -99,7 +117,7 @@ async function eliminarGasto(req, res) {
 
     await pool.query("DELETE FROM gastos WHERE id = $1", [id]);
 
-    res.json({ mensaje: "🗑️ Gasto eliminado correctamente" });
+    res.json({ mensaje: "🗑️ Gasto eliminado correctamente", id });
   } catch (error) {
     console.error("❌ Error al eliminar gasto:", error);
     res.status(500).json({ mensaje: "Error al eliminar gasto" });
