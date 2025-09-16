@@ -27,12 +27,15 @@ function Register() {
       await API.post("/auth/register", formData);
       setTipoMensaje("success");
       setMensaje("✅ Registro exitoso, ahora puedes iniciar sesión");
-      
-      // Redirigir después de 2 segundos
+
+      // Redirigir al login después de 2 segundos
       setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
       setTipoMensaje("error");
-      setMensaje("❌ Error en el registro: " + (error.response?.data?.mensaje || "Intenta de nuevo"));
+      setMensaje(
+        "❌ Error en el registro: " +
+          (error.response?.data?.mensaje || "Intenta de nuevo")
+      );
     }
   };
 
