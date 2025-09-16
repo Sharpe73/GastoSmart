@@ -46,10 +46,10 @@ function Gastos() {
         const catRes = await API.get("/categorias", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setCategorias(catRes.data);
+        setCategorias(catRes.data.categorias || catRes.data); // ✅ aseguramos array
 
         if (categoriaSeleccionada) {
-          const cat = catRes.data.find(
+          const cat = (catRes.data.categorias || catRes.data).find(
             (c) => c.id === Number(categoriaSeleccionada)
           );
           if (cat) setCategoriaNombre(cat.nombre);
@@ -61,10 +61,14 @@ function Gastos() {
 
         if (categoriaSeleccionada) {
           const catId = Number(categoriaSeleccionada);
-          setGastos(gastoRes.data.filter((g) => g.categoria_id === catId));
+          setGastos(
+            (gastoRes.data.gastos || gastoRes.data).filter(
+              (g) => g.categoria_id === catId
+            )
+          );
           setCategoriaId(catId);
         } else {
-          setGastos(gastoRes.data);
+          setGastos(gastoRes.data.gastos || gastoRes.data); // ✅ aseguramos array
         }
       } catch (err) {
         setError("Error al cargar datos");
@@ -98,7 +102,9 @@ function Gastos() {
       setGastos([res.data.gasto, ...gastos]);
       setDescripcion("");
       setMonto("");
-      setCategoriaId(categoriaSeleccionada ? Number(categoriaSeleccionada) : "");
+      setCategoriaId(
+        categoriaSeleccionada ? Number(categoriaSeleccionada) : ""
+      );
       setError("");
     } catch (err) {
       setError("Error al agregar gasto");
@@ -160,9 +166,7 @@ function Gastos() {
   return (
     <Container sx={{ mt: 6 }}>
       <Typography variant="h4" gutterBottom align="center" color="primary">
-        {categoriaNombre
-          ? `Gastos de ${categoriaNombre}`
-          : "Gestión de Gastos"}
+        {categoriaNombre ? `Gastos de ${categoriaNombre}` : "Gestión de Gastos"}
       </Typography>
 
       {error && (
@@ -289,7 +293,11 @@ function Gastos() {
           <Button onClick={handleCloseEdit} color="secondary">
             Cancelar
           </Button>
-          <Button onClick={handleUpdateGasto} variant="contained" color="primary">
+          <Button
+            onClick={handleUpdateGasto}
+            variant="contained"
+            color="primary"
+          >
             Guardar Cambios
           </Button>
         </DialogActions>
