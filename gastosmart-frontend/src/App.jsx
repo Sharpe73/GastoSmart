@@ -1,10 +1,17 @@
 // src/App.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import { Container, Typography, Button, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 function App() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
 
   return (
     <Container maxWidth="sm" sx={{ mt: 8, textAlign: "center" }}>
