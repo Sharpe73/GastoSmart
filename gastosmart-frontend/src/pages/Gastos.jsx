@@ -37,6 +37,7 @@ function Gastos() {
   const token = localStorage.getItem("token");
   const location = useLocation();
   const categoriaSeleccionada = location.state?.categoriaId || "";
+  const [categoriaNombre, setCategoriaNombre] = useState("");
 
   // 🔹 Cargar categorías y gastos
   useEffect(() => {
@@ -46,6 +47,11 @@ function Gastos() {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCategorias(catRes.data);
+
+        if (categoriaSeleccionada) {
+          const cat = catRes.data.find((c) => c.id === categoriaSeleccionada);
+          if (cat) setCategoriaNombre(cat.nombre);
+        }
 
         const gastoRes = await API.get("/gastos", {
           headers: { Authorization: `Bearer ${token}` },
@@ -153,7 +159,9 @@ function Gastos() {
   return (
     <Container sx={{ mt: 6 }}>
       <Typography variant="h4" gutterBottom align="center" color="primary">
-        Gestión de Gastos
+        {categoriaNombre
+          ? `Gastos de ${categoriaNombre}`
+          : "Gestión de Gastos"}
       </Typography>
 
       {error && (

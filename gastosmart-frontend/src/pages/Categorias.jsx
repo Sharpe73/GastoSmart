@@ -23,6 +23,7 @@ import {
   updateCategoria,
   deleteCategoria,
 } from "../services/categoriaService";
+import { useNavigate } from "react-router-dom";
 
 function Categorias() {
   const [categorias, setCategorias] = useState([]);
@@ -30,6 +31,8 @@ function Categorias() {
   const [nuevaCategoria, setNuevaCategoria] = useState("");
   const [editando, setEditando] = useState(null);
   const [error, setError] = useState("");
+
+  const navigate = useNavigate();
 
   // 🔹 Obtener categorías reales al cargar
   useEffect(() => {
@@ -112,17 +115,29 @@ function Categorias() {
       <Grid container spacing={3}>
         {categorias.map((cat) => (
           <Grid item xs={12} sm={6} md={4} key={cat.id}>
-            <Card sx={{ boxShadow: 3 }}>
+            <Card
+              sx={{ boxShadow: 3, cursor: "pointer" }}
+              onClick={() => navigate("/gastos", { state: { categoriaId: cat.id } })}
+            >
               <CardContent>
                 <Typography variant="h6">{cat.nombre}</Typography>
               </CardContent>
               <CardActions>
-                <IconButton color="primary" onClick={() => handleOpen(cat)}>
+                <IconButton
+                  color="primary"
+                  onClick={(e) => {
+                    e.stopPropagation(); // 👈 evita que dispare el navigate
+                    handleOpen(cat);
+                  }}
+                >
                   <Edit />
                 </IconButton>
                 <IconButton
                   color="error"
-                  onClick={() => handleDeleteCategoria(cat.id)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // 👈 evita que dispare el navigate
+                    handleDeleteCategoria(cat.id);
+                  }}
                 >
                   <Delete />
                 </IconButton>
@@ -151,7 +166,11 @@ function Categorias() {
           <Button onClick={handleClose} color="secondary">
             Cancelar
           </Button>
-          <Button onClick={handleSaveCategoria} variant="contained" color="primary">
+          <Button
+            onClick={handleSaveCategoria}
+            variant="contained"
+            color="primary"
+          >
             Guardar
           </Button>
         </DialogActions>
