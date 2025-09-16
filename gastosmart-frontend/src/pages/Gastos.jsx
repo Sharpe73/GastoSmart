@@ -14,6 +14,7 @@ import {
   Alert,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
+import { useLocation } from "react-router-dom"; // 👈 para saber desde qué categoría entramos
 import API from "../api";
 
 function Gastos() {
@@ -25,6 +26,8 @@ function Gastos() {
   const [error, setError] = useState("");
 
   const token = localStorage.getItem("token");
+  const location = useLocation();
+  const categoriaSeleccionada = location.state?.categoriaId || ""; // 👈 recibimos la categoría al navegar
 
   // 🔹 Cargar categorías y gastos
   useEffect(() => {
@@ -38,14 +41,21 @@ function Gastos() {
         const gastoRes = await API.get("/gastos", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setGastos(gastoRes.data);
+
+        // Si venimos de una categoría específica, filtramos
+        if (categoriaSeleccionada) {
+          setGastos(gastoRes.data.filter(g => g.categoria_id === categoriaSeleccionada));
+          setCategoriaId(categoriaSeleccionada);
+        } else {
+          setGastos(gastoRes.data);
+        }
       } catch (err) {
         setError("Error al cargar datos");
       }
     };
 
     fetchData();
-  }, [token]);
+  }, [token, categoriaSeleccionada]);
 
   // 🔹 Agregar gasto
   const handleAddGasto = async () => {
@@ -64,7 +74,7 @@ function Gastos() {
       setGastos([res.data, ...gastos]);
       setDescripcion("");
       setMonto("");
-      setCategoriaId("");
+      setCategoriaId(categoriaSeleccionada || "");
       setError("");
     } catch (err) {
       setError("Error al agregar gasto");
@@ -108,7 +118,7 @@ function Gastos() {
             label="Categoría"
             fullWidth
             value={categoriaId}
-            onChange={(e) => setCategoriaId(e.target.value)}
+            onChange={(e) => setCategoriaId(Number(e.target.value))}
           >
             {categorias.map((cat) => (
               <MenuItem key={cat.id} value={cat.id}>
