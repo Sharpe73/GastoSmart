@@ -49,7 +49,9 @@ function Gastos() {
         setCategorias(catRes.data);
 
         if (categoriaSeleccionada) {
-          const cat = catRes.data.find((c) => c.id === categoriaSeleccionada);
+          const cat = catRes.data.find(
+            (c) => c.id === Number(categoriaSeleccionada)
+          );
           if (cat) setCategoriaNombre(cat.nombre);
         }
 
@@ -58,10 +60,9 @@ function Gastos() {
         });
 
         if (categoriaSeleccionada) {
-          setGastos(
-            gastoRes.data.filter((g) => g.categoria_id === categoriaSeleccionada)
-          );
-          setCategoriaId(categoriaSeleccionada);
+          const catId = Number(categoriaSeleccionada);
+          setGastos(gastoRes.data.filter((g) => g.categoria_id === catId));
+          setCategoriaId(catId);
         } else {
           setGastos(gastoRes.data);
         }
@@ -88,7 +89,7 @@ function Gastos() {
           usuario_id: decoded.id,
           descripcion,
           monto,
-          categoria_id: categoriaId,
+          categoria_id: Number(categoriaId),
           fecha: new Date().toISOString().split("T")[0],
         },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -97,7 +98,7 @@ function Gastos() {
       setGastos([res.data.gasto, ...gastos]);
       setDescripcion("");
       setMonto("");
-      setCategoriaId(categoriaSeleccionada || "");
+      setCategoriaId(categoriaSeleccionada ? Number(categoriaSeleccionada) : "");
       setError("");
     } catch (err) {
       setError("Error al agregar gasto");
@@ -141,7 +142,7 @@ function Gastos() {
         {
           descripcion: gastoEdit.descripcion,
           monto: gastoEdit.monto,
-          categoria_id: gastoEdit.categoria_id,
+          categoria_id: Number(gastoEdit.categoria_id),
           fecha: new Date().toISOString().split("T")[0],
         },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -271,7 +272,10 @@ function Gastos() {
             fullWidth
             value={gastoEdit?.categoria_id || ""}
             onChange={(e) =>
-              setGastoEdit({ ...gastoEdit, categoria_id: Number(e.target.value) })
+              setGastoEdit({
+                ...gastoEdit,
+                categoria_id: Number(e.target.value),
+              })
             }
           >
             {categorias.map((cat) => (

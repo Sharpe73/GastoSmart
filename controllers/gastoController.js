@@ -3,12 +3,13 @@ const pool = require("../models/db");
 // Crear un gasto
 async function crearGasto(req, res) {
   try {
-    const { usuario_id, descripcion, monto, fecha, categoria_id } = req.body;
+    const usuario_id = req.user.id; // 👈 viene del token
+    const { descripcion, monto, fecha, categoria_id } = req.body;
 
-    if (!usuario_id || !descripcion || !monto) {
+    if (!descripcion || !monto) {
       return res
         .status(400)
-        .json({ mensaje: "usuario_id, descripción y monto son obligatorios" });
+        .json({ mensaje: "Descripción y monto son obligatorios" });
     }
 
     const nuevoGasto = await pool.query(
@@ -18,7 +19,6 @@ async function crearGasto(req, res) {
       [usuario_id, descripcion, monto, fecha || new Date(), categoria_id || null]
     );
 
-    // 🔹 Traer también el nombre de la categoría
     const gastoConCategoria = await pool.query(
       `SELECT g.*, c.nombre AS categoria_nombre
        FROM gastos g
@@ -37,16 +37,10 @@ async function crearGasto(req, res) {
   }
 }
 
-// Listar todos los gastos de un usuario
+// Listar todos los gastos del usuario autenticado
 async function listarGastos(req, res) {
   try {
-    const { usuario_id } = req.params;
-
-    if (!usuario_id) {
-      return res
-        .status(400)
-        .json({ mensaje: "El usuario_id es obligatorio" });
-    }
+    const usuario_id = req.user.id; // 👈 se toma del token
 
     const gastos = await pool.query(
       `SELECT g.*, c.nombre AS categoria_nombre
@@ -71,12 +65,16 @@ async function listarGastos(req, res) {
 // Actualizar un gasto
 async function actualizarGasto(req, res) {
   try {
+    const usuario_id = req.user.id; // 👈 asegurar que es del usuario autenticado
     const { id } = req.params;
     const { descripcion, monto, fecha, categoria_id } = req.body;
 
-    const gasto = await pool.query("SELECT * FROM gastos WHERE id = $1", [id]);
+    const gasto = await pool.query(
+      "SELECT * FROM gastos WHERE id = $1 AND usuario_id = $2",
+      [id, usuario_id]
+    );
     if (gasto.rows.length === 0) {
-      return res.status(404).json({ mensaje: "Gasto no encontrado" });
+      return res.status(404).json({ mensaje: "Gasto no encontrado o no autorizado" });
     }
 
     await pool.query(
@@ -86,7 +84,6 @@ async function actualizarGasto(req, res) {
       [descripcion, monto, fecha || new Date(), categoria_id || null, id]
     );
 
-    // 🔹 Devolver actualizado con nombre de categoría
     const actualizado = await pool.query(
       `SELECT g.*, c.nombre AS categoria_nombre
        FROM gastos g
@@ -108,11 +105,15 @@ async function actualizarGasto(req, res) {
 // Eliminar un gasto
 async function eliminarGasto(req, res) {
   try {
+    const usuario_id = req.user.id;
     const { id } = req.params;
 
-    const gasto = await pool.query("SELECT * FROM gastos WHERE id = $1", [id]);
+    const gasto = await pool.query(
+      "SELECT * FROM gastos WHERE id = $1 AND usuario_id = $2",
+      [id, usuario_id]
+    );
     if (gasto.rows.length === 0) {
-      return res.status(404).json({ mensaje: "Gasto no encontrado" });
+      return res.status(404).json({ mensaje: "Gasto no encontrado o no autorizado" });
     }
 
     await pool.query("DELETE FROM gastos WHERE id = $1", [id]);

@@ -2,17 +2,17 @@ const express = require("express");
 const router = express.Router();
 const verificarToken = require("../middleware/authMiddleware");
 const {
-  crearGasto,
-  listarGastos,
-  actualizarGasto,
-  eliminarGasto,
-} = require("../controllers/gastoController");
+  listarCategorias,
+  crearCategoria,
+  actualizarCategoria,
+  eliminarCategoria,
+} = require("../controllers/categoriaController");
 
 /**
  * @swagger
  * tags:
- *   name: Gastos
- *   description: Rutas para gestionar gastos (requieren autenticación)
+ *   name: Categorías
+ *   description: Rutas para gestionar categorías (requieren autenticación)
  */
 
 /**
@@ -27,24 +27,24 @@ const {
 
 /**
  * @swagger
- * /gastos:
+ * /categorias:
  *   get:
- *     summary: Listar todos los gastos del usuario autenticado
- *     tags: [Gastos]
+ *     summary: Listar todas las categorías
+ *     tags: [Categorías]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Lista de gastos del usuario
+ *         description: Lista de categorías
  */
-router.get("/", verificarToken, listarGastos);
+router.get("/", verificarToken, listarCategorias);
 
 /**
  * @swagger
- * /gastos:
+ * /categorias:
  *   post:
- *     summary: Crear un nuevo gasto para el usuario autenticado
- *     tags: [Gastos]
+ *     summary: Crear una nueva categoría
+ *     tags: [Categorías]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -54,31 +54,21 @@ router.get("/", verificarToken, listarGastos);
  *           schema:
  *             type: object
  *             properties:
- *               descripcion:
- *                 type: string
- *                 example: Supermercado
- *               monto:
- *                 type: number
- *                 example: 50000
- *               fecha:
- *                 type: string
- *                 format: date
- *                 example: 2025-09-16
- *               categoria:
+ *               nombre:
  *                 type: string
  *                 example: Alimentación
  *     responses:
  *       201:
- *         description: Gasto creado exitosamente
+ *         description: Categoría creada exitosamente
  */
-router.post("/", verificarToken, crearGasto);
+router.post("/", verificarToken, crearCategoria);
 
 /**
  * @swagger
- * /gastos/{id}:
+ * /categorias/{id}:
  *   put:
- *     summary: Actualizar un gasto por ID (solo si pertenece al usuario autenticado)
- *     tags: [Gastos]
+ *     summary: Actualizar una categoría por ID
+ *     tags: [Categorías]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -94,29 +84,23 @@ router.post("/", verificarToken, crearGasto);
  *           schema:
  *             type: object
  *             properties:
- *               descripcion:
+ *               nombre:
  *                 type: string
- *               monto:
- *                 type: number
- *               fecha:
- *                 type: string
- *                 format: date
- *               categoria:
- *                 type: string
+ *                 example: Transporte
  *     responses:
  *       200:
- *         description: Gasto actualizado exitosamente
+ *         description: Categoría actualizada exitosamente
  *       404:
- *         description: Gasto no encontrado
+ *         description: Categoría no encontrada
  */
-router.put("/:id", verificarToken, actualizarGasto);
+router.put("/:id", verificarToken, actualizarCategoria);
 
 /**
  * @swagger
- * /gastos/{id}:
+ * /categorias/{id}:
  *   delete:
- *     summary: Eliminar un gasto por ID (solo si pertenece al usuario autenticado)
- *     tags: [Gastos]
+ *     summary: Eliminar una categoría por ID
+ *     tags: [Categorías]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -127,10 +111,10 @@ router.put("/:id", verificarToken, actualizarGasto);
  *           type: integer
  *     responses:
  *       200:
- *         description: Gasto eliminado exitosamente
+ *         description: Categoría eliminada exitosamente
  *       404:
- *         description: Gasto no encontrado
+ *         description: Categoría no encontrada
  */
-router.delete("/:id", verificarToken, eliminarGasto);
+router.delete("/:id", verificarToken, eliminarCategoria);
 
 module.exports = router;
