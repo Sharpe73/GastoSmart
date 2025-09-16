@@ -59,11 +59,11 @@ async function login(req, res) {
       return res.status(400).json({ mensaje: "Credenciales incorrectas" });
     }
 
-    // Generar token
+    // Generar token con nombre incluido
     const token = jwt.sign(
-      { id: user.id, email: user.email }, // payload
-      process.env.JWT_SECRET,             // clave secreta
-      { expiresIn: "2h" }                 // tiempo de expiración
+      { id: user.id, email: user.email, nombre: user.nombre }, // 👈 ahora incluye el nombre
+      process.env.JWT_SECRET,                                  // clave secreta
+      { expiresIn: "2h" }                                      // tiempo de expiración
     );
 
     res.json({
