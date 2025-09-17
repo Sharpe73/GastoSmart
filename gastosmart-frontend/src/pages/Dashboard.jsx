@@ -1,66 +1,99 @@
-// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
-import { Container, Typography, Button, Box } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import {
+  Typography,
+  Box,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+} from "@mui/material";
 import { jwtDecode } from "jwt-decode";
+import API from "../api";
 
 function Dashboard() {
-  const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [gastos, setGastos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    // Decodificar usuario
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        setUser(decoded); // el token contiene id, email, nombre
+        setUser(decoded);
       } catch (err) {
         console.error("Error al decodificar token:", err);
       }
     }
-  }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+    // Cargar datos de gastos y categorías
+    const fetchData = async () => {
+      try {
+        const gastoRes = await API.get("/gastos", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setGastos(gastoRes.data.gastos || gastoRes.data);
+
+        const catRes = await API.get("/categorias", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCategorias(catRes.data.categorias || catRes.data);
+      } catch (err) {
+        console.error("Error al cargar datos:", err);
+      }
+    };
+
+    fetchData();
+  }, [token]);
+
+  // 🔹 Calcular totales
+  const totalGeneral = gastos.reduce((sum, g) => sum + Number(g.monto), 0);
+
+  const totalesPorCategoria = categorias.map((cat) => {
+    const totalCat = gastos
+      .filter((g) => g.categoria_id === cat.id)
+      .reduce((sum, g) => sum + Number(g.monto), 0);
+    return { ...cat, total: totalCat };
+  });
 
   return (
-    <Container sx={{ mt: 6, textAlign: "center" }}>
+    <Box>
       <Typography variant="h4" gutterBottom>
         Bienvenido {user?.nombre || "al Dashboard de GastoSmart"}
       </Typography>
 
-      <Typography variant="body1" sx={{ mb: 4 }}>
-        Aquí podrás ver y gestionar tus gastos personales.
-      </Typography>
+      <Paper sx={{ p: 3, mb: 4 }}>
+        <Typography>
+          Aquí tienes un resumen de tus gastos y categorías.  
+          Usa el menú lateral para gestionar tus datos.
+        </Typography>
+      </Paper>
 
-      {/* Botones principales del dashboard */}
-      <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mb: 3 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => navigate("/categorias")}
-        >
-          Gestionar Categorías
-        </Button>
+      <Grid container spacing={3}>
+        {/* Total general */}
+        <Grid item xs={12} sm={6} md={4}>
+          <Card sx={{ boxShadow: 3, bgcolor: "primary.main", color: "white" }}>
+            <CardContent>
+              <Typography variant="h6">Total de Gastos</Typography>
+              <Typography variant="h4">${totalGeneral}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
 
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => navigate("/gastos")}
-        >
-          Gestionar Gastos
-        </Button>
-      </Box>
-
-      {/* Botón de cierre de sesión */}
-      <Box>
-        <Button variant="contained" color="secondary" onClick={handleLogout}>
-          Cerrar Sesión
-        </Button>
-      </Box>
-    </Container>
+        {/* Totales por categoría */}
+        {totalesPorCategoria.map((cat) => (
+          <Grid item xs={12} sm={6} md={4} key={cat.id}>
+            <Card sx={{ boxShadow: 3 }}>
+              <CardContent>
+                <Typography variant="h6">{cat.nombre}</Typography>
+                <Typography variant="h5">${cat.total}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
   );
 }
 
