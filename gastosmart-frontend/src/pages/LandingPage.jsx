@@ -1,21 +1,16 @@
 // src/pages/LandingPage.jsx
-import React, { useEffect } from "react";
+import React from "react";
 import { Container, Typography, Button, Box } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 
 function LandingPage() {
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      // Si ya está logeado → directo al dashboard
-      navigate("/dashboard", { replace: true });
-    } else {
-      // Si no hay token → directo al login
-      navigate("/login", { replace: true });
-    }
-  }, [navigate]);
+  // 👇 Si hay token, redirige sin romper el router
+  if (token) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <Container maxWidth="sm" sx={{ mt: 8, textAlign: "center" }}>
