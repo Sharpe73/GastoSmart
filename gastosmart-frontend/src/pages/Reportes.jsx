@@ -57,7 +57,7 @@ export default function Reportes() {
       });
 
       const formatted = res.data.map((item) => ({
-        dia: `Día ${item.dia}`,
+        dia: Number(item.dia), // ahora es número
         total: Number(item.total),
       }));
 
@@ -149,10 +149,17 @@ export default function Reportes() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis dataKey="dia" tick={{ fill: "#555" }} />
+              <XAxis
+                dataKey="dia"
+                type="number"
+                domain={["dataMin", "dataMax"]}
+                tickFormatter={(value) => `Día ${value}`}
+                tick={{ fill: "#555" }}
+              />
               <YAxis tick={{ fill: "#555" }} />
               <Tooltip
                 formatter={(value) => `$${value.toLocaleString()}`}
+                labelFormatter={(label) => `Día ${label}`}
                 contentStyle={{
                   backgroundColor: "#fff",
                   border: "1px solid #ddd",
