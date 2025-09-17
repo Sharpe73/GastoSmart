@@ -28,6 +28,7 @@ export default function AppLayout({ children, onLogout }) {
           width: { md: `calc(100% - ${drawerWidth}px)` },
           ml: { md: `${drawerWidth}px` },
           backgroundColor: "#1976d2",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.2)", // ✅ sombra al AppBar
         }}
       >
         <Toolbar>
@@ -54,6 +55,10 @@ export default function AppLayout({ children, onLogout }) {
           flexGrow: 1,
           p: 3,
           width: { md: `calc(100% - ${drawerWidth}px)` },
+          bgcolor: "white",
+          borderRadius: 2,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.15)", // ✅ sombra más notoria
+          m: 2, // margen para que no quede pegado a los bordes
         }}
       >
         {/* espacio para AppBar */}
