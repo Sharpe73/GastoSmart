@@ -15,7 +15,7 @@ import API from "../api";
 // Íconos de MUI
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import CategoryIcon from "@mui/icons-material/Category";
-import InfoIcon from "@mui/icons-material/Info";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp"; // ✅ Nuevo ícono financiero
 
 function Dashboard() {
   const [user, setUser] = useState(null);
@@ -78,9 +78,9 @@ function Dashboard() {
         Bienvenido {user?.nombre || "al Dashboard de GastoSmart"}
       </Typography>
 
-      {/* ✅ Alert en vez de Paper */}
+      {/* ✅ Alert con ícono financiero */}
       <Alert
-        icon={<InfoIcon fontSize="inherit" />}
+        icon={<TrendingUpIcon fontSize="inherit" />}
         severity="info"
         sx={{
           mb: 4,
