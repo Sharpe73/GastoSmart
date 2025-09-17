@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import Sidebar, { drawerWidth } from "./Sidebar";
-import logo from "../assets/gasto.png"; // 👈 importa tu logo
+import logo from "../assets/gasto.png"; // 👈 tu logo
 
 export default function AppLayout({ children, onLogout }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -43,12 +43,12 @@ export default function AppLayout({ children, onLogout }) {
             <MenuIcon />
           </IconButton>
 
-          {/* ✅ Solo logo */}
+          {/* ✅ Logo más grande */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <img
               src={logo}
               alt="GastoSmart Logo"
-              style={{ height: "45px" }}
+              style={{ height: "60px", marginLeft: "8px" }}
             />
           </Box>
         </Toolbar>
