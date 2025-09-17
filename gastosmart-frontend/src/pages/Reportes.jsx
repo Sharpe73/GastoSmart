@@ -57,7 +57,7 @@ export default function Reportes() {
       });
 
       const formatted = res.data.map((item) => ({
-        dia: `Día ${item.dia}`,
+        dia: `Día ${item.dia}`, // ✅ mantener como categoría
         total: Number(item.total),
       }));
 
@@ -149,10 +149,16 @@ export default function Reportes() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis dataKey="dia" tick={{ fill: "#555" }} />
+              <XAxis
+                dataKey="dia"
+                type="category"
+                interval={0} 
+                tick={{ fill: "#555" }}
+              />
               <YAxis tick={{ fill: "#555" }} />
               <Tooltip
                 formatter={(value) => `$${value.toLocaleString()}`}
+                labelFormatter={(label) => label}
                 contentStyle={{
                   backgroundColor: "#fff",
                   border: "1px solid #ddd",
@@ -163,6 +169,7 @@ export default function Reportes() {
                 dataKey="total"
                 fill="url(#colorDia)"
                 barSize={40}
+                barCategoryGap="20%" 
                 radius={[8, 8, 0, 0]}
               />
             </BarChart>
