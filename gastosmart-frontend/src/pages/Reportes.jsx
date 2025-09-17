@@ -1,3 +1,4 @@
+// src/pages/Reportes.jsx
 import React, { useEffect, useState } from "react";
 import { Typography, Container, Paper } from "@mui/material";
 import API from "../api";
@@ -21,11 +22,18 @@ export default function Reportes() {
         const res = await API.get("/reportes/gastos-por-mes", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        // Normalizar los datos para el gráfico
+
+        // 🔹 Convertir mes numérico a nombre
+        const nombresMeses = [
+          "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+          "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ];
+
         const formatted = res.data.map((item) => ({
-          mes: `${item.anio}-${item.mes}`,
+          mes: `${nombresMeses[item.mes - 1]} ${item.anio}`,
           total: Number(item.total),
         }));
+
         setData(formatted);
       } catch (err) {
         console.error("Error cargando reportes:", err);
