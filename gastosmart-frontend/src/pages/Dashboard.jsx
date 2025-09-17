@@ -16,16 +16,6 @@ import API from "../api";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import CategoryIcon from "@mui/icons-material/Category";
 
-// Recharts
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
-
 function Dashboard() {
   const [user, setUser] = useState(null);
   const [gastos, setGastos] = useState([]);
@@ -71,7 +61,7 @@ function Dashboard() {
     return { ...cat, total: totalCat };
   });
 
-  // 🔹 Colores para el gráfico
+  // 🔹 Colores para las tarjetas
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AB47BC", "#FF5252"];
 
   return (
@@ -123,37 +113,6 @@ function Dashboard() {
             </Card>
           </Grid>
         ))}
-
-        {/* Gráfico circular de distribución */}
-        <Grid item xs={12} md={12}>
-          <Card sx={{ p: 3, boxShadow: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Distribución de Gastos por Categoría
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={totalesPorCategoria}
-                  dataKey="total"
-                  nameKey="nombre"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  label
-                >
-                  {totalesPorCategoria.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </Card>
-        </Grid>
       </Grid>
     </Box>
   );
