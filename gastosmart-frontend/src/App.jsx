@@ -17,7 +17,7 @@ import Register from "./pages/Register";
 function App() {
   const handleLogout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/login"; // 👈 mejor mandar al login, no a "/"
+    window.location.href = "/login"; // 👈 al cerrar sesión siempre manda al login
   };
 
   return (
@@ -42,7 +42,7 @@ function App() {
           }
         />
 
-        {/* Submenú Categorías */}
+        {/* Submenú Categorías (PROTEGIDO) */}
         <Route
           path="/categorias/gestionar"
           element={
@@ -54,7 +54,7 @@ function App() {
           }
         />
 
-        {/* Submenú Gastos */}
+        {/* Submenú Gastos (PROTEGIDO) */}
         <Route
           path="/gastos/gestionar"
           element={
@@ -66,7 +66,7 @@ function App() {
           }
         />
 
-        {/* Reportes */}
+        {/* Reportes (PROTEGIDO) */}
         <Route
           path="/reportes"
           element={
@@ -78,7 +78,7 @@ function App() {
           }
         />
 
-        {/* Configuración */}
+        {/* Configuración (PROTEGIDO) */}
         <Route
           path="/config"
           element={

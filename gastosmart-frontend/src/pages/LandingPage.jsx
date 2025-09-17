@@ -9,7 +9,11 @@ function LandingPage() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      navigate("/dashboard");
+      // Si ya está logeado → directo al dashboard
+      navigate("/dashboard", { replace: true });
+    } else {
+      // Si no hay token → directo al login
+      navigate("/login", { replace: true });
     }
   }, [navigate]);
 
