@@ -8,7 +8,6 @@ import AppLayout from "./components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Categorias from "./pages/Categorias";
 import Gastos from "./pages/Gastos";
-import Subir from "./pages/Subir";
 import Reportes from "./pages/Reportes";
 import Config from "./pages/Config";
 
@@ -94,14 +93,6 @@ function App() {
           }
         />
 
-        <Route
-          path="/subir"
-          element={
-            <AppLayout onLogout={handleLogout}>
-              <Subir />
-            </AppLayout>
-          }
-        />
         <Route
           path="/reportes"
           element={
