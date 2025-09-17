@@ -20,7 +20,6 @@ import CategoryIcon from "@mui/icons-material/Category";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import InsightsIcon from "@mui/icons-material/Insights";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -104,18 +103,6 @@ export default function Sidebar({ open, onClose, onLogout }) {
         </Collapse>
 
         {/* Otras opciones */}
-        <ListItemButton
-          component={RouterLink}
-          to="/subir"
-          selected={location.pathname.startsWith("/subir")}
-          onClick={!isDesktop ? onClose : undefined}
-        >
-          <ListItemIcon>
-            <PictureAsPdfIcon />
-          </ListItemIcon>
-          <ListItemText primary="Subir Boleta" />
-        </ListItemButton>
-
         <ListItemButton
           component={RouterLink}
           to="/reportes"
