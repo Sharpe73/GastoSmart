@@ -94,7 +94,7 @@ function Categorias() {
   return (
     <Container sx={{ mt: 6 }}>
       <Typography variant="h4" gutterBottom align="center" color="primary">
-        Categorías
+        Gestionar Categorías
       </Typography>
 
       {error && (
@@ -117,7 +117,9 @@ function Categorias() {
           <Grid item xs={12} sm={6} md={4} key={cat.id}>
             <Card
               sx={{ boxShadow: 3, cursor: "pointer" }}
-              onClick={() => navigate("/gastos", { state: { categoriaId: cat.id } })}
+              onClick={() =>
+                navigate("/gastos/gestionar", { state: { categoriaId: cat.id } })
+              }
             >
               <CardContent>
                 <Typography variant="h6">{cat.nombre}</Typography>

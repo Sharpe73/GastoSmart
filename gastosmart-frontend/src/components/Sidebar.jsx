@@ -1,0 +1,187 @@
+// src/components/Sidebar.jsx
+import React, { useState } from "react";
+import {
+  Drawer,
+  Toolbar,
+  Box,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Typography,
+  Collapse,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import { Link as RouterLink, useLocation } from "react-router-dom";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import CategoryIcon from "@mui/icons-material/Category";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import InsightsIcon from "@mui/icons-material/Insights";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LogoutIcon from "@mui/icons-material/Logout";
+
+export const drawerWidth = 260;
+
+export default function Sidebar({ open, onClose, onLogout }) {
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const location = useLocation();
+
+  const [openCategorias, setOpenCategorias] = useState(false);
+  const [openGastos, setOpenGastos] = useState(false);
+
+  const Content = (
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <Toolbar>
+        <Typography variant="h6" noWrap sx={{ fontWeight: 700 }}>
+          GastoSmart
+        </Typography>
+      </Toolbar>
+
+      <Divider />
+
+      <List sx={{ py: 0 }}>
+        {/* Dashboard */}
+        <ListItemButton
+          component={RouterLink}
+          to="/dashboard"
+          selected={location.pathname === "/dashboard"}
+          onClick={!isDesktop ? onClose : undefined}
+        >
+          <ListItemIcon>
+            <DashboardIcon />
+          </ListItemIcon>
+          <ListItemText primary="Dashboard" />
+        </ListItemButton>
+
+        {/* Categorías */}
+        <ListItemButton onClick={() => setOpenCategorias(!openCategorias)}>
+          <ListItemIcon>
+            <CategoryIcon />
+          </ListItemIcon>
+          <ListItemText primary="Categorías" />
+          {openCategorias ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+        <Collapse in={openCategorias} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              component={RouterLink}
+              to="/categorias/gestionar"
+              selected={location.pathname.startsWith("/categorias/gestionar")}
+              onClick={!isDesktop ? onClose : undefined}
+            >
+              <ListItemText primary="Gestionar Categorías" />
+            </ListItemButton>
+          </List>
+        </Collapse>
+
+        {/* Gastos */}
+        <ListItemButton onClick={() => setOpenGastos(!openGastos)}>
+          <ListItemIcon>
+            <ReceiptLongIcon />
+          </ListItemIcon>
+          <ListItemText primary="Gastos" />
+          {openGastos ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+        <Collapse in={openGastos} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              component={RouterLink}
+              to="/gastos/gestionar"
+              selected={location.pathname.startsWith("/gastos/gestionar")}
+              onClick={!isDesktop ? onClose : undefined}
+            >
+              <ListItemText primary="Gestionar Gastos" />
+            </ListItemButton>
+          </List>
+        </Collapse>
+
+        {/* Otras opciones */}
+        <ListItemButton
+          component={RouterLink}
+          to="/subir"
+          selected={location.pathname.startsWith("/subir")}
+          onClick={!isDesktop ? onClose : undefined}
+        >
+          <ListItemIcon>
+            <PictureAsPdfIcon />
+          </ListItemIcon>
+          <ListItemText primary="Subir Boleta" />
+        </ListItemButton>
+
+        <ListItemButton
+          component={RouterLink}
+          to="/reportes"
+          selected={location.pathname.startsWith("/reportes")}
+          onClick={!isDesktop ? onClose : undefined}
+        >
+          <ListItemIcon>
+            <InsightsIcon />
+          </ListItemIcon>
+          <ListItemText primary="Reportes" />
+        </ListItemButton>
+
+        <ListItemButton
+          component={RouterLink}
+          to="/config"
+          selected={location.pathname.startsWith("/config")}
+          onClick={!isDesktop ? onClose : undefined}
+        >
+          <ListItemIcon>
+            <SettingsIcon />
+          </ListItemIcon>
+          <ListItemText primary="Configuración" />
+        </ListItemButton>
+      </List>
+
+      <Box sx={{ flexGrow: 1 }} />
+
+      <Divider />
+
+      <List sx={{ py: 0 }}>
+        <ListItemButton onClick={onLogout}>
+          <ListItemIcon>
+            <LogoutIcon />
+          </ListItemIcon>
+          <ListItemText primary="Cerrar sesión" />
+        </ListItemButton>
+      </List>
+    </Box>
+  );
+
+  return isDesktop ? (
+    <Drawer
+      variant="permanent"
+      open
+      sx={{
+        width: drawerWidth,
+        flexShrink: 0,
+        "& .MuiDrawer-paper": {
+          width: drawerWidth,
+          boxSizing: "border-box",
+        },
+      }}
+    >
+      {Content}
+    </Drawer>
+  ) : (
+    <Drawer
+      variant="temporary"
+      open={open}
+      onClose={onClose}
+      ModalProps={{ keepMounted: true }}
+      sx={{
+        "& .MuiDrawer-paper": { width: drawerWidth },
+      }}
+    >
+      {Content}
+    </Drawer>
+  );
+}

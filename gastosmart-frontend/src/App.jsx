@@ -1,9 +1,18 @@
 // src/App.jsx
 import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import { Container, Typography, Button, Box } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import AppLayout from "./components/AppLayout";
 
-function App() {
+// Páginas
+import Dashboard from "./pages/Dashboard";
+import Categorias from "./pages/Categorias";
+import Gastos from "./pages/Gastos";
+import Subir from "./pages/Subir";
+import Reportes from "./pages/Reportes";
+import Config from "./pages/Config";
+
+function LandingPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +49,77 @@ function App() {
         </Button>
       </Box>
     </Container>
+  );
+}
+
+function App() {
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/";
+  };
+
+  return (
+    <Router>
+      <Routes>
+        {/* Landing page sin layout */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Rutas con Sidebar */}
+        <Route
+          path="/dashboard"
+          element={
+            <AppLayout onLogout={handleLogout}>
+              <Dashboard />
+            </AppLayout>
+          }
+        />
+
+        {/* Submenú Categorías */}
+        <Route
+          path="/categorias/gestionar"
+          element={
+            <AppLayout onLogout={handleLogout}>
+              <Categorias />
+            </AppLayout>
+          }
+        />
+
+        {/* Submenú Gastos */}
+        <Route
+          path="/gastos/gestionar"
+          element={
+            <AppLayout onLogout={handleLogout}>
+              <Gastos />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/subir"
+          element={
+            <AppLayout onLogout={handleLogout}>
+              <Subir />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/reportes"
+          element={
+            <AppLayout onLogout={handleLogout}>
+              <Reportes />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/config"
+          element={
+            <AppLayout onLogout={handleLogout}>
+              <Config />
+            </AppLayout>
+          }
+        />
+      </Routes>
+    </Router>
   );
 }
 

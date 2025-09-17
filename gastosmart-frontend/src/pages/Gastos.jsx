@@ -46,7 +46,7 @@ function Gastos() {
         const catRes = await API.get("/categorias", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setCategorias(catRes.data.categorias || catRes.data); // ✅ aseguramos array
+        setCategorias(catRes.data.categorias || catRes.data);
 
         if (categoriaSeleccionada) {
           const cat = (catRes.data.categorias || catRes.data).find(
@@ -68,7 +68,7 @@ function Gastos() {
           );
           setCategoriaId(catId);
         } else {
-          setGastos(gastoRes.data.gastos || gastoRes.data); // ✅ aseguramos array
+          setGastos(gastoRes.data.gastos || gastoRes.data);
         }
       } catch (err) {
         setError("Error al cargar datos");
@@ -117,7 +117,6 @@ function Gastos() {
       await API.delete(`/gastos/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setGastos(gastos.filter((g) => g.id !== id));
     } catch (err) {
       setError("Error al eliminar gasto");
@@ -166,7 +165,9 @@ function Gastos() {
   return (
     <Container sx={{ mt: 6 }}>
       <Typography variant="h4" gutterBottom align="center" color="primary">
-        {categoriaNombre ? `Gastos de ${categoriaNombre}` : "Gestión de Gastos"}
+        {categoriaNombre
+          ? `Gastos de ${categoriaNombre}`
+          : "Gestionar Gastos"}
       </Typography>
 
       {error && (
