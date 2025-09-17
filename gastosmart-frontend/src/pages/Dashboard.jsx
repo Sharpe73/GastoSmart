@@ -3,11 +3,11 @@ import React, { useEffect, useState } from "react";
 import {
   Typography,
   Box,
-  Paper,
   Grid,
   Card,
   CardContent,
   Avatar,
+  Alert,
 } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import API from "../api";
@@ -15,6 +15,7 @@ import API from "../api";
 // Íconos de MUI
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import CategoryIcon from "@mui/icons-material/Category";
+import InfoIcon from "@mui/icons-material/Info";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
@@ -62,7 +63,14 @@ function Dashboard() {
   });
 
   // 🔹 Colores para las tarjetas
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AB47BC", "#FF5252"];
+  const COLORS = [
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#AB47BC",
+    "#FF5252",
+  ];
 
   return (
     <Box>
@@ -70,14 +78,24 @@ function Dashboard() {
         Bienvenido {user?.nombre || "al Dashboard de GastoSmart"}
       </Typography>
 
-      <Paper sx={{ p: 3, mb: 4 }}>
-        <Typography>
-          <b>{user?.nombre || "Usuario"}</b>, este es tu resumen financiero
-          actualizado. Actualmente tienes un total de{" "}
-          <b>${totalGeneral.toLocaleString()}</b> en gastos distribuidos en{" "}
-          <b>{categorias.length}</b> categorías.
-        </Typography>
-      </Paper>
+      {/* ✅ Alert en vez de Paper */}
+      <Alert
+        icon={<InfoIcon fontSize="inherit" />}
+        severity="info"
+        sx={{
+          mb: 4,
+          fontSize: "1.1rem",
+          "& .MuiAlert-message": { width: "100%" },
+        }}
+      >
+        <strong>{user?.nombre}</strong>, este es tu resumen financiero
+        actualizado. Actualmente tienes un total de{" "}
+        <strong>
+          ${totalGeneral.toLocaleString("es-CL")}
+        </strong>{" "}
+        en gastos distribuidos en{" "}
+        <strong>{categorias.length}</strong> categorías.
+      </Alert>
 
       <Grid container spacing={3}>
         {/* Tarjeta total general */}
@@ -91,7 +109,7 @@ function Dashboard() {
                 <Box>
                   <Typography variant="h6">Total de Gastos</Typography>
                   <Typography variant="h4">
-                    ${totalGeneral.toLocaleString()}
+                    ${totalGeneral.toLocaleString("es-CL")}
                   </Typography>
                 </Box>
               </Box>
@@ -111,7 +129,7 @@ function Dashboard() {
                   <Box>
                     <Typography variant="h6">{cat.nombre}</Typography>
                     <Typography variant="h5">
-                      ${cat.total.toLocaleString()}
+                      ${cat.total.toLocaleString("es-CL")}
                     </Typography>
                   </Box>
                 </Box>
