@@ -34,7 +34,7 @@ export default function Reportes() {
         const formatted = res.data.map((item) => {
           const [anio, mes] = item.mes.split("-");
           return {
-            rawMes: item.mes, // "YYYY-MM" para usar en el detalle
+            rawMes: item.mes,
             mes: `${nombresMeses[parseInt(mes, 10) - 1]} ${anio}`,
             total: Number(item.total),
           };
@@ -57,7 +57,7 @@ export default function Reportes() {
       });
 
       const formatted = res.data.map((item) => ({
-        dia: `Día ${item.dia}`, // ahora viene como número desde el backend
+        dia: `Día ${item.dia}`,
         total: Number(item.total),
       }));
 
@@ -83,6 +83,7 @@ export default function Reportes() {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart
               data={data}
+              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
               onClick={(e) => {
                 if (e && e.activeLabel) {
                   const mesData = data.find((d) => d.mes === e.activeLabel);
@@ -92,11 +93,29 @@ export default function Reportes() {
                 }
               }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="mes" />
-              <YAxis />
-              <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
-              <Bar dataKey="total" fill="#1976d2" />
+              <defs>
+                <linearGradient id="colorMes" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#1976d2" stopOpacity={0.9} />
+                  <stop offset="95%" stopColor="#90caf9" stopOpacity={0.8} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+              <XAxis dataKey="mes" tick={{ fill: "#555" }} />
+              <YAxis tick={{ fill: "#555" }} />
+              <Tooltip
+                formatter={(value) => `$${value.toLocaleString()}`}
+                contentStyle={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #ddd",
+                  borderRadius: "6px",
+                }}
+              />
+              <Bar
+                dataKey="total"
+                fill="url(#colorMes)"
+                barSize={40}
+                radius={[8, 8, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </Paper>
@@ -119,12 +138,33 @@ export default function Reportes() {
             ← Volver a vista mensual
           </Button>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={detalleDias}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="dia" />
-              <YAxis />
-              <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
-              <Bar dataKey="total" fill="#ff9800" />
+            <BarChart
+              data={detalleDias}
+              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+            >
+              <defs>
+                <linearGradient id="colorDia" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ff9800" stopOpacity={0.9} />
+                  <stop offset="95%" stopColor="#ffe0b2" stopOpacity={0.8} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+              <XAxis dataKey="dia" tick={{ fill: "#555" }} />
+              <YAxis tick={{ fill: "#555" }} />
+              <Tooltip
+                formatter={(value) => `$${value.toLocaleString()}`}
+                contentStyle={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #ddd",
+                  borderRadius: "6px",
+                }}
+              />
+              <Bar
+                dataKey="total"
+                fill="url(#colorDia)"
+                barSize={40}
+                radius={[8, 8, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </Paper>
