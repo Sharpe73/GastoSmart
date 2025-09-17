@@ -1,3 +1,4 @@
+// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import {
   Typography,
@@ -17,7 +18,6 @@ function Dashboard() {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    // Decodificar usuario
     if (token) {
       try {
         const decoded = jwtDecode(token);
@@ -27,7 +27,6 @@ function Dashboard() {
       }
     }
 
-    // Cargar datos de gastos y categorías
     const fetchData = async () => {
       try {
         const gastoRes = await API.get("/gastos", {
@@ -66,7 +65,7 @@ function Dashboard() {
       <Paper sx={{ p: 3, mb: 4 }}>
         <Typography>
           Aquí tienes un resumen de tus gastos y categorías.  
-          Usa el menú lateral para gestionar tus datos.
+          Usa el menú lateral para gestionarlos.
         </Typography>
       </Paper>
 
