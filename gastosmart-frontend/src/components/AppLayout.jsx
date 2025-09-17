@@ -1,235 +1,65 @@
-// src/components/Sidebar.jsx
+// src/components/AppLayout.jsx
 import React, { useState } from "react";
 import {
-  Drawer,
+  AppBar,
   Toolbar,
+  IconButton,
   Box,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  Typography,
-  Collapse,
-  useMediaQuery,
-  useTheme,
+  CssBaseline,
 } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import MenuIcon from "@mui/icons-material/Menu";
+import Sidebar, { drawerWidth } from "./Sidebar";
 
-// Íconos
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import CategoryIcon from "@mui/icons-material/Category";
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import InsightsIcon from "@mui/icons-material/Insights";
-import SettingsIcon from "@mui/icons-material/Settings";
-import LogoutIcon from "@mui/icons-material/Logout";
+export default function AppLayout({ children, onLogout }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-// Logo
-import logo from "../assets/gasto.png";
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
-export const drawerWidth = 260;
+  return (
+    <Box sx={{ display: "flex" }}>
+      <CssBaseline />
 
-export default function Sidebar({ open, onClose, onLogout }) {
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
-  const location = useLocation();
-
-  const [openCategorias, setOpenCategorias] = useState(false);
-  const [openGastos, setOpenGastos] = useState(false);
-
-  const Content = (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* Header con logo + texto */}
-      <Toolbar
+      {/* AppBar superior */}
+      <AppBar
+        position="fixed"
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "primary.main",
-          color: "white",
-          gap: 1,
+          width: { md: `calc(100% - ${drawerWidth}px)` },
+          ml: { md: `${drawerWidth}px` },
+          backgroundColor: "#1976d2",
         }}
       >
-        <img
-          src={logo}
-          alt="GastoSmart Logo"
-          style={{ height: "36px", width: "auto" }}
-        />
-        <Typography variant="h6" noWrap sx={{ fontWeight: 700 }}>
-          GastoSmart
-        </Typography>
-      </Toolbar>
+        <Toolbar>
+          {/* Botón hamburguesa solo en móvil */}
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { md: "none" } }}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
 
-      <Divider />
+      {/* Sidebar */}
+      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} onLogout={onLogout} />
 
-      {/* Menú principal */}
-      <List sx={{ py: 0 }}>
-        {/* Dashboard */}
-        <ListItemButton
-          component={RouterLink}
-          to="/dashboard"
-          selected={location.pathname === "/dashboard"}
-          onClick={!isDesktop ? onClose : undefined}
-          sx={{
-            "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
-            "&:hover": { bgcolor: "primary.light", color: "white" },
-          }}
-        >
-          <ListItemIcon>
-            <DashboardIcon />
-          </ListItemIcon>
-          <ListItemText primary="Dashboard" />
-        </ListItemButton>
-
-        {/* Categorías */}
-        <ListItemButton
-          onClick={() => setOpenCategorias(!openCategorias)}
-          sx={{
-            "&:hover": { bgcolor: "action.hover" },
-          }}
-        >
-          <ListItemIcon>
-            <CategoryIcon />
-          </ListItemIcon>
-          <ListItemText primary="Categorías" />
-          {openCategorias ? <ExpandLess /> : <ExpandMore />}
-        </ListItemButton>
-        <Collapse in={openCategorias} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItemButton
-              sx={{
-                pl: 4,
-                "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
-                "&:hover": { bgcolor: "primary.light", color: "white" },
-              }}
-              component={RouterLink}
-              to="/categorias/gestionar"
-              selected={location.pathname.startsWith("/categorias/gestionar")}
-              onClick={!isDesktop ? onClose : undefined}
-            >
-              <ListItemText primary="Gestionar Categorías" />
-            </ListItemButton>
-          </List>
-        </Collapse>
-
-        {/* Gastos */}
-        <ListItemButton
-          onClick={() => setOpenGastos(!openGastos)}
-          sx={{
-            "&:hover": { bgcolor: "action.hover" },
-          }}
-        >
-          <ListItemIcon>
-            <ReceiptLongIcon />
-          </ListItemIcon>
-          <ListItemText primary="Gastos" />
-          {openGastos ? <ExpandLess /> : <ExpandMore />}
-        </ListItemButton>
-        <Collapse in={openGastos} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItemButton
-              sx={{
-                pl: 4,
-                "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
-                "&:hover": { bgcolor: "primary.light", color: "white" },
-              }}
-              component={RouterLink}
-              to="/gastos/gestionar"
-              selected={location.pathname.startsWith("/gastos/gestionar")}
-              onClick={!isDesktop ? onClose : undefined}
-            >
-              <ListItemText primary="Gestionar Gastos" />
-            </ListItemButton>
-          </List>
-        </Collapse>
-
-        {/* Reportes */}
-        <ListItemButton
-          component={RouterLink}
-          to="/reportes"
-          selected={location.pathname.startsWith("/reportes")}
-          onClick={!isDesktop ? onClose : undefined}
-          sx={{
-            "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
-            "&:hover": { bgcolor: "primary.light", color: "white" },
-          }}
-        >
-          <ListItemIcon>
-            <InsightsIcon />
-          </ListItemIcon>
-          <ListItemText primary="Reportes" />
-        </ListItemButton>
-
-        {/* Configuración */}
-        <ListItemButton
-          component={RouterLink}
-          to="/config"
-          selected={location.pathname.startsWith("/config")}
-          onClick={!isDesktop ? onClose : undefined}
-          sx={{
-            "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
-            "&:hover": { bgcolor: "primary.light", color: "white" },
-          }}
-        >
-          <ListItemIcon>
-            <SettingsIcon />
-          </ListItemIcon>
-          <ListItemText primary="Configuración" />
-        </ListItemButton>
-      </List>
-
-      <Box sx={{ flexGrow: 1 }} />
-
-      <Divider />
-
-      {/* Logout */}
-      <List sx={{ py: 0 }}>
-        <ListItemButton
-          onClick={onLogout}
-          sx={{
-            "&:hover": { bgcolor: "error.light", color: "white" },
-          }}
-        >
-          <ListItemIcon>
-            <LogoutIcon />
-          </ListItemIcon>
-          <ListItemText primary="Cerrar sesión" />
-        </ListItemButton>
-      </List>
+      {/* Contenido principal */}
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          width: { md: `calc(100% - ${drawerWidth}px)` },
+        }}
+      >
+        {/* espacio para AppBar */}
+        <Toolbar />
+        {children}
+      </Box>
     </Box>
-  );
-
-  return isDesktop ? (
-    <Drawer
-      variant="permanent"
-      open
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        "& .MuiDrawer-paper": {
-          width: drawerWidth,
-          boxSizing: "border-box",
-          boxShadow: 3,
-          borderRight: "none",
-        },
-      }}
-    >
-      {Content}
-    </Drawer>
-  ) : (
-    <Drawer
-      variant="temporary"
-      open={open}
-      onClose={onClose}
-      ModalProps={{ keepMounted: true }}
-      sx={{
-        "& .MuiDrawer-paper": { width: drawerWidth, boxShadow: 3 },
-      }}
-    >
-      {Content}
-    </Drawer>
   );
 }
