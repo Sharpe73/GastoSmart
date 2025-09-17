@@ -14,8 +14,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 
 // Íconos
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -26,6 +25,9 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import InsightsIcon from "@mui/icons-material/Insights";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
+
+// 👇 Importa tu logo
+import logo from "../assets/gasto.png";
 
 export const drawerWidth = 260;
 
@@ -49,6 +51,11 @@ export default function Sidebar({ open, onClose, onLogout }) {
           color: "white",
         }}
       >
+        <img
+          src={logo}
+          alt="Logo"
+          style={{ height: "32px", marginRight: "8px" }}
+        />
         <Typography variant="h6" noWrap sx={{ fontWeight: 700 }}>
           GastoSmart
         </Typography>
