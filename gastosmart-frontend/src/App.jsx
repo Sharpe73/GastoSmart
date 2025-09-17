@@ -93,6 +93,7 @@ function App() {
           }
         />
 
+        {/* Reportes */}
         <Route
           path="/reportes"
           element={
@@ -101,6 +102,8 @@ function App() {
             </AppLayout>
           }
         />
+
+        {/* Configuración */}
         <Route
           path="/config"
           element={
