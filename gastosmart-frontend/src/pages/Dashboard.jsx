@@ -72,8 +72,10 @@ function Dashboard() {
 
       <Paper sx={{ p: 3, mb: 4 }}>
         <Typography>
-          Aquí tienes un resumen de tus gastos y categorías.  
-          Usa el menú lateral para gestionarlos.
+          <b>{user?.nombre || "Usuario"}</b>, este es tu resumen financiero
+          actualizado. Actualmente tienes un total de{" "}
+          <b>${totalGeneral.toLocaleString()}</b> en gastos distribuidos en{" "}
+          <b>{categorias.length}</b> categorías.
         </Typography>
       </Paper>
 
@@ -88,7 +90,9 @@ function Dashboard() {
                 </Avatar>
                 <Box>
                   <Typography variant="h6">Total de Gastos</Typography>
-                  <Typography variant="h4">${totalGeneral}</Typography>
+                  <Typography variant="h4">
+                    ${totalGeneral.toLocaleString()}
+                  </Typography>
                 </Box>
               </Box>
             </CardContent>
@@ -106,7 +110,9 @@ function Dashboard() {
                   </Avatar>
                   <Box>
                     <Typography variant="h6">{cat.nombre}</Typography>
-                    <Typography variant="h5">${cat.total}</Typography>
+                    <Typography variant="h5">
+                      ${cat.total.toLocaleString()}
+                    </Typography>
                   </Box>
                 </Box>
               </CardContent>
