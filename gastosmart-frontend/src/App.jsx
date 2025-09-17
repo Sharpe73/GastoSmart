@@ -2,16 +2,16 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import { Container, Typography, Button, Box } from "@mui/material";
-import AppLayout from "./components/AppLayout";
+import AppLayout from "./components/AppLayout.jsx";
 
 // Páginas
-import Dashboard from "./pages/Dashboard";
-import Categorias from "./pages/Categorias";
-import Gastos from "./pages/Gastos";
-import Reportes from "./pages/Reportes";
-import Config from "./pages/Config";
-import Login from "./pages/Login";       // 👈 agregado
-import Register from "./pages/Register"; // 👈 agregado
+import Dashboard from "./pages/Dashboard.jsx";
+import Categorias from "./pages/Categorias.jsx";
+import Gastos from "./pages/Gastos.jsx";
+import Reportes from "./pages/Reportes.jsx";
+import Config from "./pages/Config.jsx";
+import Login from "./pages/Login.jsx";       // 👈 agregado
+import Register from "./pages/Register.jsx"; // 👈 agregado
 
 function LandingPage() {
   const navigate = useNavigate();
