@@ -225,7 +225,7 @@ function Gastos() {
               <CardContent>
                 <Typography variant="h6">{gasto.descripcion}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Monto: ${gasto.monto}
+                  Monto: ${Number(gasto.monto).toLocaleString("es-CL")}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Categoría: {gasto.categoria_nombre}
