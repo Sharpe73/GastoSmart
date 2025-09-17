@@ -2,6 +2,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Páginas
 import LandingPage from "./pages/LandingPage";
@@ -16,7 +17,7 @@ import Register from "./pages/Register";
 function App() {
   const handleLogout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/";
+    window.location.href = "/login"; // 👈 mejor mandar al login, no a "/"
   };
 
   return (
@@ -29,13 +30,15 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Dashboard con Sidebar */}
+        {/* Dashboard con Sidebar (PROTEGIDO) */}
         <Route
           path="/dashboard"
           element={
-            <AppLayout onLogout={handleLogout}>
-              <Dashboard />
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout onLogout={handleLogout}>
+                <Dashboard />
+              </AppLayout>
+            </ProtectedRoute>
           }
         />
 
@@ -43,9 +46,11 @@ function App() {
         <Route
           path="/categorias/gestionar"
           element={
-            <AppLayout onLogout={handleLogout}>
-              <Categorias />
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout onLogout={handleLogout}>
+                <Categorias />
+              </AppLayout>
+            </ProtectedRoute>
           }
         />
 
@@ -53,9 +58,11 @@ function App() {
         <Route
           path="/gastos/gestionar"
           element={
-            <AppLayout onLogout={handleLogout}>
-              <Gastos />
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout onLogout={handleLogout}>
+                <Gastos />
+              </AppLayout>
+            </ProtectedRoute>
           }
         />
 
@@ -63,9 +70,11 @@ function App() {
         <Route
           path="/reportes"
           element={
-            <AppLayout onLogout={handleLogout}>
-              <Reportes />
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout onLogout={handleLogout}>
+                <Reportes />
+              </AppLayout>
+            </ProtectedRoute>
           }
         />
 
@@ -73,9 +82,11 @@ function App() {
         <Route
           path="/config"
           element={
-            <AppLayout onLogout={handleLogout}>
-              <Config />
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout onLogout={handleLogout}>
+                <Config />
+              </AppLayout>
+            </ProtectedRoute>
           }
         />
       </Routes>
