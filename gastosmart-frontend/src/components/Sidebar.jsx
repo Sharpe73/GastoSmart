@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+
+// Íconos
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import CategoryIcon from "@mui/icons-material/Category";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
@@ -37,7 +39,16 @@ export default function Sidebar({ open, onClose, onLogout }) {
 
   const Content = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <Toolbar>
+      {/* Header */}
+      <Toolbar
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "primary.main",
+          color: "white",
+        }}
+      >
         <Typography variant="h6" noWrap sx={{ fontWeight: 700 }}>
           GastoSmart
         </Typography>
@@ -45,6 +56,7 @@ export default function Sidebar({ open, onClose, onLogout }) {
 
       <Divider />
 
+      {/* Menú principal */}
       <List sx={{ py: 0 }}>
         {/* Dashboard */}
         <ListItemButton
@@ -52,6 +64,10 @@ export default function Sidebar({ open, onClose, onLogout }) {
           to="/dashboard"
           selected={location.pathname === "/dashboard"}
           onClick={!isDesktop ? onClose : undefined}
+          sx={{
+            "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
+            "&:hover": { bgcolor: "primary.light", color: "white" },
+          }}
         >
           <ListItemIcon>
             <DashboardIcon />
@@ -60,7 +76,12 @@ export default function Sidebar({ open, onClose, onLogout }) {
         </ListItemButton>
 
         {/* Categorías */}
-        <ListItemButton onClick={() => setOpenCategorias(!openCategorias)}>
+        <ListItemButton
+          onClick={() => setOpenCategorias(!openCategorias)}
+          sx={{
+            "&:hover": { bgcolor: "action.hover" },
+          }}
+        >
           <ListItemIcon>
             <CategoryIcon />
           </ListItemIcon>
@@ -70,7 +91,11 @@ export default function Sidebar({ open, onClose, onLogout }) {
         <Collapse in={openCategorias} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             <ListItemButton
-              sx={{ pl: 4 }}
+              sx={{
+                pl: 4,
+                "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
+                "&:hover": { bgcolor: "primary.light", color: "white" },
+              }}
               component={RouterLink}
               to="/categorias/gestionar"
               selected={location.pathname.startsWith("/categorias/gestionar")}
@@ -82,7 +107,12 @@ export default function Sidebar({ open, onClose, onLogout }) {
         </Collapse>
 
         {/* Gastos */}
-        <ListItemButton onClick={() => setOpenGastos(!openGastos)}>
+        <ListItemButton
+          onClick={() => setOpenGastos(!openGastos)}
+          sx={{
+            "&:hover": { bgcolor: "action.hover" },
+          }}
+        >
           <ListItemIcon>
             <ReceiptLongIcon />
           </ListItemIcon>
@@ -92,7 +122,11 @@ export default function Sidebar({ open, onClose, onLogout }) {
         <Collapse in={openGastos} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             <ListItemButton
-              sx={{ pl: 4 }}
+              sx={{
+                pl: 4,
+                "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
+                "&:hover": { bgcolor: "primary.light", color: "white" },
+              }}
               component={RouterLink}
               to="/gastos/gestionar"
               selected={location.pathname.startsWith("/gastos/gestionar")}
@@ -103,12 +137,16 @@ export default function Sidebar({ open, onClose, onLogout }) {
           </List>
         </Collapse>
 
-        {/* Otras opciones */}
+        {/* Reportes */}
         <ListItemButton
           component={RouterLink}
           to="/reportes"
           selected={location.pathname.startsWith("/reportes")}
           onClick={!isDesktop ? onClose : undefined}
+          sx={{
+            "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
+            "&:hover": { bgcolor: "primary.light", color: "white" },
+          }}
         >
           <ListItemIcon>
             <InsightsIcon />
@@ -116,11 +154,16 @@ export default function Sidebar({ open, onClose, onLogout }) {
           <ListItemText primary="Reportes" />
         </ListItemButton>
 
+        {/* Configuración */}
         <ListItemButton
           component={RouterLink}
           to="/config"
           selected={location.pathname.startsWith("/config")}
           onClick={!isDesktop ? onClose : undefined}
+          sx={{
+            "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
+            "&:hover": { bgcolor: "primary.light", color: "white" },
+          }}
         >
           <ListItemIcon>
             <SettingsIcon />
@@ -133,8 +176,14 @@ export default function Sidebar({ open, onClose, onLogout }) {
 
       <Divider />
 
+      {/* Logout */}
       <List sx={{ py: 0 }}>
-        <ListItemButton onClick={onLogout}>
+        <ListItemButton
+          onClick={onLogout}
+          sx={{
+            "&:hover": { bgcolor: "error.light", color: "white" },
+          }}
+        >
           <ListItemIcon>
             <LogoutIcon />
           </ListItemIcon>
@@ -154,6 +203,8 @@ export default function Sidebar({ open, onClose, onLogout }) {
         "& .MuiDrawer-paper": {
           width: drawerWidth,
           boxSizing: "border-box",
+          boxShadow: 3,
+          borderRight: "none",
         },
       }}
     >
@@ -166,7 +217,7 @@ export default function Sidebar({ open, onClose, onLogout }) {
       onClose={onClose}
       ModalProps={{ keepMounted: true }}
       sx={{
-        "& .MuiDrawer-paper": { width: drawerWidth },
+        "& .MuiDrawer-paper": { width: drawerWidth, boxShadow: 3 },
       }}
     >
       {Content}
