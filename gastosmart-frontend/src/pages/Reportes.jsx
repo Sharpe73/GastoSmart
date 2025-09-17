@@ -23,16 +23,19 @@ export default function Reportes() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // 🔹 Convertir mes numérico a nombre
         const nombresMeses = [
           "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
           "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
         ];
 
-        const formatted = res.data.map((item) => ({
-          mes: `${nombresMeses[item.mes - 1]} ${item.anio}`,
-          total: Number(item.total),
-        }));
+        const formatted = res.data.map((item) => {
+          // item.mes = "2025-09"
+          const [anio, mes] = item.mes.split("-");
+          return {
+            mes: `${nombresMeses[parseInt(mes, 10) - 1]} ${anio}`,
+            total: Number(item.total),
+          };
+        });
 
         setData(formatted);
       } catch (err) {
@@ -58,7 +61,7 @@ export default function Reportes() {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="mes" />
             <YAxis />
-            <Tooltip />
+            <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
             <Bar dataKey="total" fill="#1976d2" />
           </BarChart>
         </ResponsiveContainer>
