@@ -10,6 +10,8 @@ import Categorias from "./pages/Categorias";
 import Gastos from "./pages/Gastos";
 import Reportes from "./pages/Reportes";
 import Config from "./pages/Config";
+import Login from "./pages/Login";       // 👈 agregado
+import Register from "./pages/Register"; // 👈 agregado
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -63,7 +65,11 @@ function App() {
         {/* Landing page sin layout */}
         <Route path="/" element={<LandingPage />} />
 
-        {/* Rutas con Sidebar */}
+        {/* Login y Register sin sidebar */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Dashboard con Sidebar */}
         <Route
           path="/dashboard"
           element={
