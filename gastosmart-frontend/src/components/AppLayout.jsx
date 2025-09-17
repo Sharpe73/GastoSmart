@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import Sidebar, { drawerWidth } from "./Sidebar";
+import logo from "../assets/gasto.png"; // 👈 Importamos el logo
 
 export default function AppLayout({ children, onLogout }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -43,14 +44,26 @@ export default function AppLayout({ children, onLogout }) {
             <MenuIcon />
           </IconButton>
 
-          <Typography variant="h6" noWrap component="div">
-            GastoSmart
-          </Typography>
+          {/* 👇 Logo en vez de texto */}
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <img
+              src={logo}
+              alt="GastoSmart Logo"
+              style={{ height: "40px", marginRight: "10px" }}
+            />
+            <Typography variant="h6" noWrap component="div">
+              GastoSmart
+            </Typography>
+          </Box>
         </Toolbar>
       </AppBar>
 
       {/* Sidebar */}
-      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} onLogout={onLogout} />
+      <Sidebar
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        onLogout={onLogout}
+      />
 
       {/* Contenido principal */}
       <Box
