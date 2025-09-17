@@ -1,74 +1,58 @@
-// src/pages/Reportes.jsx
 import React, { useEffect, useState } from "react";
-import { Container, Typography, Paper } from "@mui/material";
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { Typography, Container, Paper } from "@mui/material";
 import API from "../api";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function Reportes() {
-  const [gastos, setGastos] = useState([]);
-  const [categorias, setCategorias] = useState([]);
+  const [data, setData] = useState([]);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchReportes = async () => {
       try {
-        const gastoRes = await API.get("/gastos", {
+        const res = await API.get("/reportes/gastos-por-mes", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setGastos(gastoRes.data.gastos || gastoRes.data);
-
-        const catRes = await API.get("/categorias", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCategorias(catRes.data.categorias || catRes.data);
+        // Normalizar los datos para el gráfico
+        const formatted = res.data.map((item) => ({
+          mes: `${item.anio}-${item.mes}`,
+          total: Number(item.total),
+        }));
+        setData(formatted);
       } catch (err) {
-        console.error("Error al cargar datos:", err);
+        console.error("Error cargando reportes:", err);
       }
     };
 
-    fetchData();
+    fetchReportes();
   }, [token]);
 
-  // 🔹 Calcular totales por categoría
-  const data = categorias.map((cat) => {
-    const totalCat = gastos
-      .filter((g) => g.categoria_id === cat.id)
-      .reduce((sum, g) => sum + Number(g.monto), 0);
-    return { name: cat.nombre, value: totalCat };
-  });
-
-  // 🔹 Colores para cada categoría
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#9C27B0", "#E91E63"];
-
   return (
-    <Container sx={{ mt: 6 }}>
-      <Typography variant="h4" gutterBottom align="center" color="primary">
+    <Container sx={{ mt: 4 }}>
+      <Typography variant="h4" gutterBottom color="primary">
         Reportes de Gastos
       </Typography>
 
-      <Paper sx={{ p: 3, boxShadow: 3 }}>
+      <Paper sx={{ p: 3, mt: 3 }}>
         <Typography variant="h6" gutterBottom>
-          Distribución de Gastos por Categoría
+          Gastos por Mes
         </Typography>
-        <ResponsiveContainer width="100%" height={350}>
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              outerRadius={120}
-              fill="#8884d8"
-              dataKey="value"
-              label={({ name, value }) => `${name}: $${value}`}
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip formatter={(value) => `$${value}`} />
-            <Legend />
-          </PieChart>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="mes" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="total" fill="#1976d2" />
+          </BarChart>
         </ResponsiveContainer>
       </Paper>
     </Container>
