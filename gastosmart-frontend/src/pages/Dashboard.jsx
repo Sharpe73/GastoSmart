@@ -7,9 +7,24 @@ import {
   Grid,
   Card,
   CardContent,
+  Avatar,
 } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import API from "../api";
+
+// Íconos de MUI
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import CategoryIcon from "@mui/icons-material/Category";
+
+// Recharts
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
@@ -56,6 +71,9 @@ function Dashboard() {
     return { ...cat, total: totalCat };
   });
 
+  // 🔹 Colores para el gráfico
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AB47BC", "#FF5252"];
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
@@ -70,27 +88,72 @@ function Dashboard() {
       </Paper>
 
       <Grid container spacing={3}>
-        {/* Total general */}
+        {/* Tarjeta total general */}
         <Grid item xs={12} sm={6} md={4}>
-          <Card sx={{ boxShadow: 3, bgcolor: "primary.main", color: "white" }}>
+          <Card sx={{ boxShadow: 4, bgcolor: "primary.main", color: "white" }}>
             <CardContent>
-              <Typography variant="h6">Total de Gastos</Typography>
-              <Typography variant="h4">${totalGeneral}</Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar sx={{ bgcolor: "white", color: "primary.main" }}>
+                  <AttachMoneyIcon />
+                </Avatar>
+                <Box>
+                  <Typography variant="h6">Total de Gastos</Typography>
+                  <Typography variant="h4">${totalGeneral}</Typography>
+                </Box>
+              </Box>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Totales por categoría */}
-        {totalesPorCategoria.map((cat) => (
+        {/* Tarjetas por categoría */}
+        {totalesPorCategoria.map((cat, index) => (
           <Grid item xs={12} sm={6} md={4} key={cat.id}>
-            <Card sx={{ boxShadow: 3 }}>
+            <Card sx={{ boxShadow: 2 }}>
               <CardContent>
-                <Typography variant="h6">{cat.nombre}</Typography>
-                <Typography variant="h5">${cat.total}</Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <Avatar sx={{ bgcolor: COLORS[index % COLORS.length] }}>
+                    <CategoryIcon />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h6">{cat.nombre}</Typography>
+                    <Typography variant="h5">${cat.total}</Typography>
+                  </Box>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
         ))}
+
+        {/* Gráfico circular de distribución */}
+        <Grid item xs={12} md={12}>
+          <Card sx={{ p: 3, boxShadow: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Distribución de Gastos por Categoría
+            </Typography>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={totalesPorCategoria}
+                  dataKey="total"
+                  nameKey="nombre"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label
+                >
+                  {totalesPorCategoria.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </Card>
+        </Grid>
       </Grid>
     </Box>
   );
