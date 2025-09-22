@@ -29,8 +29,8 @@ function Gastos() {
   const [monto, setMonto] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
   const [error, setError] = useState("");
+  const [saldo, setSaldo] = useState(null); // 👈 saldo actual
 
-  // Estado para edición
   const [openEdit, setOpenEdit] = useState(false);
   const [gastoEdit, setGastoEdit] = useState(null);
 
@@ -39,7 +39,7 @@ function Gastos() {
   const categoriaSeleccionada = location.state?.categoriaId || "";
   const [categoriaNombre, setCategoriaNombre] = useState("");
 
-  // 🔹 Cargar categorías y gastos
+  // 🔹 Cargar categorías, gastos y saldo
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -70,6 +70,10 @@ function Gastos() {
         } else {
           setGastos(gastoRes.data.gastos || gastoRes.data);
         }
+
+        // 👇 obtener saldo actual
+        const saldoRes = await API.get("/presupuesto/saldo");
+        setSaldo(saldoRes.data);
       } catch (err) {
         setError("Error al cargar datos");
       }
@@ -82,6 +86,11 @@ function Gastos() {
   const handleAddGasto = async () => {
     if (!descripcion || !monto || !categoriaId) {
       setError("Todos los campos son obligatorios");
+      return;
+    }
+
+    if (saldo && saldo.saldoRestante <= 0) {
+      setError("⚠️ No puedes agregar más gastos, el presupuesto ya está agotado.");
       return;
     }
 
@@ -106,8 +115,15 @@ function Gastos() {
         categoriaSeleccionada ? Number(categoriaSeleccionada) : ""
       );
       setError("");
+
+      // actualizar saldo después de agregar gasto
+      const saldoRes = await API.get("/presupuesto/saldo");
+      setSaldo(saldoRes.data);
     } catch (err) {
-      setError("Error al agregar gasto");
+      // 👇 Mostrar el mensaje real del backend si existe
+      const mensaje =
+        err.response?.data?.mensaje || "Error al agregar gasto";
+      setError(mensaje);
     }
   };
 
@@ -118,12 +134,14 @@ function Gastos() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setGastos(gastos.filter((g) => g.id !== id));
+
+      const saldoRes = await API.get("/presupuesto/saldo");
+      setSaldo(saldoRes.data);
     } catch (err) {
       setError("Error al eliminar gasto");
     }
   };
 
-  // 🔹 Abrir modal de edición
   const handleOpenEdit = (gasto) => {
     setGastoEdit(gasto);
     setOpenEdit(true);
@@ -157,8 +175,13 @@ function Gastos() {
         gastos.map((g) => (g.id === gastoEdit.id ? res.data.gasto : g))
       );
       handleCloseEdit();
+
+      const saldoRes = await API.get("/presupuesto/saldo");
+      setSaldo(saldoRes.data);
     } catch (err) {
-      setError("Error al actualizar gasto");
+      const mensaje =
+        err.response?.data?.mensaje || "Error al actualizar gasto";
+      setError(mensaje);
     }
   };
 
@@ -176,6 +199,12 @@ function Gastos() {
         </Alert>
       )}
 
+      {saldo && saldo.saldoRestante <= 0 && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          ⚠️ Tu presupuesto está agotado, no puedes registrar más gastos.
+        </Alert>
+      )}
+
       {/* Formulario para agregar gasto */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6}>
@@ -184,6 +213,7 @@ function Gastos() {
             fullWidth
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
+            disabled={saldo && saldo.saldoRestante <= 0}
           />
         </Grid>
         <Grid item xs={6} sm={3}>
@@ -193,6 +223,7 @@ function Gastos() {
             fullWidth
             value={monto}
             onChange={(e) => setMonto(e.target.value)}
+            disabled={saldo && saldo.saldoRestante <= 0}
           />
         </Grid>
         <Grid item xs={6} sm={3}>
@@ -202,6 +233,7 @@ function Gastos() {
             fullWidth
             value={categoriaId}
             onChange={(e) => setCategoriaId(Number(e.target.value))}
+            disabled={saldo && saldo.saldoRestante <= 0}
           >
             {categorias.map((cat) => (
               <MenuItem key={cat.id} value={cat.id}>
@@ -211,7 +243,12 @@ function Gastos() {
           </TextField>
         </Grid>
         <Grid item xs={12}>
-          <Button variant="contained" color="primary" onClick={handleAddGasto}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAddGasto}
+            disabled={saldo && saldo.saldoRestante <= 0}
+          >
             Agregar Gasto
           </Button>
         </Grid>

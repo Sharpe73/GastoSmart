@@ -12,6 +12,42 @@ async function crearGasto(req, res) {
         .json({ mensaje: "Descripción y monto son obligatorios" });
     }
 
+    // 🔹 1. Obtener presupuesto actual del usuario
+    const presupuestoRes = await pool.query(
+      `SELECT sueldo, fecha_inicio, fecha_fin 
+       FROM presupuesto 
+       WHERE usuario_id = $1 
+       ORDER BY id DESC 
+       LIMIT 1`,
+      [usuario_id]
+    );
+
+    if (presupuestoRes.rows.length === 0) {
+      return res.status(400).json({ mensaje: "No tienes un presupuesto definido" });
+    }
+
+    const presupuesto = presupuestoRes.rows[0];
+
+    // 🔹 2. Calcular total de gastos ya registrados
+    const gastosRes = await pool.query(
+      `SELECT COALESCE(SUM(monto), 0) AS total_gastos 
+       FROM gastos 
+       WHERE usuario_id = $1`,
+      [usuario_id]
+    );
+
+    const totalGastos = Number(gastosRes.rows[0].total_gastos);
+    const saldoRestante = presupuesto.sueldo - totalGastos;
+
+    // 🔹 3. Validar si hay saldo suficiente
+    if (saldoRestante <= 0 || Number(monto) > saldoRestante) {
+      return res.status(400).json({
+        mensaje: "❌ No puedes agregar más gastos, el presupuesto está agotado",
+        saldoRestante,
+      });
+    }
+
+    // 🔹 4. Insertar el gasto
     const nuevoGasto = await pool.query(
       `INSERT INTO gastos (usuario_id, descripcion, monto, fecha, categoria_id)
        VALUES ($1, $2, $3, $4, $5)
@@ -74,7 +110,9 @@ async function actualizarGasto(req, res) {
       [id, usuario_id]
     );
     if (gasto.rows.length === 0) {
-      return res.status(404).json({ mensaje: "Gasto no encontrado o no autorizado" });
+      return res
+        .status(404)
+        .json({ mensaje: "Gasto no encontrado o no autorizado" });
     }
 
     await pool.query(
@@ -113,7 +151,9 @@ async function eliminarGasto(req, res) {
       [id, usuario_id]
     );
     if (gasto.rows.length === 0) {
-      return res.status(404).json({ mensaje: "Gasto no encontrado o no autorizado" });
+      return res
+        .status(404)
+        .json({ mensaje: "Gasto no encontrado o no autorizado" });
     }
 
     await pool.query("DELETE FROM gastos WHERE id = $1", [id]);
