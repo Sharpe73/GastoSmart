@@ -9,6 +9,8 @@ import {
   Card,
   CardContent,
   Alert,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import MoneyOffIcon from "@mui/icons-material/MoneyOff";
@@ -31,6 +33,10 @@ function Presupuesto() {
   const [fechaFin, setFechaFin] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [saldo, setSaldo] = useState(null);
+
+  // 👉 Detectar si es móvil
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   // 👉 Función para formatear fecha legible
   const formatFecha = (fecha) => {
@@ -168,6 +174,7 @@ function Presupuesto() {
             color="primary"
             onClick={handleGuardar}
             sx={{ mt: 2 }}
+            fullWidth={isMobile}
           >
             Guardar Presupuesto
           </Button>
@@ -185,70 +192,124 @@ function Presupuesto() {
 
       {/* 👉 Mostrar saldo si existe */}
       {saldo && saldo.sueldo && (
-        <Grid container spacing={2} sx={{ mt: 3 }}>
-          <Grid item xs={12} md={3}>
-            <Card sx={{ p: 2, textAlign: "center", borderTop: "5px solid #1976d2", borderRadius: 3, boxShadow: 3 }}>
-              <MonetizationOnIcon color="primary" fontSize="large" />
-              <Typography variant="subtitle2" sx={{ mt: 1 }}>Sueldo inicial</Typography>
-              <Typography variant="h6" sx={{ fontWeight: "bold" }}>{formatCLP(saldo.sueldo)}</Typography>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <Card sx={{ p: 2, textAlign: "center", borderTop: "5px solid #e53935", borderRadius: 3, boxShadow: 3 }}>
-              <MoneyOffIcon color="error" fontSize="large" />
-              <Typography variant="subtitle2" sx={{ mt: 1 }}>Total Gastos</Typography>
-              <Typography variant="h6" color="error" sx={{ fontWeight: "bold" }}>
-                {formatCLP(saldo.totalGastos)}
-              </Typography>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <Card sx={{ p: 2, textAlign: "center", borderTop: "5px solid #43a047", borderRadius: 3, boxShadow: 3 }}>
-              <AccountBalanceIcon sx={{ color: "#43a047" }} fontSize="large" />
-              <Typography variant="subtitle2" sx={{ mt: 1 }}>Saldo Restante</Typography>
-              <Typography variant="h6" color="success.main" sx={{ fontWeight: "bold" }}>
-                {formatCLP(saldo.saldoRestante)}
-              </Typography>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <Card sx={{ p: 2, textAlign: "center", borderTop: "5px solid gray", borderRadius: 3, boxShadow: 3 }}>
-              <EventIcon color="action" fontSize="large" />
-              <Typography variant="subtitle2" sx={{ mt: 1 }}>Período</Typography>
-              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                {formatFecha(saldo.fecha_inicio)} → {formatFecha(saldo.fecha_fin)}
-              </Typography>
-            </Card>
-          </Grid>
+        <Grid container spacing={2} sx={{ mt: 3 }} alignItems="stretch">
+          {/* Tarjetas principales */}
+          {[
+            {
+              titulo: "Sueldo inicial",
+              valor: formatCLP(saldo.sueldo),
+              color: "#1976d2",
+              icono: <MonetizationOnIcon color="primary" fontSize="large" />,
+            },
+            {
+              titulo: "Total Gastos",
+              valor: formatCLP(saldo.totalGastos),
+              color: "#e53935",
+              icono: <MoneyOffIcon color="error" fontSize="large" />,
+              textoColor: "error",
+            },
+            {
+              titulo: "Saldo Restante",
+              valor: formatCLP(saldo.saldoRestante),
+              color: "#43a047",
+              icono: <AccountBalanceIcon sx={{ color: "#43a047" }} fontSize="large" />,
+              textoColor: "success.main",
+            },
+            {
+              titulo: "Período",
+              valor: `${formatFecha(saldo.fecha_inicio)} → ${formatFecha(
+                saldo.fecha_fin
+              )}`,
+              color: "gray",
+              icono: <EventIcon color="action" fontSize="large" />,
+            },
+          ].map((card, idx) => (
+            <Grid item xs={12} md={3} key={idx}>
+              <Card
+                sx={{
+                  p: 2,
+                  textAlign: "center",
+                  borderTop: `5px solid ${card.color}`,
+                  borderRadius: 3,
+                  boxShadow: 3,
+                  height: "100%",
+                }}
+              >
+                {card.icono}
+                <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                  {card.titulo}
+                </Typography>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: "bold",
+                    color: card.textoColor || "inherit",
+                  }}
+                >
+                  {card.valor}
+                </Typography>
+              </Card>
+            </Grid>
+          ))}
 
-          {/* 👉 Tarjeta de gasto diario */}
+          {/* Tarjeta de gasto diario */}
           {calcularGastoDiario() && (
             <Grid item xs={12} md={6}>
-              <Card sx={{ p: 2, textAlign: "center", bgcolor: "#e8f5e9", borderRadius: 3, boxShadow: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: "bold", color: "green" }}>
+              <Card
+                sx={{
+                  p: 2,
+                  textAlign: "center",
+                  bgcolor: "#e8f5e9",
+                  borderRadius: 3,
+                  boxShadow: 3,
+                  height: "100%",
+                }}
+              >
+                <Typography
+                  variant={isMobile ? "subtitle1" : "h6"}
+                  sx={{ fontWeight: "bold", color: "green" }}
+                >
                   Puedes gastar por día: {formatCLP(calcularGastoDiario())}
                 </Typography>
               </Card>
             </Grid>
           )}
 
-          {/* 👉 Mini gráfico circular */}
+          {/* Mini gráfico circular */}
           <Grid item xs={12} md={6}>
-            <Card sx={{ p: 2, textAlign: "center", borderRadius: 3, boxShadow: 3 }}>
-              <PieChartIcon color="action" fontSize="large" />
-              <Typography variant="subtitle2" sx={{ mt: 1 }}>Distribución</Typography>
-              <ResponsiveContainer width="100%" height={200}>
+            <Card
+              sx={{
+                p: 2,
+                textAlign: "center",
+                borderRadius: 3,
+                boxShadow: 3,
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}
+            >
+              <div>
+                <PieChartIcon color="action" fontSize="large" />
+                <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                  Distribución
+                </Typography>
+              </div>
+              <ResponsiveContainer width="100%" height={isMobile ? 220 : 150}>
                 <PieChart>
                   <Pie
                     data={dataGrafico}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={80}
+                    outerRadius={isMobile ? 90 : 70}
                     dataKey="value"
                   >
                     {dataGrafico.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value) => formatCLP(value)} />
