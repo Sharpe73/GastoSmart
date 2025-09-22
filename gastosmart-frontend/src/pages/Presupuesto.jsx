@@ -187,35 +187,35 @@ function Presupuesto() {
       {saldo && saldo.sueldo && (
         <Grid container spacing={2} sx={{ mt: 3 }}>
           <Grid item xs={12} md={3}>
-            <Card sx={{ p: 2, textAlign: "center", borderTop: "4px solid blue" }}>
+            <Card sx={{ p: 2, textAlign: "center", borderTop: "5px solid #1976d2", borderRadius: 3, boxShadow: 3 }}>
               <MonetizationOnIcon color="primary" fontSize="large" />
-              <Typography variant="subtitle2">Sueldo inicial</Typography>
-              <Typography variant="h6">{formatCLP(saldo.sueldo)}</Typography>
+              <Typography variant="subtitle2" sx={{ mt: 1 }}>Sueldo inicial</Typography>
+              <Typography variant="h6" sx={{ fontWeight: "bold" }}>{formatCLP(saldo.sueldo)}</Typography>
             </Card>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Card sx={{ p: 2, textAlign: "center", borderTop: "4px solid red" }}>
+            <Card sx={{ p: 2, textAlign: "center", borderTop: "5px solid #e53935", borderRadius: 3, boxShadow: 3 }}>
               <MoneyOffIcon color="error" fontSize="large" />
-              <Typography variant="subtitle2">Total Gastos</Typography>
-              <Typography variant="h6" color="error">
+              <Typography variant="subtitle2" sx={{ mt: 1 }}>Total Gastos</Typography>
+              <Typography variant="h6" color="error" sx={{ fontWeight: "bold" }}>
                 {formatCLP(saldo.totalGastos)}
               </Typography>
             </Card>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Card sx={{ p: 2, textAlign: "center", borderTop: "4px solid green" }}>
-              <AccountBalanceIcon sx={{ color: "green" }} fontSize="large" />
-              <Typography variant="subtitle2">Saldo Restante</Typography>
-              <Typography variant="h6" color="success.main">
+            <Card sx={{ p: 2, textAlign: "center", borderTop: "5px solid #43a047", borderRadius: 3, boxShadow: 3 }}>
+              <AccountBalanceIcon sx={{ color: "#43a047" }} fontSize="large" />
+              <Typography variant="subtitle2" sx={{ mt: 1 }}>Saldo Restante</Typography>
+              <Typography variant="h6" color="success.main" sx={{ fontWeight: "bold" }}>
                 {formatCLP(saldo.saldoRestante)}
               </Typography>
             </Card>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Card sx={{ p: 2, textAlign: "center", borderTop: "4px solid gray" }}>
+            <Card sx={{ p: 2, textAlign: "center", borderTop: "5px solid gray", borderRadius: 3, boxShadow: 3 }}>
               <EventIcon color="action" fontSize="large" />
-              <Typography variant="subtitle2">Período</Typography>
-              <Typography variant="h6">
+              <Typography variant="subtitle2" sx={{ mt: 1 }}>Período</Typography>
+              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                 {formatFecha(saldo.fecha_inicio)} → {formatFecha(saldo.fecha_fin)}
               </Typography>
             </Card>
@@ -224,7 +224,7 @@ function Presupuesto() {
           {/* 👉 Tarjeta de gasto diario */}
           {calcularGastoDiario() && (
             <Grid item xs={12} md={6}>
-              <Card sx={{ p: 2, textAlign: "center", bgcolor: "#e8f5e9" }}>
+              <Card sx={{ p: 2, textAlign: "center", bgcolor: "#e8f5e9", borderRadius: 3, boxShadow: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: "bold", color: "green" }}>
                   Puedes gastar por día: {formatCLP(calcularGastoDiario())}
                 </Typography>
@@ -234,9 +234,9 @@ function Presupuesto() {
 
           {/* 👉 Mini gráfico circular */}
           <Grid item xs={12} md={6}>
-            <Card sx={{ p: 2, textAlign: "center" }}>
+            <Card sx={{ p: 2, textAlign: "center", borderRadius: 3, boxShadow: 3 }}>
               <PieChartIcon color="action" fontSize="large" />
-              <Typography variant="subtitle2">Distribución</Typography>
+              <Typography variant="subtitle2" sx={{ mt: 1 }}>Distribución</Typography>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie
