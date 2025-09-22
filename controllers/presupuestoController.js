@@ -10,6 +10,14 @@ const crearPresupuesto = async (req, res) => {
       return res.status(400).json({ error: "Todos los campos son obligatorios" });
     }
 
+    // 👇 Log para depuración
+    console.log("📌 Datos recibidos en crearPresupuesto:", {
+      sueldo,
+      fecha_inicio,
+      fecha_fin,
+      usuario_id,
+    });
+
     // Verificar si ya existe un presupuesto activo para el usuario
     const existe = await pool.query(
       "SELECT * FROM presupuestos WHERE usuario_id = $1 ORDER BY created_at DESC LIMIT 1",
@@ -22,6 +30,7 @@ const crearPresupuesto = async (req, res) => {
         "UPDATE presupuestos SET sueldo = $1, fecha_inicio = $2, fecha_fin = $3, created_at = NOW() WHERE id = $4 RETURNING *",
         [sueldo, fecha_inicio, fecha_fin, existe.rows[0].id]
       );
+      console.log("✅ Presupuesto actualizado:", result.rows[0]);
       return res.json(result.rows[0]);
     }
 
@@ -31,9 +40,10 @@ const crearPresupuesto = async (req, res) => {
       [usuario_id, sueldo, fecha_inicio, fecha_fin]
     );
 
+    console.log("✅ Presupuesto creado:", result.rows[0]);
     res.json(result.rows[0]);
   } catch (error) {
-    console.error("Error al crear presupuesto:", error);
+    console.error("❌ Error al crear presupuesto:", error);
     res.status(500).json({ error: "Error al guardar presupuesto" });
   }
 };
@@ -52,9 +62,10 @@ const obtenerPresupuesto = async (req, res) => {
       return res.json(null);
     }
 
+    console.log("📌 Presupuesto obtenido:", result.rows[0]);
     res.json(result.rows[0]);
   } catch (error) {
-    console.error("Error al obtener presupuesto:", error);
+    console.error("❌ Error al obtener presupuesto:", error);
     res.status(500).json({ error: "Error al obtener presupuesto" });
   }
 };
@@ -75,6 +86,7 @@ const obtenerSaldo = async (req, res) => {
     }
 
     const presupuesto = presupuestoRes.rows[0];
+    console.log("📌 Presupuesto usado para calcular saldo:", presupuesto);
 
     // Calcular gastos dentro del rango de fechas del presupuesto
     const gastosRes = await pool.query(
@@ -85,15 +97,18 @@ const obtenerSaldo = async (req, res) => {
     const totalGastos = parseFloat(gastosRes.rows[0].total_gastos);
     const saldoRestante = parseFloat(presupuesto.sueldo) - totalGastos;
 
-    res.json({
+    const response = {
       sueldo: parseFloat(presupuesto.sueldo),
       totalGastos,
       saldoRestante,
       fecha_inicio: presupuesto.fecha_inicio,
       fecha_fin: presupuesto.fecha_fin,
-    });
+    };
+
+    console.log("✅ Saldo calculado:", response);
+    res.json(response);
   } catch (error) {
-    console.error("Error al obtener saldo:", error);
+    console.error("❌ Error al obtener saldo:", error);
     res.status(500).json({ error: "Error al obtener saldo" });
   }
 };

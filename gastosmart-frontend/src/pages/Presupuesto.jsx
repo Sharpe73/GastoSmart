@@ -1,3 +1,4 @@
+// src/pages/Presupuesto.jsx
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -9,7 +10,7 @@ import {
   CardContent,
   Alert,
 } from "@mui/material";
-import API from "../api"; // 👈 tu helper para axios
+import API from "../api"; // 👈 helper para axios
 
 function Presupuesto() {
   const [sueldo, setSueldo] = useState("");
@@ -18,7 +19,18 @@ function Presupuesto() {
   const [mensaje, setMensaje] = useState("");
   const [saldo, setSaldo] = useState(null);
 
-  // 👇 Formatear números como CLP
+  // 👉 Función para formatear fecha a YYYY-MM-DD
+  const formatFecha = (fecha) => {
+    if (!fecha) return null;
+    if (fecha.includes("-") && fecha.split("-")[0].length === 4) {
+      // ya está en formato yyyy-mm-dd
+      return fecha;
+    }
+    const [day, month, year] = fecha.split("-");
+    return `${year}-${month}-${day}`;
+  };
+
+  // 👉 Formatear números como CLP
   const formatCLP = (valor) => {
     if (valor === null || valor === undefined || isNaN(valor)) return "$0";
     return new Intl.NumberFormat("es-CL", {
@@ -60,8 +72,8 @@ function Presupuesto() {
     try {
       const res = await API.post("/presupuesto", {
         sueldo,
-        fecha_inicio: fechaInicio,
-        fecha_fin: fechaFin,
+        fecha_inicio: formatFecha(fechaInicio),
+        fecha_fin: formatFecha(fechaFin),
       });
       setMensaje("✅ Presupuesto guardado correctamente");
       console.log("Presupuesto guardado:", res.data);
@@ -75,14 +87,13 @@ function Presupuesto() {
     }
   };
 
-  // 👇 Calcular gasto diario permitido
+  // 👉 Calcular gasto diario permitido
   const calcularGastoDiario = () => {
     if (!saldo || !saldo.fecha_fin) return null;
 
     const hoy = new Date();
     const fechaFin = new Date(saldo.fecha_fin);
 
-    // diferencia en milisegundos → días
     const diffTime = fechaFin.getTime() - hoy.getTime();
     const diffDias = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -149,7 +160,7 @@ function Presupuesto() {
         </CardContent>
       </Card>
 
-      {/* 👇 Mostrar saldo si existe */}
+      {/* 👉 Mostrar saldo si existe */}
       {saldo && saldo.sueldo && (
         <Card sx={{ mt: 3, p: 2, bgcolor: "#f5f5f5" }}>
           <Typography variant="h6">Resumen</Typography>
@@ -160,7 +171,6 @@ function Presupuesto() {
             Período: {saldo.fecha_inicio} → {saldo.fecha_fin}
           </Typography>
 
-          {/* 👇 Nuevo: gasto diario permitido */}
           {calcularGastoDiario() && (
             <Typography sx={{ mt: 1, fontWeight: "bold", color: "green" }}>
               Puedes gastar por día: {formatCLP(calcularGastoDiario())}
