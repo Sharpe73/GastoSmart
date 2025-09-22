@@ -19,15 +19,15 @@ function Presupuesto() {
   const [mensaje, setMensaje] = useState("");
   const [saldo, setSaldo] = useState(null);
 
-  // 👉 Función para formatear fecha a YYYY-MM-DD
+  // 👉 Función para formatear fecha legible
   const formatFecha = (fecha) => {
-    if (!fecha) return null;
-    if (fecha.includes("-") && fecha.split("-")[0].length === 4) {
-      // ya está en formato yyyy-mm-dd
-      return fecha;
-    }
-    const [day, month, year] = fecha.split("-");
-    return `${year}-${month}-${day}`;
+    if (!fecha) return "";
+    const d = new Date(fecha);
+    return d.toLocaleDateString("es-CL", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
   };
 
   // 👉 Formatear números como CLP
@@ -72,8 +72,8 @@ function Presupuesto() {
     try {
       const res = await API.post("/presupuesto", {
         sueldo,
-        fecha_inicio: formatFecha(fechaInicio),
-        fecha_fin: formatFecha(fechaFin),
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin,
       });
       setMensaje("✅ Presupuesto guardado correctamente");
       console.log("Presupuesto guardado:", res.data);
@@ -162,21 +162,49 @@ function Presupuesto() {
 
       {/* 👉 Mostrar saldo si existe */}
       {saldo && saldo.sueldo && (
-        <Card sx={{ mt: 3, p: 2, bgcolor: "#f5f5f5" }}>
-          <Typography variant="h6">Resumen</Typography>
-          <Typography>Sueldo inicial: {formatCLP(saldo.sueldo)}</Typography>
-          <Typography>Total Gastos: {formatCLP(saldo.totalGastos)}</Typography>
-          <Typography>Saldo Restante: {formatCLP(saldo.saldoRestante)}</Typography>
-          <Typography>
-            Período: {saldo.fecha_inicio} → {saldo.fecha_fin}
-          </Typography>
+        <Grid container spacing={2} sx={{ mt: 3 }}>
+          <Grid item xs={12} md={3}>
+            <Card sx={{ p: 2, textAlign: "center", bgcolor: "#f5f5f5" }}>
+              <Typography variant="subtitle2">Sueldo inicial</Typography>
+              <Typography variant="h6">{formatCLP(saldo.sueldo)}</Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Card sx={{ p: 2, textAlign: "center", bgcolor: "#f5f5f5" }}>
+              <Typography variant="subtitle2">Total Gastos</Typography>
+              <Typography variant="h6" color="error">
+                {formatCLP(saldo.totalGastos)}
+              </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Card sx={{ p: 2, textAlign: "center", bgcolor: "#f5f5f5" }}>
+              <Typography variant="subtitle2">Saldo Restante</Typography>
+              <Typography variant="h6" color="success.main">
+                {formatCLP(saldo.saldoRestante)}
+              </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Card sx={{ p: 2, textAlign: "center", bgcolor: "#f5f5f5" }}>
+              <Typography variant="subtitle2">Período</Typography>
+              <Typography variant="h6">
+                {formatFecha(saldo.fecha_inicio)} → {formatFecha(saldo.fecha_fin)}
+              </Typography>
+            </Card>
+          </Grid>
 
+          {/* 👉 Tarjeta de gasto diario */}
           {calcularGastoDiario() && (
-            <Typography sx={{ mt: 1, fontWeight: "bold", color: "green" }}>
-              Puedes gastar por día: {formatCLP(calcularGastoDiario())}
-            </Typography>
+            <Grid item xs={12}>
+              <Card sx={{ p: 2, textAlign: "center", bgcolor: "#e8f5e9" }}>
+                <Typography variant="h6" sx={{ fontWeight: "bold", color: "green" }}>
+                  Puedes gastar por día: {formatCLP(calcularGastoDiario())}
+                </Typography>
+              </Card>
+            </Grid>
           )}
-        </Card>
+        </Grid>
       )}
     </Container>
   );
