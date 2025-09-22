@@ -212,7 +212,9 @@ function Presupuesto() {
               titulo: "Saldo Restante",
               valor: formatCLP(saldo.saldoRestante),
               color: "#43a047",
-              icono: <AccountBalanceIcon sx={{ color: "#43a047" }} fontSize="large" />,
+              icono: (
+                <AccountBalanceIcon sx={{ color: "#43a047" }} fontSize="large" />
+              ),
               textoColor: "success.main",
             },
             {
@@ -224,7 +226,7 @@ function Presupuesto() {
               icono: <EventIcon color="action" fontSize="large" />,
             },
           ].map((card, idx) => (
-            <Grid item xs={12} md={3} key={idx}>
+            <Grid item xs={12} sm={6} md={3} key={idx}>
               <Card
                 sx={{
                   p: 2,
@@ -236,7 +238,7 @@ function Presupuesto() {
                 }}
               >
                 {card.icono}
-                <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                <Typography variant="subtitle2" sx={{ mt: 1, color: "text.secondary" }}>
                   {card.titulo}
                 </Typography>
                 <Typography
@@ -254,7 +256,7 @@ function Presupuesto() {
 
           {/* Tarjeta de gasto diario */}
           {calcularGastoDiario() && (
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} sm={6} md={6}>
               <Card
                 sx={{
                   p: 2,
@@ -276,7 +278,7 @@ function Presupuesto() {
           )}
 
           {/* Mini gráfico circular */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} sm={6} md={6}>
             <Card
               sx={{
                 p: 2,
@@ -291,7 +293,7 @@ function Presupuesto() {
             >
               <div>
                 <PieChartIcon color="action" fontSize="large" />
-                <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                <Typography variant="subtitle2" sx={{ mt: 1, color: "text.secondary" }}>
                   Distribución
                 </Typography>
               </div>
