@@ -13,11 +13,12 @@ import Reportes from "./pages/Reportes";
 import Config from "./pages/Config";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Presupuesto from "./pages/Presupuesto"; 
 
 function App() {
   const handleLogout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/login"; // 👈 al cerrar sesión siempre manda al login
+    window.location.href = "/login";
   };
 
   return (
@@ -85,6 +86,18 @@ function App() {
             <ProtectedRoute>
               <AppLayout onLogout={handleLogout}>
                 <Config />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Presupuesto (PROTEGIDO) */}
+        <Route
+          path="/presupuesto"
+          element={
+            <ProtectedRoute>
+              <AppLayout onLogout={handleLogout}>
+                <Presupuesto />
               </AppLayout>
             </ProtectedRoute>
           }

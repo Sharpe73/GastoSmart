@@ -25,6 +25,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import InsightsIcon from "@mui/icons-material/Insights";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet"; // 👈 Presupuesto
 
 // 👇 Importa tu logo
 import logo from "../assets/gasto.png";
@@ -143,6 +144,23 @@ export default function Sidebar({ open, onClose, onLogout }) {
             </ListItemButton>
           </List>
         </Collapse>
+
+        {/* Presupuesto */}
+        <ListItemButton
+          component={RouterLink}
+          to="/presupuesto"
+          selected={location.pathname.startsWith("/presupuesto")}
+          onClick={!isDesktop ? onClose : undefined}
+          sx={{
+            "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
+            "&:hover": { bgcolor: "primary.light", color: "white" },
+          }}
+        >
+          <ListItemIcon>
+            <AccountBalanceWalletIcon />
+          </ListItemIcon>
+          <ListItemText primary="Presupuesto" />
+        </ListItemButton>
 
         {/* Reportes */}
         <ListItemButton
