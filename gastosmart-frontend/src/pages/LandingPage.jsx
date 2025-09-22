@@ -7,6 +7,7 @@ import {
   Card,
   CardContent,
   Stack,
+  Avatar,
 } from "@mui/material";
 import { useNavigate, Navigate } from "react-router-dom";
 import { Login, PersonAdd } from "@mui/icons-material";
@@ -32,60 +33,23 @@ function LandingPage() {
         background: "linear-gradient(135deg, #90caf9 0%, #e3f2fd 100%)",
       }}
     >
-      {/* Fondo decorativo con ondas */}
+      {/* Fondo con ondas suaves */}
       <Box
         component="div"
         sx={{
           position: "absolute",
-          top: 0,
-          left: 0,
+          bottom: 0,
           width: "100%",
-          height: "100%",
+          height: "40%",
           backgroundImage: `url("data:image/svg+xml;utf8,
             <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'>
-              <path fill='%23ffffff22' fill-opacity='1' d='M0,192L60,181.3C120,171,240,149,360,154.7C480,160,600,192,720,192C840,192,960,160,1080,149.3C1200,139,1320,149,1380,154.7L1440,160L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z'></path>
+              <path fill='%23ffffff55' d='M0,224L40,213.3C80,203,160,181,240,160C320,139,400,117,480,122.7C560,128,640,160,720,176C800,192,880,192,960,165.3C1040,139,1120,85,1200,90.7C1280,96,1360,160,1400,192L1440,224L1440,0L0,0Z'></path>
             </svg>")`,
           backgroundRepeat: "no-repeat",
           backgroundSize: "cover",
-          backgroundPosition: "bottom",
           opacity: 0.3,
         }}
       />
-
-      {/* Íconos decorativos financieros */}
-      <Typography
-        sx={{
-          position: "absolute",
-          top: "15%",
-          left: "10%",
-          fontSize: "3rem",
-          opacity: 0.15,
-        }}
-      >
-        💳
-      </Typography>
-      <Typography
-        sx={{
-          position: "absolute",
-          bottom: "20%",
-          right: "15%",
-          fontSize: "3.5rem",
-          opacity: 0.15,
-        }}
-      >
-        📊
-      </Typography>
-      <Typography
-        sx={{
-          position: "absolute",
-          bottom: "10%",
-          left: "20%",
-          fontSize: "3rem",
-          opacity: 0.15,
-        }}
-      >
-        💵
-      </Typography>
 
       {/* Tarjeta central */}
       <Card
@@ -95,16 +59,33 @@ function LandingPage() {
           boxShadow: 6,
           borderRadius: 4,
           textAlign: "center",
-          p: 3,
-          zIndex: 2, // 👈 para que quede sobre el fondo
+          p: 4,
+          zIndex: 2,
+          background: "rgba(255,255,255,0.9)",
+          backdropFilter: "blur(6px)", // 👈 efecto glassmorphism
         }}
       >
         <CardContent>
+          {/* Logo circular */}
+          <Avatar
+            sx={{
+              bgcolor: "primary.main",
+              width: 70,
+              height: 70,
+              mx: "auto",
+              mb: 2,
+              fontSize: "2rem",
+            }}
+          >
+            💰
+          </Avatar>
+
           <Typography variant="h3" color="primary" gutterBottom>
             GastoSmart
           </Typography>
           <Typography variant="subtitle1" sx={{ mb: 4 }}>
-            💰 Controla tus gastos y organiza tu presupuesto de manera fácil
+            Tu compañero inteligente para <br />
+            controlar gastos y organizar tu presupuesto
           </Typography>
 
           <Stack spacing={2}>
