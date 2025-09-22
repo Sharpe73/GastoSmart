@@ -28,8 +28,8 @@ function Gastos() {
   const [descripcion, setDescripcion] = useState("");
   const [monto, setMonto] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
-  const [error, setError] = useState("");
-  const [saldo, setSaldo] = useState(null); // 👈 saldo actual
+  const [mensaje, setMensaje] = useState({ tipo: "", texto: "" });
+  const [saldo, setSaldo] = useState(null);
 
   const [openEdit, setOpenEdit] = useState(false);
   const [gastoEdit, setGastoEdit] = useState(null);
@@ -75,7 +75,10 @@ function Gastos() {
         const saldoRes = await API.get("/presupuesto/saldo");
         setSaldo(saldoRes.data);
       } catch (err) {
-        setError("Error al cargar datos");
+        setMensaje({
+          tipo: "error",
+          texto: "❌ Error al cargar datos. Intenta nuevamente.",
+        });
       }
     };
 
@@ -85,12 +88,15 @@ function Gastos() {
   // 🔹 Agregar gasto
   const handleAddGasto = async () => {
     if (!descripcion || !monto || !categoriaId) {
-      setError("Todos los campos son obligatorios");
+      setMensaje({ tipo: "error", texto: "⚠️ Todos los campos son obligatorios." });
       return;
     }
 
     if (saldo && saldo.saldoRestante <= 0) {
-      setError("⚠️ No puedes agregar más gastos, el presupuesto ya está agotado.");
+      setMensaje({
+        tipo: "warning",
+        texto: "⚠️ Tu presupuesto está agotado. No puedes registrar más gastos.",
+      });
       return;
     }
 
@@ -114,16 +120,22 @@ function Gastos() {
       setCategoriaId(
         categoriaSeleccionada ? Number(categoriaSeleccionada) : ""
       );
-      setError("");
+      setMensaje({ tipo: "success", texto: "✅ Gasto agregado correctamente." });
 
       // actualizar saldo después de agregar gasto
       const saldoRes = await API.get("/presupuesto/saldo");
       setSaldo(saldoRes.data);
     } catch (err) {
-      // 👇 Mostrar el mensaje real del backend si existe
-      const mensaje =
-        err.response?.data?.mensaje || "Error al agregar gasto";
-      setError(mensaje);
+      let texto = "❌ Error inesperado al intentar agregar gasto.";
+      if (err.response?.data?.mensaje) {
+        texto = err.response.data.mensaje;
+        if (err.response.data.saldoRestante !== undefined) {
+          texto += ` (Saldo disponible: $${Number(
+            err.response.data.saldoRestante
+          ).toLocaleString("es-CL")})`;
+        }
+      }
+      setMensaje({ tipo: "error", texto });
     }
   };
 
@@ -137,8 +149,12 @@ function Gastos() {
 
       const saldoRes = await API.get("/presupuesto/saldo");
       setSaldo(saldoRes.data);
+      setMensaje({ tipo: "info", texto: "🗑️ Gasto eliminado correctamente." });
     } catch (err) {
-      setError("Error al eliminar gasto");
+      setMensaje({
+        tipo: "error",
+        texto: "❌ Error al intentar eliminar gasto.",
+      });
     }
   };
 
@@ -155,7 +171,7 @@ function Gastos() {
   // 🔹 Guardar cambios en edición
   const handleUpdateGasto = async () => {
     if (!gastoEdit.descripcion || !gastoEdit.monto || !gastoEdit.categoria_id) {
-      setError("Todos los campos son obligatorios");
+      setMensaje({ tipo: "error", texto: "⚠️ Todos los campos son obligatorios." });
       return;
     }
 
@@ -178,10 +194,13 @@ function Gastos() {
 
       const saldoRes = await API.get("/presupuesto/saldo");
       setSaldo(saldoRes.data);
+
+      setMensaje({ tipo: "success", texto: "✏️ Gasto actualizado correctamente." });
     } catch (err) {
-      const mensaje =
-        err.response?.data?.mensaje || "Error al actualizar gasto";
-      setError(mensaje);
+      const texto =
+        err.response?.data?.mensaje ||
+        "❌ Error inesperado al intentar actualizar gasto.";
+      setMensaje({ tipo: "error", texto });
     }
   };
 
@@ -193,15 +212,9 @@ function Gastos() {
           : "Gestionar Gastos"}
       </Typography>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      {saldo && saldo.saldoRestante <= 0 && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          ⚠️ Tu presupuesto está agotado, no puedes registrar más gastos.
+      {mensaje.texto && (
+        <Alert severity={mensaje.tipo} sx={{ mb: 2 }}>
+          {mensaje.texto}
         </Alert>
       )}
 
@@ -262,10 +275,10 @@ function Gastos() {
               <CardContent>
                 <Typography variant="h6">{gasto.descripcion}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Monto: ${Number(gasto.monto).toLocaleString("es-CL")}
+                  💰 Monto: ${Number(gasto.monto).toLocaleString("es-CL")}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Categoría: {gasto.categoria_nombre}
+                  📂 Categoría: {gasto.categoria_nombre}
                 </Typography>
               </CardContent>
               <CardActions>

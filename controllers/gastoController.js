@@ -41,11 +41,19 @@ async function crearGasto(req, res) {
     const totalGastos = Number(gastosRes.rows[0].total_gastos);
     const saldoRestante = presupuesto.sueldo - totalGastos;
 
-    // 🔹 3. Validar si hay saldo suficiente
-    if (saldoRestante <= 0 || Number(monto) > saldoRestante) {
+    // 🔹 3. Validaciones más claras
+    if (saldoRestante <= 0) {
       return res.status(400).json({
-        mensaje:
-          "❌ No puedes agregar más gastos, el presupuesto está agotado",
+        mensaje: "❌ No puedes agregar más gastos, el presupuesto está agotado",
+        saldoRestante,
+      });
+    }
+
+    if (Number(monto) > saldoRestante) {
+      return res.status(400).json({
+        mensaje: `⚠️ El gasto sobrepasa tu presupuesto. Te quedan $${saldoRestante.toLocaleString(
+          "es-CL"
+        )}, pero intentas registrar $${Number(monto).toLocaleString("es-CL")}.`,
         saldoRestante,
       });
     }
