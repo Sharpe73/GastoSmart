@@ -15,7 +15,7 @@ async function crearGasto(req, res) {
     // 🔹 1. Obtener presupuesto actual del usuario
     const presupuestoRes = await pool.query(
       `SELECT sueldo, fecha_inicio, fecha_fin 
-       FROM presupuesto 
+       FROM presupuestos   -- 👈 ahora en plural
        WHERE usuario_id = $1 
        ORDER BY id DESC 
        LIMIT 1`,
@@ -23,7 +23,9 @@ async function crearGasto(req, res) {
     );
 
     if (presupuestoRes.rows.length === 0) {
-      return res.status(400).json({ mensaje: "No tienes un presupuesto definido" });
+      return res
+        .status(400)
+        .json({ mensaje: "No tienes un presupuesto definido" });
     }
 
     const presupuesto = presupuestoRes.rows[0];
@@ -42,7 +44,8 @@ async function crearGasto(req, res) {
     // 🔹 3. Validar si hay saldo suficiente
     if (saldoRestante <= 0 || Number(monto) > saldoRestante) {
       return res.status(400).json({
-        mensaje: "❌ No puedes agregar más gastos, el presupuesto está agotado",
+        mensaje:
+          "❌ No puedes agregar más gastos, el presupuesto está agotado",
         saldoRestante,
       });
     }
