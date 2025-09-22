@@ -5,7 +5,7 @@ const {
   obtenerPresupuesto,
   obtenerSaldo,
 } = require("../controllers/presupuestoController.js"); // 👈 corregido con C mayúscula
-const verifyToken = require("../middleware/verifyToken");
+const verifyToken = require("../middleware/authMiddleware"); // 👈 ahora usa el archivo correcto
 
 // Crear un presupuesto
 router.post("/", verifyToken, crearPresupuesto);
