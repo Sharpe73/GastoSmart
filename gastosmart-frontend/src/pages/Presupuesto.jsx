@@ -238,7 +238,10 @@ function Presupuesto() {
                 }}
               >
                 {card.icono}
-                <Typography variant="subtitle2" sx={{ mt: 1, color: "text.secondary" }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ mt: 1, color: "text.secondary" }}
+                >
                   {card.titulo}
                 </Typography>
                 <Typography
@@ -293,17 +296,19 @@ function Presupuesto() {
             >
               <div>
                 <PieChartIcon color="action" fontSize="large" />
-                <Typography variant="subtitle2" sx={{ mt: 1, color: "text.secondary" }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ mt: 1, color: "text.secondary" }}
+                >
                   Distribución
                 </Typography>
               </div>
-              <ResponsiveContainer width="100%" height={isMobile ? 220 : 150}>
+              <ResponsiveContainer width="100%" height={isMobile ? 240 : 180}>
                 <PieChart>
                   <Pie
                     data={dataGrafico}
-                    cx="50%"
+                    cx={isMobile ? "50%" : "40%"}
                     cy="50%"
-                    labelLine={false}
                     outerRadius={isMobile ? 90 : 70}
                     dataKey="value"
                   >
@@ -315,7 +320,11 @@ function Presupuesto() {
                     ))}
                   </Pie>
                   <Tooltip formatter={(value) => formatCLP(value)} />
-                  <Legend />
+                  <Legend
+                    layout={isMobile ? "horizontal" : "vertical"}
+                    align={isMobile ? "center" : "right"}
+                    verticalAlign={isMobile ? "bottom" : "middle"}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </Card>
