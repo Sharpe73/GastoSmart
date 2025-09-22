@@ -1,4 +1,4 @@
-const { pool } = require("../database");
+const { pool } = require("../models/db");
 
 // Crear un nuevo presupuesto
 const crearPresupuesto = async (req, res) => {
