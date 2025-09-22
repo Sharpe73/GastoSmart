@@ -41,12 +41,15 @@ app.get("/", (req, res) => {
 const authRoutes = require("./routes/authRoutes");
 const gastoRoutes = require("./routes/gastoRoutes");
 const categoriaRoutes = require("./routes/categoriaRoutes");
-const reporteRoutes = require("./routes/reporteRoutes"); // 👈 nueva ruta
+const reporteRoutes = require("./routes/reporteRoutes");
+const presupuestoRoutes = require("./routes/presupuestoRoutes"); // 👈 nueva ruta
 
+// 🔹 Usar rutas
 app.use("/auth", authRoutes);
 app.use("/gastos", gastoRoutes);
 app.use("/categorias", categoriaRoutes);
-app.use("/reportes", reporteRoutes); // 👈 se registra aquí
+app.use("/reportes", reporteRoutes);
+app.use("/presupuesto", presupuestoRoutes);
 
 // 🔹 Iniciar servidor
 const PORT = process.env.PORT || 3000;
