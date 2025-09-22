@@ -10,6 +10,19 @@ import {
   CardContent,
   Alert,
 } from "@mui/material";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import MoneyOffIcon from "@mui/icons-material/MoneyOff";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import EventIcon from "@mui/icons-material/Event";
+import PieChartIcon from "@mui/icons-material/PieChart";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+} from "recharts";
 import API from "../api"; // 👈 helper para axios
 
 function Presupuesto() {
@@ -102,6 +115,16 @@ function Presupuesto() {
     return saldo.saldoRestante / diffDias;
   };
 
+  // 👉 Datos para gráfico circular
+  const dataGrafico = saldo
+    ? [
+        { name: "Gastado", value: saldo.totalGastos },
+        { name: "Restante", value: saldo.saldoRestante },
+      ]
+    : [];
+
+  const COLORS = ["#e53935", "#43a047"]; // rojo para gasto, verde para saldo
+
   return (
     <Container>
       <Typography variant="h4" gutterBottom>
@@ -164,13 +187,15 @@ function Presupuesto() {
       {saldo && saldo.sueldo && (
         <Grid container spacing={2} sx={{ mt: 3 }}>
           <Grid item xs={12} md={3}>
-            <Card sx={{ p: 2, textAlign: "center", bgcolor: "#f5f5f5" }}>
+            <Card sx={{ p: 2, textAlign: "center", borderTop: "4px solid blue" }}>
+              <MonetizationOnIcon color="primary" fontSize="large" />
               <Typography variant="subtitle2">Sueldo inicial</Typography>
               <Typography variant="h6">{formatCLP(saldo.sueldo)}</Typography>
             </Card>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Card sx={{ p: 2, textAlign: "center", bgcolor: "#f5f5f5" }}>
+            <Card sx={{ p: 2, textAlign: "center", borderTop: "4px solid red" }}>
+              <MoneyOffIcon color="error" fontSize="large" />
               <Typography variant="subtitle2">Total Gastos</Typography>
               <Typography variant="h6" color="error">
                 {formatCLP(saldo.totalGastos)}
@@ -178,7 +203,8 @@ function Presupuesto() {
             </Card>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Card sx={{ p: 2, textAlign: "center", bgcolor: "#f5f5f5" }}>
+            <Card sx={{ p: 2, textAlign: "center", borderTop: "4px solid green" }}>
+              <AccountBalanceIcon sx={{ color: "green" }} fontSize="large" />
               <Typography variant="subtitle2">Saldo Restante</Typography>
               <Typography variant="h6" color="success.main">
                 {formatCLP(saldo.saldoRestante)}
@@ -186,7 +212,8 @@ function Presupuesto() {
             </Card>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Card sx={{ p: 2, textAlign: "center", bgcolor: "#f5f5f5" }}>
+            <Card sx={{ p: 2, textAlign: "center", borderTop: "4px solid gray" }}>
+              <EventIcon color="action" fontSize="large" />
               <Typography variant="subtitle2">Período</Typography>
               <Typography variant="h6">
                 {formatFecha(saldo.fecha_inicio)} → {formatFecha(saldo.fecha_fin)}
@@ -196,7 +223,7 @@ function Presupuesto() {
 
           {/* 👉 Tarjeta de gasto diario */}
           {calcularGastoDiario() && (
-            <Grid item xs={12}>
+            <Grid item xs={12} md={6}>
               <Card sx={{ p: 2, textAlign: "center", bgcolor: "#e8f5e9" }}>
                 <Typography variant="h6" sx={{ fontWeight: "bold", color: "green" }}>
                   Puedes gastar por día: {formatCLP(calcularGastoDiario())}
@@ -204,6 +231,32 @@ function Presupuesto() {
               </Card>
             </Grid>
           )}
+
+          {/* 👉 Mini gráfico circular */}
+          <Grid item xs={12} md={6}>
+            <Card sx={{ p: 2, textAlign: "center" }}>
+              <PieChartIcon color="action" fontSize="large" />
+              <Typography variant="subtitle2">Distribución</Typography>
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={dataGrafico}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    dataKey="value"
+                  >
+                    {dataGrafico.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => formatCLP(value)} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Card>
+          </Grid>
         </Grid>
       )}
     </Container>
