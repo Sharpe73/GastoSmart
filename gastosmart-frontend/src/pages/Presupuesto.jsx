@@ -1,4 +1,3 @@
-// src/pages/Presupuesto.jsx
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -25,7 +24,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import API from "../api"; // 👈 helper para axios
+import API from "../api";
 
 function Presupuesto() {
   const [sueldo, setSueldo] = useState("");
@@ -324,6 +323,7 @@ function Presupuesto() {
                     layout={isMobile ? "horizontal" : "vertical"}
                     align={isMobile ? "center" : "right"}
                     verticalAlign={isMobile ? "bottom" : "middle"}
+                    wrapperStyle={{ paddingRight: 20 }}
                   />
                 </PieChart>
               </ResponsiveContainer>
