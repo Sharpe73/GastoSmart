@@ -185,7 +185,7 @@ function Presupuesto() {
 
       {saldo && saldo.sueldo && (
         <Grid container spacing={2} sx={{ mt: 3 }} alignItems="stretch">
-          {[
+          {[ 
             {
               titulo: "Sueldo inicial",
               valor: formatCLP(saldo.sueldo),
