@@ -1,3 +1,4 @@
+// src/pages/Presupuesto.jsx
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -33,11 +34,9 @@ function Presupuesto() {
   const [mensaje, setMensaje] = useState("");
   const [saldo, setSaldo] = useState(null);
 
-  // 👉 Detectar si es móvil
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // 👉 Función para formatear fecha legible
   const formatFecha = (fecha) => {
     if (!fecha) return "";
     const d = new Date(fecha);
@@ -48,7 +47,6 @@ function Presupuesto() {
     });
   };
 
-  // 👉 Formatear números como CLP
   const formatCLP = (valor) => {
     if (valor === null || valor === undefined || isNaN(valor)) return "$0";
     return new Intl.NumberFormat("es-CL", {
@@ -58,7 +56,6 @@ function Presupuesto() {
     }).format(valor);
   };
 
-  // Cargar presupuesto actual y saldo al entrar
   useEffect(() => {
     const fetchPresupuesto = async () => {
       try {
@@ -96,7 +93,6 @@ function Presupuesto() {
       setMensaje("✅ Presupuesto guardado correctamente");
       console.log("Presupuesto guardado:", res.data);
 
-      // actualizar saldo después de guardar
       const saldoRes = await API.get("/presupuesto/saldo");
       setSaldo(saldoRes.data);
     } catch (error) {
@@ -105,7 +101,6 @@ function Presupuesto() {
     }
   };
 
-  // 👉 Calcular gasto diario permitido
   const calcularGastoDiario = () => {
     if (!saldo || !saldo.fecha_fin) return null;
 
@@ -120,7 +115,6 @@ function Presupuesto() {
     return saldo.saldoRestante / diffDias;
   };
 
-  // 👉 Datos para gráfico circular
   const dataGrafico = saldo
     ? [
         { name: "Gastado", value: saldo.totalGastos },
@@ -128,7 +122,7 @@ function Presupuesto() {
       ]
     : [];
 
-  const COLORS = ["#e53935", "#43a047"]; // rojo para gasto, verde para saldo
+  const COLORS = ["#e53935", "#43a047"];
 
   return (
     <Container>
@@ -189,10 +183,8 @@ function Presupuesto() {
         </CardContent>
       </Card>
 
-      {/* 👉 Mostrar saldo si existe */}
       {saldo && saldo.sueldo && (
         <Grid container spacing={2} sx={{ mt: 3 }} alignItems="stretch">
-          {/* Tarjetas principales */}
           {[
             {
               titulo: "Sueldo inicial",
@@ -258,7 +250,7 @@ function Presupuesto() {
 
           {/* Tarjeta de gasto diario */}
           {calcularGastoDiario() && (
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid item xs={12} sm={6} md={3}>
               <Card
                 sx={{
                   p: 2,
@@ -280,7 +272,7 @@ function Presupuesto() {
           )}
 
           {/* Mini gráfico circular */}
-          <Grid item xs={12} sm={6} md={6}>
+          <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
                 p: 2,
@@ -302,11 +294,11 @@ function Presupuesto() {
                   Distribución
                 </Typography>
               </div>
-              <ResponsiveContainer width="100%" height={isMobile ? 240 : 180}>
+              <ResponsiveContainer width="100%" height={isMobile ? 220 : 150}>
                 <PieChart>
                   <Pie
                     data={dataGrafico}
-                    cx={isMobile ? "50%" : "40%"}
+                    cx="50%"
                     cy="50%"
                     outerRadius={isMobile ? 90 : 70}
                     dataKey="value"
@@ -323,7 +315,6 @@ function Presupuesto() {
                     layout={isMobile ? "horizontal" : "vertical"}
                     align={isMobile ? "center" : "right"}
                     verticalAlign={isMobile ? "bottom" : "middle"}
-                    wrapperStyle={{ paddingRight: 20 }}
                   />
                 </PieChart>
               </ResponsiveContainer>
