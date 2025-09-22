@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { crearPresupuesto, obtenerPresupuesto, obtenerSaldo } = require("../controllers/presupuestoController");
+const {
+  crearPresupuesto,
+  obtenerPresupuesto,
+  obtenerSaldo,
+} = require("../controllers/presupuestoController.js"); // 👈 corregido con C mayúscula
 const verifyToken = require("../middleware/verifyToken");
 
 // Crear un presupuesto
