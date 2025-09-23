@@ -1,4 +1,3 @@
-// src/pages/Gastos.jsx
 import React, { useState, useEffect } from "react";
 import {
   Container,
