@@ -1,5 +1,19 @@
 const pool = require("../models/db");
 
+// Función segura para parsear JSON
+function safeParseJSON(value) {
+  if (!value) return [];
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      console.error("⚠️ Error al parsear JSON:", e.message);
+      return [];
+    }
+  }
+  return value; // ya es objeto
+}
+
 // 📌 Listar todos los históricos del usuario autenticado
 async function listarHistoricos(req, res) {
   try {
@@ -22,11 +36,10 @@ async function listarHistoricos(req, res) {
       [usuario_id]
     );
 
-    // 🔹 Parsear categorías y gastos en cada histórico
     const historicos = result.rows.map((h) => ({
       ...h,
-      categorias: JSON.parse(h.categorias || "[]"),
-      gastos: JSON.parse(h.gastos || "[]"),
+      categorias: safeParseJSON(h.categorias),
+      gastos: safeParseJSON(h.gastos),
     }));
 
     res.json({
@@ -69,10 +82,9 @@ async function detalleHistorico(req, res) {
         .json({ mensaje: "❌ No se encontró el histórico solicitado" });
     }
 
-    // 🔹 Parsear los campos JSON
     const historico = result.rows[0];
-    historico.categorias = JSON.parse(historico.categorias || "[]");
-    historico.gastos = JSON.parse(historico.gastos || "[]");
+    historico.categorias = safeParseJSON(historico.categorias);
+    historico.gastos = safeParseJSON(historico.gastos);
 
     res.json(historico);
   } catch (error) {
