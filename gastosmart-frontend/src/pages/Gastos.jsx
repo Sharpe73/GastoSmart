@@ -41,7 +41,7 @@ function Gastos() {
   const categoriaSeleccionada = location.state?.categoriaId || "";
   const [categoriaNombre, setCategoriaNombre] = useState("");
 
-  // 🔹 Cargar categorías, gastos y saldo
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
