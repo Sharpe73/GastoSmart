@@ -142,7 +142,7 @@ function Gastos() {
     }
   };
 
-  // 🔹 Eliminar gasto
+  
   const handleDeleteGasto = async (id) => {
     try {
       await API.delete(`/gastos/${id}`, {
