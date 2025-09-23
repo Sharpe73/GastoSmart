@@ -63,7 +63,8 @@ async function crearGasto(req, res) {
     const nuevoGasto = await pool.query(
       `INSERT INTO gastos (usuario_id, descripcion, monto, categoria_id, archivo)
        VALUES ($1, $2, $3, $4, $5)
-       RETURNING *`,
+       RETURNING id, descripcion, monto, categoria_id, fecha, creado_en,
+                 (CASE WHEN archivo IS NOT NULL THEN true ELSE false END) AS tiene_archivo`,
       [usuario_id, descripcion, monto, categoria_id || null, archivo]
     );
 
@@ -119,7 +120,13 @@ async function descargarArchivo(req, res) {
       return res.status(404).json({ mensaje: "Archivo no encontrado" });
     }
 
-    res.setHeader("Content-Type", "application/pdf"); // 👈 asumimos boletas/facturas en PDF
+    // 🔹 Configurar headers para abrir/descargar siempre como PDF
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="documento-gasto-${id}.pdf"`
+    );
+
     res.send(gasto.rows[0].archivo);
   } catch (error) {
     console.error("❌ Error al descargar archivo:", error);
@@ -145,14 +152,19 @@ async function actualizarGasto(req, res) {
         .json({ mensaje: "Gasto no encontrado o no autorizado" });
     }
 
-    await pool.query(
+    const actualizado = await pool.query(
       `UPDATE gastos 
        SET descripcion = $1, monto = $2, categoria_id = $3, archivo = COALESCE($4, archivo)
-       WHERE id = $5`,
+       WHERE id = $5
+       RETURNING id, descripcion, monto, categoria_id, fecha, creado_en,
+                 (CASE WHEN archivo IS NOT NULL THEN true ELSE false END) AS tiene_archivo`,
       [descripcion, monto, categoria_id || null, archivo, id]
     );
 
-    res.json({ mensaje: "✅ Gasto actualizado correctamente" });
+    res.json({
+      mensaje: "✅ Gasto actualizado correctamente",
+      gasto: actualizado.rows[0],
+    });
   } catch (error) {
     console.error("❌ Error al actualizar gasto:", error);
     res.status(500).json({ mensaje: "Error al actualizar gasto" });

@@ -15,7 +15,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Link,
 } from "@mui/material";
 import { Edit, Delete, PictureAsPdf, AttachFile } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
@@ -84,6 +83,27 @@ function Gastos() {
 
     fetchData();
   }, [token, categoriaSeleccionada]);
+
+  // 🔹 Descargar y abrir PDF
+  const handleVerDocumento = async (id) => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/gastos/${id}/archivo`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error("Error al descargar el archivo");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (error) {
+      setMensaje({
+        tipo: "error",
+        texto: "❌ No se pudo abrir el documento.",
+      });
+    }
+  };
 
   // 🔹 Agregar gasto
   const handleAddGasto = async () => {
@@ -271,7 +291,7 @@ function Gastos() {
             <input
               type="file"
               hidden
-              accept=".pdf,.jpg,.png,.jpeg"
+              accept=".pdf"
               onChange={(e) => setArchivo(e.target.files[0])}
             />
           </Button>
@@ -310,16 +330,14 @@ function Gastos() {
                   📅 Fecha: {new Date(gasto.fecha).toLocaleDateString("es-CL")}
                 </Typography>
                 {gasto.tiene_archivo && (
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    <Link
-                      href={`${import.meta.env.VITE_API_URL}/gastos/${gasto.id}/archivo`}
-                      target="_blank"
-                      rel="noopener"
-                      underline="hover"
-                    >
-                      <PictureAsPdf fontSize="small" /> Ver documento
-                    </Link>
-                  </Typography>
+                  <IconButton
+                    color="secondary"
+                    size="small"
+                    onClick={() => handleVerDocumento(gasto.id)}
+                    sx={{ mt: 1 }}
+                  >
+                    <PictureAsPdf fontSize="small" />
+                  </IconButton>
                 )}
               </CardContent>
               <CardActions>
@@ -390,7 +408,7 @@ function Gastos() {
             <input
               type="file"
               hidden
-              accept=".pdf,.jpg,.png,.jpeg"
+              accept=".pdf"
               onChange={(e) => setArchivoEdit(e.target.files[0])}
             />
           </Button>
