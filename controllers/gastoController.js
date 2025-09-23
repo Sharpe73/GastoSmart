@@ -5,7 +5,7 @@ async function crearGasto(req, res) {
   try {
     const usuario_id = req.user.id; // 👈 viene del token
     const { descripcion, monto, categoria_id } = req.body;
-    const archivo = req.file ? req.file.filename : null;
+    const archivo = req.file ? req.file.buffer : null; // 👈 buffer en memoria
 
     if (!descripcion || !monto) {
       return res
@@ -67,24 +67,9 @@ async function crearGasto(req, res) {
       [usuario_id, descripcion, monto, categoria_id || null, archivo]
     );
 
-    const gastoConCategoria = await pool.query(
-      `SELECT g.*, c.nombre AS categoria_nombre
-       FROM gastos g
-       LEFT JOIN categorias c ON g.categoria_id = c.id
-       WHERE g.id = $1`,
-      [nuevoGasto.rows[0].id]
-    );
-
-    const gasto = gastoConCategoria.rows[0];
-
-    // 👉 agregar URL pública al archivo si existe
-    if (gasto.archivo) {
-      gasto.archivo_url = `${process.env.BASE_URL || "http://localhost:3000"}/uploads/${gasto.archivo}`;
-    }
-
     res.status(201).json({
       mensaje: "✅ Gasto creado exitosamente",
-      gasto,
+      gasto: nuevoGasto.rows[0],
     });
   } catch (error) {
     console.error("❌ Error al crear gasto:", error);
@@ -98,7 +83,9 @@ async function listarGastos(req, res) {
     const usuario_id = req.user.id;
 
     const gastos = await pool.query(
-      `SELECT g.*, c.nombre AS categoria_nombre
+      `SELECT g.id, g.descripcion, g.monto, g.categoria_id, g.fecha, g.creado_en, 
+              (CASE WHEN g.archivo IS NOT NULL THEN true ELSE false END) AS tiene_archivo,
+              c.nombre AS categoria_nombre
        FROM gastos g
        LEFT JOIN categorias c ON g.categoria_id = c.id
        WHERE g.usuario_id = $1
@@ -106,22 +93,37 @@ async function listarGastos(req, res) {
       [usuario_id]
     );
 
-    // 👉 agregar URL pública a cada gasto
-    const gastosConArchivos = gastos.rows.map((g) => {
-      if (g.archivo) {
-        g.archivo_url = `${process.env.BASE_URL || "http://localhost:3000"}/uploads/${g.archivo}`;
-      }
-      return g;
-    });
-
     res.json({
       mensaje: "📋 Lista de gastos obtenida correctamente",
-      total: gastosConArchivos.length,
-      gastos: gastosConArchivos,
+      total: gastos.rows.length,
+      gastos: gastos.rows,
     });
   } catch (error) {
     console.error("❌ Error al listar gastos:", error);
     res.status(500).json({ mensaje: "Error al listar gastos" });
+  }
+}
+
+// Descargar archivo asociado a un gasto
+async function descargarArchivo(req, res) {
+  try {
+    const usuario_id = req.user.id;
+    const { id } = req.params;
+
+    const gasto = await pool.query(
+      "SELECT archivo FROM gastos WHERE id = $1 AND usuario_id = $2",
+      [id, usuario_id]
+    );
+
+    if (gasto.rows.length === 0 || !gasto.rows[0].archivo) {
+      return res.status(404).json({ mensaje: "Archivo no encontrado" });
+    }
+
+    res.setHeader("Content-Type", "application/pdf"); // 👈 asumimos boletas/facturas en PDF
+    res.send(gasto.rows[0].archivo);
+  } catch (error) {
+    console.error("❌ Error al descargar archivo:", error);
+    res.status(500).json({ mensaje: "Error al descargar archivo" });
   }
 }
 
@@ -131,7 +133,7 @@ async function actualizarGasto(req, res) {
     const usuario_id = req.user.id;
     const { id } = req.params;
     const { descripcion, monto, categoria_id } = req.body;
-    const archivo = req.file ? req.file.filename : null;
+    const archivo = req.file ? req.file.buffer : null;
 
     const gasto = await pool.query(
       "SELECT * FROM gastos WHERE id = $1 AND usuario_id = $2",
@@ -150,24 +152,7 @@ async function actualizarGasto(req, res) {
       [descripcion, monto, categoria_id || null, archivo, id]
     );
 
-    const actualizado = await pool.query(
-      `SELECT g.*, c.nombre AS categoria_nombre
-       FROM gastos g
-       LEFT JOIN categorias c ON g.categoria_id = c.id
-       WHERE g.id = $1`,
-      [id]
-    );
-
-    const gastoActualizado = actualizado.rows[0];
-
-    if (gastoActualizado.archivo) {
-      gastoActualizado.archivo_url = `${process.env.BASE_URL || "http://localhost:3000"}/uploads/${gastoActualizado.archivo}`;
-    }
-
-    res.json({
-      mensaje: "✅ Gasto actualizado correctamente",
-      gasto: gastoActualizado,
-    });
+    res.json({ mensaje: "✅ Gasto actualizado correctamente" });
   } catch (error) {
     console.error("❌ Error al actualizar gasto:", error);
     res.status(500).json({ mensaje: "Error al actualizar gasto" });
@@ -204,4 +189,5 @@ module.exports = {
   listarGastos,
   actualizarGasto,
   eliminarGasto,
+  descargarArchivo,
 };

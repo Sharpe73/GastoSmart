@@ -1,13 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const verificarToken = require("../middleware/authMiddleware");
-const upload = require("../middleware/upload"); // 👈 importamos multer
 const {
   crearGasto,
   listarGastos,
   actualizarGasto,
   eliminarGasto,
+  descargarArchivo,
 } = require("../controllers/gastoController");
+
+const multer = require("multer");
+// 👉 Guardamos archivos en memoria (como buffer), no en disco
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 /**
  * @swagger
@@ -132,5 +137,27 @@ router.put("/:id", verificarToken, upload.single("archivo"), actualizarGasto);
  *         description: Gasto no encontrado
  */
 router.delete("/:id", verificarToken, eliminarGasto);
+
+/**
+ * @swagger
+ * /gastos/{id}/archivo:
+ *   get:
+ *     summary: Descargar archivo asociado a un gasto
+ *     tags: [Gastos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Devuelve el archivo PDF asociado
+ *       404:
+ *         description: Archivo no encontrado
+ */
+router.get("/:id/archivo", verificarToken, descargarArchivo);
 
 module.exports = router;

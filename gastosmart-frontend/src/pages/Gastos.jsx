@@ -17,7 +17,7 @@ import {
   DialogActions,
   Link,
 } from "@mui/material";
-import { Edit, Delete, PictureAsPdf, AttachFile } from "@mui/icons-material"; // 👈 nuevo ícono
+import { Edit, Delete, PictureAsPdf, AttachFile } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import API from "../api";
@@ -41,7 +41,6 @@ function Gastos() {
   const categoriaSeleccionada = location.state?.categoriaId || "";
   const [categoriaNombre, setCategoriaNombre] = useState("");
 
-  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -142,7 +141,6 @@ function Gastos() {
     }
   };
 
-  
   const handleDeleteGasto = async (id) => {
     try {
       await API.delete(`/gastos/${id}`, {
@@ -311,10 +309,10 @@ function Gastos() {
                 <Typography variant="body2" color="text.secondary">
                   📅 Fecha: {new Date(gasto.fecha).toLocaleDateString("es-CL")}
                 </Typography>
-                {gasto.archivo_url && (
+                {gasto.tiene_archivo && (
                   <Typography variant="body2" sx={{ mt: 1 }}>
                     <Link
-                      href={gasto.archivo_url}
+                      href={`${import.meta.env.VITE_API_URL}/gastos/${gasto.id}/archivo`}
                       target="_blank"
                       rel="noopener"
                       underline="hover"
