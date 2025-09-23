@@ -9,26 +9,7 @@ const db = require("./models/db");
 dotenv.config();
 
 const app = express();
-
-// 🔹 Configuración de CORS
-const allowedOrigins = [
-  "http://localhost:5173", // para desarrollo local con Vite
-  "https://soft-druid-777600.netlify.app", // tu frontend en Netlify
-  "https://tudominio.com" // 👈 aquí puedes poner tu dominio personalizado futuro
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("No permitido por CORS"));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
-
+app.use(cors());
 app.use(express.json());
 
 // 🔹 Servir archivos estáticos (uploads)
