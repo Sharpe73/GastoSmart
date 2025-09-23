@@ -4,7 +4,7 @@ const pool = require("../models/db");
 async function crearGasto(req, res) {
   try {
     const usuario_id = req.user.id; // 👈 viene del token
-    const { descripcion, monto, fecha, categoria_id } = req.body;
+    const { descripcion, monto, categoria_id } = req.body;
 
     if (!descripcion || !monto) {
       return res
@@ -15,7 +15,7 @@ async function crearGasto(req, res) {
     // 🔹 1. Obtener presupuesto actual del usuario
     const presupuestoRes = await pool.query(
       `SELECT sueldo, fecha_inicio, fecha_fin 
-       FROM presupuestos   -- 👈 ahora en plural
+       FROM presupuestos
        WHERE usuario_id = $1 
        ORDER BY id DESC 
        LIMIT 1`,
@@ -58,18 +58,12 @@ async function crearGasto(req, res) {
       });
     }
 
-    // 🔹 4. Formatear fecha a YYYY-MM-DD
-    const hoy = new Date();
-    const fechaFormateada = fecha
-      ? new Date(fecha).toISOString().split("T")[0]
-      : hoy.toISOString().split("T")[0];
-
-    // 🔹 5. Insertar el gasto
+    // 🔹 4. Insertar el gasto sin enviar fecha (la BD pone CURRENT_DATE)
     const nuevoGasto = await pool.query(
-      `INSERT INTO gastos (usuario_id, descripcion, monto, fecha, categoria_id)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO gastos (usuario_id, descripcion, monto, categoria_id)
+       VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [usuario_id, descripcion, monto, fechaFormateada, categoria_id || null]
+      [usuario_id, descripcion, monto, categoria_id || null]
     );
 
     const gastoConCategoria = await pool.query(
@@ -120,7 +114,7 @@ async function actualizarGasto(req, res) {
   try {
     const usuario_id = req.user.id; // 👈 asegurar que es del usuario autenticado
     const { id } = req.params;
-    const { descripcion, monto, fecha, categoria_id } = req.body;
+    const { descripcion, monto, categoria_id } = req.body;
 
     const gasto = await pool.query(
       "SELECT * FROM gastos WHERE id = $1 AND usuario_id = $2",
@@ -132,17 +126,11 @@ async function actualizarGasto(req, res) {
         .json({ mensaje: "Gasto no encontrado o no autorizado" });
     }
 
-    // 🔹 Formatear fecha
-    const hoy = new Date();
-    const fechaFormateada = fecha
-      ? new Date(fecha).toISOString().split("T")[0]
-      : hoy.toISOString().split("T")[0];
-
     await pool.query(
       `UPDATE gastos 
-       SET descripcion = $1, monto = $2, fecha = $3, categoria_id = $4
-       WHERE id = $5`,
-      [descripcion, monto, fechaFormateada, categoria_id || null, id]
+       SET descripcion = $1, monto = $2, categoria_id = $3
+       WHERE id = $4`,
+      [descripcion, monto, categoria_id || null, id]
     );
 
     const actualizado = await pool.query(

@@ -109,7 +109,7 @@ function Gastos() {
           descripcion,
           monto,
           categoria_id: Number(categoriaId),
-          fecha: new Date().toISOString().split("T")[0],
+          // 👈 ya no mandamos fecha, la pone la BD
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -182,7 +182,7 @@ function Gastos() {
           descripcion: gastoEdit.descripcion,
           monto: gastoEdit.monto,
           categoria_id: Number(gastoEdit.categoria_id),
-          fecha: new Date().toISOString().split("T")[0],
+          // 👈 tampoco mandamos fecha, la BD mantiene la original
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -279,6 +279,9 @@ function Gastos() {
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   📂 Categoría: {gasto.categoria_nombre}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  📅 Fecha: {new Date(gasto.fecha).toLocaleDateString("es-CL")}
                 </Typography>
               </CardContent>
               <CardActions>
