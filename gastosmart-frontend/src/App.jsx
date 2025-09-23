@@ -14,8 +14,8 @@ import Config from "./pages/Config";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Presupuesto from "./pages/Presupuesto";
-import Historicos from "./pages/Historicos";          // 👈 nuevo
-import HistoricoDetalle from "./pages/HistoricoDetalle"; // 👈 nuevo
+import Historicos from "./pages/Historicos";          
+import HistoricoDetalle from "./pages/HistoricoDetalle"; 
 
 function App() {
   const handleLogout = () => {
@@ -95,7 +95,7 @@ function App() {
 
         {/* Detalle Histórico (PROTEGIDO) */}
         <Route
-          path="/historicos/:periodo"
+          path="/historicos/:id"
           element={
             <ProtectedRoute>
               <AppLayout onLogout={handleLogout}>
