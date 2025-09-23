@@ -93,7 +93,7 @@ const obtenerPresupuesto = async (req, res) => {
         [usuario_id]
       );
 
-      // Guardar en historicos (versión completa con JSON)
+      // 👉 Guardar primero el presupuesto terminado en históricos
       await pool.query(
         `INSERT INTO historicos 
           (usuario_id, mes, anio, sueldo, total_gastado, saldo_restante, categorias, gastos)
@@ -110,7 +110,7 @@ const obtenerPresupuesto = async (req, res) => {
         ]
       );
 
-      // Crear nuevo presupuesto con fechas del mes actual
+      // 👉 Luego crear el nuevo presupuesto del mes actual
       const fechaInicioNueva = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
       const fechaFinNueva = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
 
@@ -119,7 +119,7 @@ const obtenerPresupuesto = async (req, res) => {
         [usuario_id, presupuesto.sueldo, fechaInicioNueva, fechaFinNueva]
       );
 
-      presupuesto = nuevoRes.rows[0];
+      presupuesto = nuevoRes.rows[0]; // el que se devuelve al frontend
     }
 
     res.json(presupuesto);

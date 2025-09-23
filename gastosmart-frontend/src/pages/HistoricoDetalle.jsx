@@ -15,7 +15,7 @@ import { PictureAsPdf } from "@mui/icons-material";
 import API from "../api";
 
 function HistoricoDetalle() {
-  const { periodo } = useParams(); // viene como "YYYY-MM"
+  const { id } = useParams(); // ahora recibimos el ID del histórico
   const [detalle, setDetalle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mensaje, setMensaje] = useState({ tipo: "", texto: "" });
@@ -25,8 +25,7 @@ function HistoricoDetalle() {
   useEffect(() => {
     const fetchDetalle = async () => {
       try {
-        const [anio, mes] = periodo.split("-");
-        const res = await API.get(`/historicos/${anio}/${mes}`, {
+        const res = await API.get(`/historicos/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setDetalle(res.data);
@@ -41,7 +40,7 @@ function HistoricoDetalle() {
       }
     };
     fetchDetalle();
-  }, [periodo, token]);
+  }, [id, token]);
 
   if (loading) {
     return (
@@ -64,7 +63,7 @@ function HistoricoDetalle() {
     );
   }
 
-  const { presupuesto, gastos } = detalle;
+  const { presupuesto, gastos, periodo } = detalle;
 
   return (
     <Container sx={{ mt: 6 }}>
@@ -86,10 +85,12 @@ function HistoricoDetalle() {
             Sueldo: ${Number(presupuesto.sueldo).toLocaleString("es-CL")}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Fecha inicio: {new Date(presupuesto.fecha_inicio).toLocaleDateString("es-CL")}
+            Fecha inicio:{" "}
+            {new Date(presupuesto.fecha_inicio).toLocaleDateString("es-CL")}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Fecha fin: {new Date(presupuesto.fecha_fin).toLocaleDateString("es-CL")}
+            Fecha fin:{" "}
+            {new Date(presupuesto.fecha_fin).toLocaleDateString("es-CL")}
           </Typography>
         </CardContent>
       </Card>
@@ -114,7 +115,7 @@ function HistoricoDetalle() {
                     💰 Monto: ${Number(gasto.monto).toLocaleString("es-CL")}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    📂 Categoría: {gasto.categoria_nombre}
+                    📂 Categoría: {gasto.categoria}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     📅 Fecha: {new Date(gasto.fecha).toLocaleDateString("es-CL")}

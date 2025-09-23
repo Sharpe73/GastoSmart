@@ -67,7 +67,11 @@ function Historicos() {
 
       <Grid container spacing={3}>
         {historicos.length === 0 ? (
-          <Typography variant="body1" align="center" sx={{ mt: 3, width: "100%" }}>
+          <Typography
+            variant="body1"
+            align="center"
+            sx={{ mt: 3, width: "100%" }}
+          >
             No hay históricos disponibles todavía.
           </Typography>
         ) : (
@@ -90,7 +94,8 @@ function Historicos() {
                   <Button
                     size="small"
                     variant="contained"
-                    onClick={() => navigate(`/historicos/${histo.periodo}`)}
+                    // 👇 Usamos el ID real en la ruta
+                    onClick={() => navigate(`/historicos/${histo.id}`)}
                   >
                     Ver Detalle
                   </Button>
