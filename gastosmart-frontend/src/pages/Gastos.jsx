@@ -18,7 +18,7 @@ import {
   DialogActions,
   Link,
 } from "@mui/material";
-import { Edit, Delete, PictureAsPdf } from "@mui/icons-material";
+import { Edit, Delete, PictureAsPdf, AttachFile } from "@mui/icons-material"; // 👈 nuevo ícono
 import { useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import API from "../api";
@@ -263,12 +263,26 @@ function Gastos() {
           </TextField>
         </Grid>
         <Grid item xs={12}>
-          <input
-            type="file"
-            accept=".pdf,.jpg,.png,.jpeg"
-            onChange={(e) => setArchivo(e.target.files[0])}
+          <Button
+            variant="outlined"
+            component="label"
+            startIcon={<AttachFile />}
+            sx={{ mr: 2 }}
             disabled={saldo && saldo.saldoRestante <= 0}
-          />
+          >
+            Adjuntar documento
+            <input
+              type="file"
+              hidden
+              accept=".pdf,.jpg,.png,.jpeg"
+              onChange={(e) => setArchivo(e.target.files[0])}
+            />
+          </Button>
+          {archivo && (
+            <Typography variant="body2" color="text.secondary">
+              📎 {archivo.name}
+            </Typography>
+          )}
         </Grid>
         <Grid item xs={12}>
           <Button
@@ -369,11 +383,25 @@ function Gastos() {
               </MenuItem>
             ))}
           </TextField>
-          <input
-            type="file"
-            accept=".pdf,.jpg,.png,.jpeg"
-            onChange={(e) => setArchivoEdit(e.target.files[0])}
-          />
+          <Button
+            variant="outlined"
+            component="label"
+            startIcon={<AttachFile />}
+            sx={{ mt: 2 }}
+          >
+            Cambiar documento
+            <input
+              type="file"
+              hidden
+              accept=".pdf,.jpg,.png,.jpeg"
+              onChange={(e) => setArchivoEdit(e.target.files[0])}
+            />
+          </Button>
+          {archivoEdit && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              📎 {archivoEdit.name}
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseEdit} color="secondary">
