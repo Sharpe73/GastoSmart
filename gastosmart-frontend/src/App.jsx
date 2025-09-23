@@ -13,7 +13,9 @@ import Reportes from "./pages/Reportes";
 import Config from "./pages/Config";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Presupuesto from "./pages/Presupuesto"; 
+import Presupuesto from "./pages/Presupuesto";
+import Historicos from "./pages/Historicos";          // 👈 nuevo
+import HistoricoDetalle from "./pages/HistoricoDetalle"; // 👈 nuevo
 
 function App() {
   const handleLogout = () => {
@@ -67,6 +69,42 @@ function App() {
           }
         />
 
+        {/* Presupuesto (PROTEGIDO) */}
+        <Route
+          path="/presupuesto"
+          element={
+            <ProtectedRoute>
+              <AppLayout onLogout={handleLogout}>
+                <Presupuesto />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Históricos (PROTEGIDO) */}
+        <Route
+          path="/historicos"
+          element={
+            <ProtectedRoute>
+              <AppLayout onLogout={handleLogout}>
+                <Historicos />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Detalle Histórico (PROTEGIDO) */}
+        <Route
+          path="/historicos/:periodo"
+          element={
+            <ProtectedRoute>
+              <AppLayout onLogout={handleLogout}>
+                <HistoricoDetalle />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
         {/* Reportes (PROTEGIDO) */}
         <Route
           path="/reportes"
@@ -86,18 +124,6 @@ function App() {
             <ProtectedRoute>
               <AppLayout onLogout={handleLogout}>
                 <Config />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Presupuesto (PROTEGIDO) */}
-        <Route
-          path="/presupuesto"
-          element={
-            <ProtectedRoute>
-              <AppLayout onLogout={handleLogout}>
-                <Presupuesto />
               </AppLayout>
             </ProtectedRoute>
           }

@@ -1,4 +1,4 @@
-const pool = require("../models/db"); // 👈 corregido
+const pool = require("../models/db"); // 👈 conexión a la BD
 
 // Crear un nuevo presupuesto
 const crearPresupuesto = async (req, res) => {
@@ -14,7 +14,9 @@ const crearPresupuesto = async (req, res) => {
     });
 
     if (!sueldo || !fecha_inicio || !fecha_fin) {
-      return res.status(400).json({ error: "Todos los campos son obligatorios" });
+      return res
+        .status(400)
+        .json({ error: "Todos los campos son obligatorios" });
     }
 
     // Verificar si ya existe un presupuesto activo para el usuario
@@ -45,10 +47,11 @@ const crearPresupuesto = async (req, res) => {
   }
 };
 
-// Obtener el presupuesto actual
+// Obtener presupuesto actual con detección de cambio de mes
 const obtenerPresupuesto = async (req, res) => {
   try {
     const usuario_id = req.user.id;
+    const hoy = new Date();
 
     const result = await pool.query(
       "SELECT * FROM presupuestos WHERE usuario_id = $1 ORDER BY created_at DESC LIMIT 1",
@@ -59,7 +62,67 @@ const obtenerPresupuesto = async (req, res) => {
       return res.json(null);
     }
 
-    res.json(result.rows[0]);
+    let presupuesto = result.rows[0];
+
+    // Si ya terminó el periodo → guardar en historicos y crear nuevo
+    if (new Date(presupuesto.fecha_fin) < hoy) {
+      console.log("📌 Presupuesto finalizado, moviendo a históricos...");
+
+      // Calcular total de gastos del periodo
+      const gastosRes = await pool.query(
+        "SELECT COALESCE(SUM(monto),0) as total FROM gastos WHERE usuario_id=$1 AND fecha BETWEEN $2 AND $3",
+        [usuario_id, presupuesto.fecha_inicio, presupuesto.fecha_fin]
+      );
+      const totalGastos = parseFloat(gastosRes.rows[0].total) || 0;
+      const saldoRestante = parseFloat(presupuesto.sueldo) - totalGastos;
+
+      // Traer snapshot de gastos detallados
+      const gastosDetalle = await pool.query(
+        `SELECT g.id, g.descripcion, g.monto, g.fecha, c.nombre AS categoria
+         FROM gastos g
+         LEFT JOIN categorias c ON g.categoria_id = c.id
+         WHERE g.usuario_id = $1 AND g.fecha BETWEEN $2 AND $3`,
+        [usuario_id, presupuesto.fecha_inicio, presupuesto.fecha_fin]
+      );
+
+      // Traer snapshot de categorías
+      const categoriasDetalle = await pool.query(
+        `SELECT id, nombre
+         FROM categorias
+         WHERE usuario_id = $1`,
+        [usuario_id]
+      );
+
+      // Guardar en historicos (versión completa con JSON)
+      await pool.query(
+        `INSERT INTO historicos 
+          (usuario_id, mes, anio, sueldo, total_gastado, saldo_restante, categorias, gastos)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+        [
+          usuario_id,
+          new Date(presupuesto.fecha_fin).getMonth() + 1, // mes
+          new Date(presupuesto.fecha_fin).getFullYear(), // año
+          presupuesto.sueldo,
+          totalGastos,
+          saldoRestante,
+          JSON.stringify(categoriasDetalle.rows),
+          JSON.stringify(gastosDetalle.rows),
+        ]
+      );
+
+      // Crear nuevo presupuesto con fechas del mes actual
+      const fechaInicioNueva = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      const fechaFinNueva = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+
+      const nuevoRes = await pool.query(
+        "INSERT INTO presupuestos (usuario_id, sueldo, fecha_inicio, fecha_fin) VALUES ($1,$2,$3,$4) RETURNING *",
+        [usuario_id, presupuesto.sueldo, fechaInicioNueva, fechaFinNueva]
+      );
+
+      presupuesto = nuevoRes.rows[0];
+    }
+
+    res.json(presupuesto);
   } catch (error) {
     console.error("❌ Error al obtener presupuesto:", error);
     res.status(500).json({ error: "Error al obtener presupuesto" });

@@ -47,6 +47,7 @@ const gastoRoutes = require("./routes/gastoRoutes");
 const categoriaRoutes = require("./routes/categoriaRoutes");
 const reporteRoutes = require("./routes/reporteRoutes");
 const presupuestoRoutes = require("./routes/presupuestoRoutes");
+const historicosRoutes = require("./routes/historicosRoutes"); // 👈 NUEVO
 
 // 🔹 Usar rutas
 app.use("/auth", authRoutes);
@@ -54,6 +55,7 @@ app.use("/gastos", gastoRoutes);
 app.use("/categorias", categoriaRoutes);
 app.use("/reportes", reporteRoutes);
 app.use("/presupuesto", presupuestoRoutes);
+app.use("/historicos", historicosRoutes); // 👈 NUEVO
 
 // 🔹 Iniciar servidor
 const PORT = process.env.PORT || 3000;
@@ -61,4 +63,5 @@ app.listen(PORT, () => {
   console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
   console.log(`📖 Swagger en http://localhost:${PORT}/api-docs`);
   console.log(`📂 Archivos disponibles en http://localhost:${PORT}/uploads`);
+  console.log(`📊 Históricos disponibles en http://localhost:${PORT}/historicos`);
 });

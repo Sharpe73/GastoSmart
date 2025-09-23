@@ -26,6 +26,7 @@ import InsightsIcon from "@mui/icons-material/Insights";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet"; // 👈 Presupuesto
+import HistoryIcon from "@mui/icons-material/History"; // 👈 NUEVO: Históricos
 
 // 👇 Importa tu logo
 import logo from "../assets/gasto.png";
@@ -177,6 +178,23 @@ export default function Sidebar({ open, onClose, onLogout }) {
             <InsightsIcon />
           </ListItemIcon>
           <ListItemText primary="Reportes" />
+        </ListItemButton>
+
+        {/* Históricos 👈 NUEVO */}
+        <ListItemButton
+          component={RouterLink}
+          to="/historicos"
+          selected={location.pathname.startsWith("/historicos")}
+          onClick={!isDesktop ? onClose : undefined}
+          sx={{
+            "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
+            "&:hover": { bgcolor: "primary.light", color: "white" },
+          }}
+        >
+          <ListItemIcon>
+            <HistoryIcon />
+          </ListItemIcon>
+          <ListItemText primary="Históricos" />
         </ListItemButton>
 
         {/* Configuración */}
