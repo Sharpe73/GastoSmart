@@ -321,13 +321,12 @@ function Gastos() {
             <Card
               sx={{
                 boxShadow: 3,
-                minHeight: 200, // 🔹 altura mínima para uniformar
+                height: "100%", // 🔹 ocupa toda la altura disponible
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-between",
               }}
             >
-              <CardContent>
+              <CardContent sx={{ flexGrow: 1 }}>
                 <Typography variant="h6">{gasto.descripcion}</Typography>
                 <Typography variant="body2" color="text.secondary">
                   💰 Monto: ${Number(gasto.monto).toLocaleString("es-CL")}
