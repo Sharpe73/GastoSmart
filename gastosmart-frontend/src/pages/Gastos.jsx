@@ -1,3 +1,4 @@
+// src/pages/Gastos.jsx
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -317,7 +318,15 @@ function Gastos() {
       <Grid container spacing={3}>
         {gastos.map((gasto) => (
           <Grid item xs={12} sm={6} md={4} key={gasto.id}>
-            <Card sx={{ boxShadow: 3 }}>
+            <Card
+              sx={{
+                boxShadow: 3,
+                minHeight: 200, // 🔹 altura mínima para uniformar
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}
+            >
               <CardContent>
                 <Typography variant="h6">{gasto.descripcion}</Typography>
                 <Typography variant="body2" color="text.secondary">
