@@ -419,5 +419,4 @@ function Gastos() {
     </Container>
   );
 }
-
 export default Gastos;
