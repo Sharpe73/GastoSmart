@@ -64,9 +64,9 @@ const obtenerPresupuesto = async (req, res) => {
 
     let presupuesto = result.rows[0];
 
-    // Si ya terminó el periodo → guardar en historicos y crear nuevo
+    // Si ya terminó el periodo → mover a históricos y crear nuevo
     if (new Date(presupuesto.fecha_fin) < hoy) {
-      console.log("📌 Presupuesto finalizado, moviendo a históricos...");
+      console.log("📌 Presupuesto finalizado, revisando para mover a históricos...");
 
       // Calcular total de gastos del periodo
       const gastosRes = await pool.query(
@@ -76,41 +76,47 @@ const obtenerPresupuesto = async (req, res) => {
       const totalGastos = parseFloat(gastosRes.rows[0].total) || 0;
       const saldoRestante = parseFloat(presupuesto.sueldo) - totalGastos;
 
-      // Traer snapshot de gastos detallados
-      const gastosDetalle = await pool.query(
-        `SELECT g.id, g.descripcion, g.monto, g.fecha, c.nombre AS categoria
-         FROM gastos g
-         LEFT JOIN categorias c ON g.categoria_id = c.id
-         WHERE g.usuario_id = $1 AND g.fecha BETWEEN $2 AND $3`,
-        [usuario_id, presupuesto.fecha_inicio, presupuesto.fecha_fin]
-      );
+      // Solo guardar en históricos si hubo movimientos
+      if (totalGastos > 0 || saldoRestante !== parseFloat(presupuesto.sueldo)) {
+        // Traer snapshot de gastos detallados
+        const gastosDetalle = await pool.query(
+          `SELECT g.id, g.descripcion, g.monto, g.fecha, c.nombre AS categoria
+           FROM gastos g
+           LEFT JOIN categorias c ON g.categoria_id = c.id
+           WHERE g.usuario_id = $1 AND g.fecha BETWEEN $2 AND $3`,
+          [usuario_id, presupuesto.fecha_inicio, presupuesto.fecha_fin]
+        );
 
-      // Traer snapshot de categorías
-      const categoriasDetalle = await pool.query(
-        `SELECT id, nombre
-         FROM categorias
-         WHERE usuario_id = $1`,
-        [usuario_id]
-      );
+        // Traer snapshot de categorías
+        const categoriasDetalle = await pool.query(
+          `SELECT id, nombre
+           FROM categorias
+           WHERE usuario_id = $1`,
+          [usuario_id]
+        );
 
-      // 👉 Guardar primero el presupuesto terminado en históricos
-      await pool.query(
-        `INSERT INTO historicos 
-          (usuario_id, mes, anio, sueldo, total_gastado, saldo_restante, categorias, gastos)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-        [
-          usuario_id,
-          new Date(presupuesto.fecha_fin).getMonth() + 1, // mes
-          new Date(presupuesto.fecha_fin).getFullYear(), // año
-          presupuesto.sueldo,
-          totalGastos,
-          saldoRestante,
-          JSON.stringify(categoriasDetalle.rows),
-          JSON.stringify(gastosDetalle.rows),
-        ]
-      );
+        // Guardar en historicos
+        await pool.query(
+          `INSERT INTO historicos 
+            (usuario_id, mes, anio, sueldo, total_gastado, saldo_restante, categorias, gastos)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+          [
+            usuario_id,
+            new Date(presupuesto.fecha_fin).getMonth() + 1, // mes
+            new Date(presupuesto.fecha_fin).getFullYear(), // año
+            presupuesto.sueldo,
+            totalGastos,
+            saldoRestante,
+            JSON.stringify(categoriasDetalle.rows),
+            JSON.stringify(gastosDetalle.rows),
+          ]
+        );
+        console.log("✅ Histórico guardado correctamente.");
+      } else {
+        console.log("⚠️ Presupuesto finalizado sin movimientos, no se guarda histórico.");
+      }
 
-      // 👉 Luego crear el nuevo presupuesto del mes actual
+      // Crear nuevo presupuesto del mes actual
       const fechaInicioNueva = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
       const fechaFinNueva = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
 
