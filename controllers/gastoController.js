@@ -5,6 +5,7 @@ async function crearGasto(req, res) {
   try {
     const usuario_id = req.user.id; // 👈 viene del token
     const { descripcion, monto, categoria_id } = req.body;
+    const archivo = req.file ? req.file.filename : null;
 
     if (!descripcion || !monto) {
       return res
@@ -41,7 +42,7 @@ async function crearGasto(req, res) {
     const totalGastos = Number(gastosRes.rows[0].total_gastos);
     const saldoRestante = presupuesto.sueldo - totalGastos;
 
-    // 🔹 3. Validaciones más claras
+    // 🔹 3. Validaciones
     if (saldoRestante <= 0) {
       return res.status(400).json({
         mensaje: "❌ No puedes agregar más gastos, el presupuesto está agotado",
@@ -58,12 +59,12 @@ async function crearGasto(req, res) {
       });
     }
 
-    // 🔹 4. Insertar el gasto sin enviar fecha (la BD pone CURRENT_DATE)
+    // 🔹 4. Insertar el gasto
     const nuevoGasto = await pool.query(
-      `INSERT INTO gastos (usuario_id, descripcion, monto, categoria_id)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO gastos (usuario_id, descripcion, monto, categoria_id, archivo)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [usuario_id, descripcion, monto, categoria_id || null]
+      [usuario_id, descripcion, monto, categoria_id || null, archivo]
     );
 
     const gastoConCategoria = await pool.query(
@@ -74,9 +75,16 @@ async function crearGasto(req, res) {
       [nuevoGasto.rows[0].id]
     );
 
+    const gasto = gastoConCategoria.rows[0];
+
+    // 👉 agregar URL pública al archivo si existe
+    if (gasto.archivo) {
+      gasto.archivo_url = `${process.env.BASE_URL || "http://localhost:3000"}/uploads/${gasto.archivo}`;
+    }
+
     res.status(201).json({
       mensaje: "✅ Gasto creado exitosamente",
-      gasto: gastoConCategoria.rows[0],
+      gasto,
     });
   } catch (error) {
     console.error("❌ Error al crear gasto:", error);
@@ -87,7 +95,7 @@ async function crearGasto(req, res) {
 // Listar todos los gastos del usuario autenticado
 async function listarGastos(req, res) {
   try {
-    const usuario_id = req.user.id; // 👈 se toma del token
+    const usuario_id = req.user.id;
 
     const gastos = await pool.query(
       `SELECT g.*, c.nombre AS categoria_nombre
@@ -98,10 +106,18 @@ async function listarGastos(req, res) {
       [usuario_id]
     );
 
+    // 👉 agregar URL pública a cada gasto
+    const gastosConArchivos = gastos.rows.map((g) => {
+      if (g.archivo) {
+        g.archivo_url = `${process.env.BASE_URL || "http://localhost:3000"}/uploads/${g.archivo}`;
+      }
+      return g;
+    });
+
     res.json({
       mensaje: "📋 Lista de gastos obtenida correctamente",
-      total: gastos.rows.length,
-      gastos: gastos.rows,
+      total: gastosConArchivos.length,
+      gastos: gastosConArchivos,
     });
   } catch (error) {
     console.error("❌ Error al listar gastos:", error);
@@ -112,9 +128,10 @@ async function listarGastos(req, res) {
 // Actualizar un gasto
 async function actualizarGasto(req, res) {
   try {
-    const usuario_id = req.user.id; // 👈 asegurar que es del usuario autenticado
+    const usuario_id = req.user.id;
     const { id } = req.params;
     const { descripcion, monto, categoria_id } = req.body;
+    const archivo = req.file ? req.file.filename : null;
 
     const gasto = await pool.query(
       "SELECT * FROM gastos WHERE id = $1 AND usuario_id = $2",
@@ -128,9 +145,9 @@ async function actualizarGasto(req, res) {
 
     await pool.query(
       `UPDATE gastos 
-       SET descripcion = $1, monto = $2, categoria_id = $3
-       WHERE id = $4`,
-      [descripcion, monto, categoria_id || null, id]
+       SET descripcion = $1, monto = $2, categoria_id = $3, archivo = COALESCE($4, archivo)
+       WHERE id = $5`,
+      [descripcion, monto, categoria_id || null, archivo, id]
     );
 
     const actualizado = await pool.query(
@@ -141,9 +158,15 @@ async function actualizarGasto(req, res) {
       [id]
     );
 
+    const gastoActualizado = actualizado.rows[0];
+
+    if (gastoActualizado.archivo) {
+      gastoActualizado.archivo_url = `${process.env.BASE_URL || "http://localhost:3000"}/uploads/${gastoActualizado.archivo}`;
+    }
+
     res.json({
       mensaje: "✅ Gasto actualizado correctamente",
-      gasto: actualizado.rows[0],
+      gasto: gastoActualizado,
     });
   } catch (error) {
     console.error("❌ Error al actualizar gasto:", error);

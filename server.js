@@ -3,6 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
+const path = require("path"); // 👈 necesario para servir uploads
 const db = require("./models/db");
 
 dotenv.config();
@@ -10,6 +11,9 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// 🔹 Servir archivos estáticos (uploads)
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // 🔹 Configuración de Swagger
 const swaggerOptions = {
@@ -42,7 +46,7 @@ const authRoutes = require("./routes/authRoutes");
 const gastoRoutes = require("./routes/gastoRoutes");
 const categoriaRoutes = require("./routes/categoriaRoutes");
 const reporteRoutes = require("./routes/reporteRoutes");
-const presupuestoRoutes = require("./routes/presupuestoRoutes"); // 👈 nueva ruta
+const presupuestoRoutes = require("./routes/presupuestoRoutes");
 
 // 🔹 Usar rutas
 app.use("/auth", authRoutes);
@@ -56,4 +60,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
   console.log(`📖 Swagger en http://localhost:${PORT}/api-docs`);
+  console.log(`📂 Archivos disponibles en http://localhost:${PORT}/uploads`);
 });

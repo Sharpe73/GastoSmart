@@ -16,8 +16,9 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Link,
 } from "@mui/material";
-import { Edit, Delete } from "@mui/icons-material";
+import { Edit, Delete, PictureAsPdf } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import API from "../api";
@@ -28,11 +29,13 @@ function Gastos() {
   const [descripcion, setDescripcion] = useState("");
   const [monto, setMonto] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
+  const [archivo, setArchivo] = useState(null);
   const [mensaje, setMensaje] = useState({ tipo: "", texto: "" });
   const [saldo, setSaldo] = useState(null);
 
   const [openEdit, setOpenEdit] = useState(false);
   const [gastoEdit, setGastoEdit] = useState(null);
+  const [archivoEdit, setArchivoEdit] = useState(null);
 
   const token = localStorage.getItem("token");
   const location = useLocation();
@@ -71,7 +74,6 @@ function Gastos() {
           setGastos(gastoRes.data.gastos || gastoRes.data);
         }
 
-        // 👇 obtener saldo actual
         const saldoRes = await API.get("/presupuesto/saldo");
         setSaldo(saldoRes.data);
       } catch (err) {
@@ -102,27 +104,29 @@ function Gastos() {
 
     try {
       const decoded = jwtDecode(token);
-      const res = await API.post(
-        "/gastos",
-        {
-          usuario_id: decoded.id,
-          descripcion,
-          monto,
-          categoria_id: Number(categoriaId),
-          // 👈 ya no mandamos fecha, la pone la BD
+      const formData = new FormData();
+      formData.append("usuario_id", decoded.id);
+      formData.append("descripcion", descripcion);
+      formData.append("monto", monto);
+      formData.append("categoria_id", categoriaId);
+      if (archivo) {
+        formData.append("archivo", archivo);
+      }
+
+      const res = await API.post("/gastos", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      });
 
       setGastos([res.data.gasto, ...gastos]);
       setDescripcion("");
       setMonto("");
-      setCategoriaId(
-        categoriaSeleccionada ? Number(categoriaSeleccionada) : ""
-      );
+      setCategoriaId(categoriaSeleccionada ? Number(categoriaSeleccionada) : "");
+      setArchivo(null);
       setMensaje({ tipo: "success", texto: "✅ Gasto agregado correctamente." });
 
-      // actualizar saldo después de agregar gasto
       const saldoRes = await API.get("/presupuesto/saldo");
       setSaldo(saldoRes.data);
     } catch (err) {
@@ -166,6 +170,7 @@ function Gastos() {
   const handleCloseEdit = () => {
     setOpenEdit(false);
     setGastoEdit(null);
+    setArchivoEdit(null);
   };
 
   // 🔹 Guardar cambios en edición
@@ -176,16 +181,20 @@ function Gastos() {
     }
 
     try {
-      const res = await API.put(
-        `/gastos/${gastoEdit.id}`,
-        {
-          descripcion: gastoEdit.descripcion,
-          monto: gastoEdit.monto,
-          categoria_id: Number(gastoEdit.categoria_id),
-          // 👈 tampoco mandamos fecha, la BD mantiene la original
+      const formData = new FormData();
+      formData.append("descripcion", gastoEdit.descripcion);
+      formData.append("monto", gastoEdit.monto);
+      formData.append("categoria_id", gastoEdit.categoria_id);
+      if (archivoEdit) {
+        formData.append("archivo", archivoEdit);
+      }
+
+      const res = await API.put(`/gastos/${gastoEdit.id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      });
 
       setGastos(
         gastos.map((g) => (g.id === gastoEdit.id ? res.data.gasto : g))
@@ -207,9 +216,7 @@ function Gastos() {
   return (
     <Container sx={{ mt: 6 }}>
       <Typography variant="h4" gutterBottom align="center" color="primary">
-        {categoriaNombre
-          ? `Gastos de ${categoriaNombre}`
-          : "Gestionar Gastos"}
+        {categoriaNombre ? `Gastos de ${categoriaNombre}` : "Gestionar Gastos"}
       </Typography>
 
       {mensaje.texto && (
@@ -256,6 +263,14 @@ function Gastos() {
           </TextField>
         </Grid>
         <Grid item xs={12}>
+          <input
+            type="file"
+            accept=".pdf,.jpg,.png,.jpeg"
+            onChange={(e) => setArchivo(e.target.files[0])}
+            disabled={saldo && saldo.saldoRestante <= 0}
+          />
+        </Grid>
+        <Grid item xs={12}>
           <Button
             variant="contained"
             color="primary"
@@ -283,6 +298,18 @@ function Gastos() {
                 <Typography variant="body2" color="text.secondary">
                   📅 Fecha: {new Date(gasto.fecha).toLocaleDateString("es-CL")}
                 </Typography>
+                {gasto.archivo_url && (
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    <Link
+                      href={gasto.archivo_url}
+                      target="_blank"
+                      rel="noopener"
+                      underline="hover"
+                    >
+                      <PictureAsPdf fontSize="small" /> Ver documento
+                    </Link>
+                  </Typography>
+                )}
               </CardContent>
               <CardActions>
                 <IconButton color="primary" onClick={() => handleOpenEdit(gasto)}>
@@ -342,6 +369,11 @@ function Gastos() {
               </MenuItem>
             ))}
           </TextField>
+          <input
+            type="file"
+            accept=".pdf,.jpg,.png,.jpeg"
+            onChange={(e) => setArchivoEdit(e.target.files[0])}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseEdit} color="secondary">

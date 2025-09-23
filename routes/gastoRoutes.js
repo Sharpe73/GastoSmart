@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const verificarToken = require("../middleware/authMiddleware");
+const upload = require("../middleware/upload"); // 👈 importamos multer
 const {
   crearGasto,
   listarGastos,
@@ -43,14 +44,14 @@ router.get("/", verificarToken, listarGastos);
  * @swagger
  * /gastos:
  *   post:
- *     summary: Crear un nuevo gasto para el usuario autenticado
+ *     summary: Crear un nuevo gasto para el usuario autenticado (con archivo opcional)
  *     tags: [Gastos]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -60,24 +61,23 @@ router.get("/", verificarToken, listarGastos);
  *               monto:
  *                 type: number
  *                 example: 50000
- *               fecha:
- *                 type: string
- *                 format: date
- *                 example: 2025-09-16
  *               categoria_id:
  *                 type: integer
  *                 example: 1
+ *               archivo:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       201:
  *         description: Gasto creado exitosamente
  */
-router.post("/", verificarToken, crearGasto);
+router.post("/", verificarToken, upload.single("archivo"), crearGasto);
 
 /**
  * @swagger
  * /gastos/{id}:
  *   put:
- *     summary: Actualizar un gasto por ID (solo si pertenece al usuario autenticado)
+ *     summary: Actualizar un gasto por ID (con archivo opcional, solo si pertenece al usuario autenticado)
  *     tags: [Gastos]
  *     security:
  *       - bearerAuth: []
@@ -90,7 +90,7 @@ router.post("/", verificarToken, crearGasto);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -98,18 +98,18 @@ router.post("/", verificarToken, crearGasto);
  *                 type: string
  *               monto:
  *                 type: number
- *               fecha:
- *                 type: string
- *                 format: date
  *               categoria_id:
  *                 type: integer
+ *               archivo:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Gasto actualizado exitosamente
  *       404:
  *         description: Gasto no encontrado
  */
-router.put("/:id", verificarToken, actualizarGasto);
+router.put("/:id", verificarToken, upload.single("archivo"), actualizarGasto);
 
 /**
  * @swagger
