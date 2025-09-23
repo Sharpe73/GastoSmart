@@ -75,13 +75,11 @@ function Historicos() {
             No hay históricos disponibles todavía.
           </Typography>
         ) : (
-          historicos.map((histo, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
+          historicos.map((histo) => (
+            <Grid item xs={12} sm={6} md={4} key={histo.id}>
               <Card sx={{ boxShadow: 3 }}>
                 <CardContent>
-                  <Typography variant="h6">
-                    📅 {histo.periodo}
-                  </Typography>
+                  <Typography variant="h6">📅 {histo.periodo}</Typography>
                   <Typography variant="body2" color="text.secondary">
                     💰 Sueldo: ${Number(histo.sueldo).toLocaleString("es-CL")}
                   </Typography>
@@ -94,8 +92,7 @@ function Historicos() {
                   <Button
                     size="small"
                     variant="contained"
-                    // 👇 Usamos el ID real en la ruta
-                    onClick={() => navigate(`/historicos/${histo.id}`)}
+                    onClick={() => navigate(`/historicos/${histo.id}`)} // 👈 Ahora navega con el ID
                   >
                     Ver Detalle
                   </Button>

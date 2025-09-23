@@ -29,31 +29,25 @@ router.get("/", verificarToken, listarHistoricos);
 
 /**
  * @swagger
- * /historicos/{anio}/{mes}:
+ * /historicos/{id}:
  *   get:
- *     summary: Obtener el detalle de un histórico específico (año y mes)
+ *     summary: Obtener el detalle de un histórico específico por ID
  *     tags: [Históricos]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: anio
+ *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         example: 2025
- *       - in: path
- *         name: mes
- *         required: true
- *         schema:
- *           type: integer
- *         example: 9
+ *         example: 1
  *     responses:
  *       200:
  *         description: Detalle del histórico obtenido correctamente
  *       404:
- *         description: No se encontró histórico en ese período
+ *         description: No se encontró histórico con ese ID
  */
-router.get("/:anio/:mes", verificarToken, detalleHistorico);
+router.get("/:id", verificarToken, detalleHistorico);
 
 module.exports = router;

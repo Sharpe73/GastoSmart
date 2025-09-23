@@ -63,12 +63,20 @@ function HistoricoDetalle() {
     );
   }
 
-  const { presupuesto, gastos, periodo } = detalle;
+  const {
+    sueldo,
+    total_gastado,
+    saldo_restante,
+    gastos = [],
+    categorias = [],
+    mes,
+    anio,
+  } = detalle;
 
   return (
     <Container sx={{ mt: 6 }}>
       <Typography variant="h4" gutterBottom align="center" color="primary">
-        📅 Detalle Histórico {periodo}
+        📅 Detalle Histórico {anio}-{String(mes).padStart(2, "0")}
       </Typography>
 
       {mensaje.texto && (
@@ -82,15 +90,13 @@ function HistoricoDetalle() {
         <CardContent>
           <Typography variant="h6">💰 Presupuesto</Typography>
           <Typography variant="body2" color="text.secondary">
-            Sueldo: ${Number(presupuesto.sueldo).toLocaleString("es-CL")}
+            Sueldo: ${Number(sueldo).toLocaleString("es-CL")}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Fecha inicio:{" "}
-            {new Date(presupuesto.fecha_inicio).toLocaleDateString("es-CL")}
+            Total Gastado: ${Number(total_gastado).toLocaleString("es-CL")}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Fecha fin:{" "}
-            {new Date(presupuesto.fecha_fin).toLocaleDateString("es-CL")}
+            Saldo Restante: ${Number(saldo_restante).toLocaleString("es-CL")}
           </Typography>
         </CardContent>
       </Card>

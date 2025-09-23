@@ -32,11 +32,11 @@ async function listarHistoricos(req, res) {
   }
 }
 
-// 📌 Detalle de un histórico específico (por año y mes)
+// 📌 Detalle de un histórico específico (por ID)
 async function detalleHistorico(req, res) {
   try {
     const usuario_id = req.user.id;
-    const { anio, mes } = req.params;
+    const { id } = req.params;
 
     const result = await pool.query(
       `SELECT 
@@ -51,22 +51,18 @@ async function detalleHistorico(req, res) {
          creado_en
        FROM historicos
        WHERE usuario_id = $1
-       AND anio = $2
-       AND mes = $3
+       AND id = $2
        LIMIT 1`,
-      [usuario_id, anio, mes]
+      [usuario_id, id]
     );
 
     if (result.rows.length === 0) {
       return res
         .status(404)
-        .json({ mensaje: "❌ No se encontró histórico en ese período" });
+        .json({ mensaje: "❌ No se encontró el histórico solicitado" });
     }
 
-    res.json({
-      mensaje: "📋 Detalle histórico obtenido correctamente",
-      historico: result.rows[0],
-    });
+    res.json(result.rows[0]);
   } catch (error) {
     console.error("❌ Error al obtener detalle histórico:", error);
     res.status(500).json({ mensaje: "Error al obtener detalle histórico" });
