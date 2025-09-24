@@ -9,12 +9,16 @@ import {
   IconButton,
   Pagination,
   Box,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
 } from "@mui/material";
 import { Edit, Delete, PictureAsPdf } from "@mui/icons-material";
 
 function GastosList({ gastos, onEdit, onDelete, onVerDocumento }) {
   const [page, setPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Calcular total de páginas
   const totalPages = Math.ceil(gastos.length / itemsPerPage);
@@ -22,9 +26,7 @@ function GastosList({ gastos, onEdit, onDelete, onVerDocumento }) {
   // Resetear página cuando cambian los gastos
   useEffect(() => {
     setPage(1);
-    console.log("🔹 Total de gastos:", gastos.length);
-    console.log("🔹 Total de páginas:", totalPages);
-  }, [gastos, totalPages]);
+  }, [gastos, itemsPerPage]);
 
   // Gastos que se muestran en la página actual
   const gastosPaginados = gastos.slice(
@@ -36,8 +38,31 @@ function GastosList({ gastos, onEdit, onDelete, onVerDocumento }) {
     setPage(value);
   };
 
+  const handleChangeItemsPerPage = (event) => {
+    setItemsPerPage(event.target.value);
+    setPage(1); // reinicia a la primera página
+  };
+
   return (
     <Box>
+      {/* Selector de cantidad por página */}
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+        <FormControl size="small" sx={{ minWidth: 120 }}>
+          <InputLabel id="items-per-page-label">Por página</InputLabel>
+          <Select
+            labelId="items-per-page-label"
+            value={itemsPerPage}
+            label="Por página"
+            onChange={handleChangeItemsPerPage}
+          >
+            <MenuItem value={5}>5</MenuItem>
+            <MenuItem value={10}>10</MenuItem>
+            <MenuItem value={20}>20</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
+      {/* Lista de gastos */}
       <Grid container spacing={3}>
         {gastosPaginados.map((gasto) => (
           <Grid item xs={12} sm={6} md={4} key={gasto.id}>
