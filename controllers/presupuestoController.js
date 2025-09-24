@@ -58,8 +58,17 @@ const obtenerPresupuesto = async (req, res) => {
       [usuario_id]
     );
 
+    // 🚀 Si no hay presupuesto → crear uno inicial vacío automáticamente
     if (result.rows.length === 0) {
-      return res.json(null);
+      const fechaInicioNueva = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      const fechaFinNueva = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+
+      const nuevo = await pool.query(
+        "INSERT INTO presupuestos (usuario_id, sueldo, fecha_inicio, fecha_fin) VALUES ($1,$2,$3,$4) RETURNING *",
+        [usuario_id, 0, fechaInicioNueva, fechaFinNueva] // sueldo inicial = 0
+      );
+
+      return res.json(nuevo.rows[0]);
     }
 
     let presupuesto = result.rows[0];
@@ -103,8 +112,8 @@ const obtenerPresupuesto = async (req, res) => {
           new Date(presupuesto.fecha_fin).getMonth() + 1, // mes
           new Date(presupuesto.fecha_fin).getFullYear(), // año
           presupuesto.sueldo,
-          totalGastos,       // puede ser 0
-          saldoRestante,     // puede ser igual al sueldo
+          totalGastos,
+          saldoRestante,
           JSON.stringify(categoriasDetalle.rows),
           JSON.stringify(gastosDetalle.rows),
         ]
