@@ -7,7 +7,7 @@ const {
   listarLiquidaciones,
   descargarLiquidacion,
 } = require("../controllers/liquidacionesController");
-const verifyToken = require("../middleware/verifyToken");
+const verificarToken = require("../middleware/authMiddleware"); // 👈 cambiado
 
 // ⚙️ Configuración de multer en memoria (no en disco)
 const storage = multer.memoryStorage();
@@ -23,9 +23,9 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage, fileFilter });
 
-// 📌 Rutas
-router.post("/", verifyToken, upload.single("archivo"), subirLiquidacion);
-router.get("/", verifyToken, listarLiquidaciones);
-router.get("/:id/descargar", verifyToken, descargarLiquidacion);
+// 📌 Rutas protegidas
+router.post("/", verificarToken, upload.single("archivo"), subirLiquidacion);
+router.get("/", verificarToken, listarLiquidaciones);
+router.get("/:id/descargar", verificarToken, descargarLiquidacion);
 
 module.exports = router;
