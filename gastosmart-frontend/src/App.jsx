@@ -14,8 +14,9 @@ import Config from "./pages/Config";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Presupuesto from "./pages/Presupuesto";
-import Historicos from "./pages/Historicos";          
-import HistoricoDetalle from "./pages/HistoricoDetalle"; 
+import Historicos from "./pages/Historicos";
+import HistoricoDetalle from "./pages/HistoricoDetalle";
+import Liquidaciones from "./pages/Liquidaciones"; // 👈 NUEVO
 
 function App() {
   const handleLogout = () => {
@@ -124,6 +125,18 @@ function App() {
             <ProtectedRoute>
               <AppLayout onLogout={handleLogout}>
                 <Config />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Liquidaciones (PROTEGIDO) */}
+        <Route
+          path="/liquidaciones"
+          element={
+            <ProtectedRoute>
+              <AppLayout onLogout={handleLogout}>
+                <Liquidaciones />
               </AppLayout>
             </ProtectedRoute>
           }

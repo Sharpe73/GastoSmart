@@ -25,10 +25,11 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import InsightsIcon from "@mui/icons-material/Insights";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet"; // 👈 Presupuesto
-import HistoryIcon from "@mui/icons-material/History"; // 👈 NUEVO: Históricos
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet"; // Presupuesto
+import HistoryIcon from "@mui/icons-material/History"; // Históricos
+import DescriptionIcon from "@mui/icons-material/Description"; // 👈 NUEVO: Liquidaciones
 
-// 👇 Importa tu logo
+// Logo
 import logo from "../assets/gasto.png";
 
 export const drawerWidth = 260;
@@ -180,7 +181,7 @@ export default function Sidebar({ open, onClose, onLogout }) {
           <ListItemText primary="Reportes" />
         </ListItemButton>
 
-        {/* Históricos 👈 NUEVO */}
+        {/* Históricos */}
         <ListItemButton
           component={RouterLink}
           to="/historicos"
@@ -195,6 +196,23 @@ export default function Sidebar({ open, onClose, onLogout }) {
             <HistoryIcon />
           </ListItemIcon>
           <ListItemText primary="Históricos" />
+        </ListItemButton>
+
+        {/* Liquidaciones 👈 NUEVO */}
+        <ListItemButton
+          component={RouterLink}
+          to="/liquidaciones"
+          selected={location.pathname.startsWith("/liquidaciones")}
+          onClick={!isDesktop ? onClose : undefined}
+          sx={{
+            "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
+            "&:hover": { bgcolor: "primary.light", color: "white" },
+          }}
+        >
+          <ListItemIcon>
+            <DescriptionIcon />
+          </ListItemIcon>
+          <ListItemText primary="Liquidaciones" />
         </ListItemButton>
 
         {/* Configuración */}
