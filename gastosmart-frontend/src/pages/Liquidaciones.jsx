@@ -59,13 +59,12 @@ function Liquidaciones() {
   // 🔹 Descargar con token
   const descargarLiquidacion = async (id) => {
     try {
-      const token = localStorage.getItem("token"); // 👈 JWT guardado al iniciar sesión
+      const token = localStorage.getItem("token");
       const response = await API.get(`/liquidaciones/${id}/descargar`, {
         headers: { Authorization: `Bearer ${token}` },
-        responseType: "blob", // 👈 recibimos el PDF como binario
+        responseType: "blob",
       });
 
-      // Crear enlace temporal
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -164,8 +163,8 @@ function Liquidaciones() {
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Subida:{" "}
-                    {liq.creado_en
-                      ? new Date(liq.creado_en).toLocaleDateString("es-CL")
+                    {liq.created_at
+                      ? new Date(liq.created_at).toLocaleDateString("es-CL")
                       : "Fecha no disponible"}
                   </Typography>
                 </CardContent>
