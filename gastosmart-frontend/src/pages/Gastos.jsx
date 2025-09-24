@@ -335,7 +335,7 @@ function Gastos() {
                   📂 Categoría: {gasto.categoria_nombre}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  📅 Fecha: {new Date(gasto.fecha).toLocaleDateString("es-CL")}
+              📅 Fecha: {gasto.fecha}
                 </Typography>
                 {gasto.tiene_archivo && (
                   <IconButton
