@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import API from "../api";
+import { obtenerIndicadores } from "../api/indicadores"; // 👈 Importar función externa
 
 // Íconos de MUI
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
@@ -25,6 +26,7 @@ function Dashboard() {
   const [gastos, setGastos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [presupuesto, setPresupuesto] = useState(null);
+  const [indicadores, setIndicadores] = useState(null); // 👈 Estado para indicadores
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
@@ -60,6 +62,10 @@ function Dashboard() {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCategorias(catRes.data.categorias || catRes.data);
+
+        // ✅ Indicadores externos
+        const indData = await obtenerIndicadores();
+        setIndicadores(indData);
       } catch (err) {
         console.error("❌ Error al cargar datos del Dashboard:", err);
       } finally {
@@ -104,23 +110,83 @@ function Dashboard() {
   // 🔹 Estilo base de tarjeta
   const cardStyle = {
     boxShadow: 4,
-    minHeight: isMobile ? 100 : 120,
+    minHeight: isMobile ? 90 : 110,
   };
 
   // 🔹 Estilo de contenido
   const contentStyle = {
-    p: isMobile ? 1.5 : 2,
+    p: isMobile ? 1 : 2,
+    textAlign: "center",
   };
 
   // 🔹 Tipografías responsivas
-  const titleVariant = isMobile ? "body2" : "subtitle1";
-  const amountVariant = isMobile ? "h6" : "h5";
+  const titleVariant = isMobile ? "caption" : "subtitle1";
+  const amountVariant = isMobile ? "body1" : "h6";
 
   return (
     <Box>
       <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
         Bienvenido {user?.nombre || "al Dashboard de GastoSmart"}
       </Typography>
+
+      {/* 🔹 Bloque de indicadores externos arriba y visible */}
+      {indicadores && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Indicadores Económicos (Chile)
+          </Typography>
+          <Grid
+            container
+            spacing={2}
+            sx={{
+              flexWrap: isMobile ? "nowrap" : "wrap",
+              overflowX: isMobile ? "auto" : "visible",
+              pb: isMobile ? 1 : 0,
+            }}
+          >
+            <Grid item xs={6} sm={3}>
+              <Card sx={{ ...cardStyle, bgcolor: "#1976d2", color: "white" }}>
+                <CardContent sx={contentStyle}>
+                  <Typography variant={titleVariant}>UF</Typography>
+                  <Typography variant={amountVariant}>
+                    ${indicadores.uf.toLocaleString("es-CL")}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <Card sx={{ ...cardStyle, bgcolor: "#388e3c", color: "white" }}>
+                <CardContent sx={contentStyle}>
+                  <Typography variant={titleVariant}>Dólar</Typography>
+                  <Typography variant={amountVariant}>
+                    ${indicadores.dolar.toLocaleString("es-CL")}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <Card sx={{ ...cardStyle, bgcolor: "#f57c00", color: "white" }}>
+                <CardContent sx={contentStyle}>
+                  <Typography variant={titleVariant}>IPC</Typography>
+                  <Typography variant={amountVariant}>
+                    {indicadores.ipc.toLocaleString("es-CL")}%
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <Card sx={{ ...cardStyle, bgcolor: "#6a1b9a", color: "white" }}>
+                <CardContent sx={contentStyle}>
+                  <Typography variant={titleVariant}>UTM</Typography>
+                  <Typography variant={amountVariant}>
+                    ${indicadores.utm.toLocaleString("es-CL")}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Box>
+      )}
 
       {/* ✅ Alert con información financiera + periodo */}
       <Alert
