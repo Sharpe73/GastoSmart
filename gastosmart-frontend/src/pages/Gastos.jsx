@@ -287,6 +287,7 @@ function Gastos() {
               color="primary"
               onClick={handleAddGasto}
               disabled={saldo && saldo.saldoRestante <= 0}
+              sx={{ height: 40 }}
             >
               Agregar Gasto
             </Button>
@@ -295,6 +296,7 @@ function Gastos() {
               component="label"
               startIcon={<AttachFile />}
               disabled={saldo && saldo.saldoRestante <= 0}
+              sx={{ height: 40 }}
             >
               Adjuntar documento
               <input
