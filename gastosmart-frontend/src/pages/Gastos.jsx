@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Box,
 } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
@@ -241,7 +242,7 @@ function Gastos() {
       )}
 
       {/* Formulario para agregar gasto */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
+      <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <TextField
             label="Descripción"
@@ -312,12 +313,14 @@ function Gastos() {
       </Grid>
 
       {/* Lista de gastos con paginación */}
-      <GastosList
-        gastos={gastos}
-        onEdit={handleOpenEdit}
-        onDelete={handleDeleteGasto}
-        onVerDocumento={handleVerDocumento}
-      />
+      <Box sx={{ mt: 2 }}>
+        <GastosList
+          gastos={gastos}
+          onEdit={handleOpenEdit}
+          onDelete={handleDeleteGasto}
+          onVerDocumento={handleVerDocumento}
+        />
+      </Box>
 
       {/* Modal de edición */}
       <Dialog open={openEdit} onClose={handleCloseEdit}>
