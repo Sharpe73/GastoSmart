@@ -137,58 +137,68 @@ function Dashboard() {
 
   return (
     <Box>
-      <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
-        Bienvenido {user?.nombre || "al Dashboard de GastoSmart"}
-      </Typography>
+      {/* 🔹 Encabezado con título + indicadores */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          justifyContent: "space-between",
+          alignItems: isMobile ? "flex-start" : "center",
+          mb: 3,
+        }}
+      >
+        <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
+          Bienvenido {user?.nombre || "al Dashboard de GastoSmart"}
+        </Typography>
 
-      {/* 🔹 Indicadores pequeños en la parte superior */}
-      {indicadores && (
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: isMobile ? "center" : "flex-end",
-            gap: 2,
-            mb: 3,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Typography
-              variant="body2"
-              sx={{ fontWeight: "bold", color: "#1976d2" }}
-            >
-              UF:
-            </Typography>
-            <Typography variant="body2">
-              ${indicadores.uf.toLocaleString("es-CL")}
-            </Typography>
-          </Box>
+        {indicadores && (
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: isMobile ? "flex-start" : "flex-end",
+              gap: 2,
+              mt: isMobile ? 1 : 0,
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: "bold", color: "#1976d2" }}
+              >
+                UF:
+              </Typography>
+              <Typography variant="body2">
+                ${indicadores.uf.toLocaleString("es-CL")}
+              </Typography>
+            </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Typography
-              variant="body2"
-              sx={{ fontWeight: "bold", color: "#388e3c" }}
-            >
-              Dólar:
-            </Typography>
-            <Typography variant="body2">
-              ${indicadores.dolar.toLocaleString("es-CL")}
-            </Typography>
-          </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: "bold", color: "#388e3c" }}
+              >
+                Dólar:
+              </Typography>
+              <Typography variant="body2">
+                ${indicadores.dolar.toLocaleString("es-CL")}
+              </Typography>
+            </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Typography
-              variant="body2"
-              sx={{ fontWeight: "bold", color: "#6a1b9a" }}
-            >
-              UTM:
-            </Typography>
-            <Typography variant="body2">
-              ${indicadores.utm.toLocaleString("es-CL")}
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: "bold", color: "#6a1b9a" }}
+              >
+                UTM:
+              </Typography>
+              <Typography variant="body2">
+                ${indicadores.utm.toLocaleString("es-CL")}
+              </Typography>
+            </Box>
           </Box>
-        </Box>
-      )}
+        )}
+      </Box>
 
       {/* ✅ Alert con información financiera + periodo */}
       <Alert
