@@ -279,7 +279,7 @@ function Gastos() {
           </TextField>
         </Grid>
 
-        {/* Botones en la misma fila */}
+        {/* Botones en la misma fila, armonizados */}
         <Grid item xs={12}>
           <Box sx={{ display: "flex", gap: 2 }}>
             <Button
@@ -287,7 +287,7 @@ function Gastos() {
               color="primary"
               onClick={handleAddGasto}
               disabled={saldo && saldo.saldoRestante <= 0}
-              sx={{ height: 40 }}
+              sx={{ height: 40, minWidth: 180 }}
             >
               Agregar Gasto
             </Button>
@@ -296,7 +296,7 @@ function Gastos() {
               component="label"
               startIcon={<AttachFile />}
               disabled={saldo && saldo.saldoRestante <= 0}
-              sx={{ height: 40 }}
+              sx={{ height: 40, minWidth: 180 }}
             >
               Adjuntar documento
               <input
