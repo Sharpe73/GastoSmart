@@ -109,11 +109,17 @@ function Liquidaciones() {
               >
                 <CardContent sx={{ textAlign: "center" }}>
                   <PictureAsPdf sx={{ fontSize: 60, color: "red" }} />
-                  <Typography variant="h6" sx={{ mt: 1, fontWeight: "bold", color }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ mt: 1, fontWeight: "bold", color }}
+                  >
                     {liq.mes}/{liq.anio}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Subida: {new Date(liq.creado_en).toLocaleDateString("es-CL")}
+                    Subida:{" "}
+                    {liq.created_at
+                      ? new Date(liq.created_at).toLocaleDateString("es-CL")
+                      : "Sin fecha"}
                   </Typography>
                 </CardContent>
                 <CardActions sx={{ justifyContent: "center" }}>

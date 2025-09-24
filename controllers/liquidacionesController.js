@@ -15,9 +15,9 @@ const subirLiquidacion = async (req, res) => {
     const archivoBuffer = req.file.buffer;
 
     const result = await pool.query(
-      `INSERT INTO liquidaciones (usuario_id, mes, anio, archivo, creado_en)
+      `INSERT INTO liquidaciones (usuario_id, mes, anio, archivo, created_at)
        VALUES ($1, $2, $3, $4, NOW())
-       RETURNING id, mes, anio, creado_en`,
+       RETURNING id, mes, anio, created_at`,
       [usuario_id, mes, anio, archivoBuffer]
     );
 
@@ -37,7 +37,7 @@ const listarLiquidaciones = async (req, res) => {
     const usuario_id = req.user.id;
 
     const result = await pool.query(
-      `SELECT id, mes, anio, creado_en
+      `SELECT id, mes, anio, created_at
        FROM liquidaciones
        WHERE usuario_id = $1
        ORDER BY anio DESC, mes DESC`,
