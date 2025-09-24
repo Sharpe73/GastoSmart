@@ -13,7 +13,11 @@ const pool = new Pool({
 });
 
 pool.connect()
-  .then(() => console.log("✅ Conectado a PostgreSQL"))
+  .then(async (client) => {
+    console.log("✅ Conectado a PostgreSQL");
+    await client.query("SET TIME ZONE 'America/Santiago'");
+    client.release();
+  })
   .catch(err => console.error("❌ Error de conexión:", err));
 
 module.exports = pool;
