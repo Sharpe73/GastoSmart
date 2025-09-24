@@ -61,6 +61,12 @@ function Liquidaciones() {
     window.open(`${API.defaults.baseURL}/liquidaciones/${id}/descargar`);
   };
 
+  // 🔹 Meses en español
+  const nombresMes = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
+
   // Colores dinámicos por mes
   const coloresMes = [
     "#1976d2", "#388e3c", "#f57c00", "#6a1b9a",
@@ -81,11 +87,11 @@ function Liquidaciones() {
           label="Mes"
           value={mes}
           onChange={(e) => setMes(e.target.value)}
-          sx={{ width: 120 }}
+          sx={{ width: 140 }}
         >
-          {Array.from({ length: 12 }, (_, i) => (
+          {nombresMes.map((nombre, i) => (
             <MenuItem key={i + 1} value={i + 1}>
-              {i + 1}
+              {nombre}
             </MenuItem>
           ))}
         </TextField>
@@ -117,35 +123,40 @@ function Liquidaciones() {
       <Grid container spacing={2}>
         {liquidaciones.map((liq) => {
           const color = coloresMes[(liq.mes - 1) % 12];
+          const mesNombre = nombresMes[liq.mes - 1] || liq.mes;
+
           return (
             <Grid item xs={12} sm={6} md={3} key={liq.id}>
               <Card
                 sx={{
-                  boxShadow: 3,
+                  boxShadow: 2,
                   borderRadius: 2,
-                  maxWidth: 220,
+                  maxWidth: 200,
                   mx: "auto",
-                  "&:hover": { transform: "translateY(-3px)", boxShadow: 5 },
+                  "&:hover": { transform: "translateY(-3px)", boxShadow: 4 },
                 }}
               >
-                <CardContent sx={{ textAlign: "center" }}>
-                  <PictureAsPdf sx={{ fontSize: 40, color: "red" }} />
-                  <Typography variant="h6" sx={{ mt: 1, fontWeight: "bold", color }}>
-                    {liq.mes}/{liq.anio}
+                <CardContent sx={{ textAlign: "center", p: 2 }}>
+                  <PictureAsPdf sx={{ fontSize: 36, color: "red" }} />
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ mt: 1, fontWeight: "bold", color }}
+                  >
+                    {mesNombre} {liq.anio}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Subida:{" "}
-                    {liq.creado_en
-                      ? new Date(liq.creado_en).toLocaleDateString("es-CL")
+                    {liq.created_at
+                      ? new Date(liq.created_at).toLocaleDateString("es-CL")
                       : "Fecha no disponible"}
                   </Typography>
                 </CardContent>
-                <CardActions sx={{ justifyContent: "center" }}>
+                <CardActions sx={{ justifyContent: "center", pb: 1 }}>
                   <IconButton
                     color="primary"
                     onClick={() => descargarLiquidacion(liq.id)}
                   >
-                    <Download fontSize="medium" />
+                    <Download fontSize="small" />
                   </IconButton>
                 </CardActions>
               </Card>
