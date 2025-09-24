@@ -59,7 +59,7 @@ async function crearGasto(req, res) {
       });
     }
 
-    // 🔹 4. Calcular fecha local Chile en Node
+    // 🔹 4. Calcular fecha local de Chile en Node
     const hoyChile = new Date().toLocaleDateString("es-CL", {
       timeZone: "America/Santiago",
       year: "numeric",
@@ -71,7 +71,7 @@ async function crearGasto(req, res) {
     const [dia, mes, anio] = hoyChile.split("-");
     const fechaFinal = `${anio}-${mes}-${dia}`;
 
-    // 🔹 5. Insertar el gasto con fecha local Chile
+    // 🔹 5. Insertar el gasto con fecha correcta
     const nuevoGasto = await pool.query(
       `INSERT INTO gastos (usuario_id, descripcion, monto, categoria_id, archivo, fecha, creado_en)
        VALUES ($1, $2, $3, $4, $5, $6, NOW())
