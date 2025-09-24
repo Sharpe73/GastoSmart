@@ -278,37 +278,38 @@ function Gastos() {
             ))}
           </TextField>
         </Grid>
+
+        {/* Botones en la misma fila */}
         <Grid item xs={12}>
-          <Button
-            variant="outlined"
-            component="label"
-            startIcon={<AttachFile />}
-            sx={{ mr: 2 }}
-            disabled={saldo && saldo.saldoRestante <= 0}
-          >
-            Adjuntar documento
-            <input
-              type="file"
-              hidden
-              accept=".pdf"
-              onChange={(e) => setArchivo(e.target.files[0])}
-            />
-          </Button>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleAddGasto}
+              disabled={saldo && saldo.saldoRestante <= 0}
+            >
+              Agregar Gasto
+            </Button>
+            <Button
+              variant="outlined"
+              component="label"
+              startIcon={<AttachFile />}
+              disabled={saldo && saldo.saldoRestante <= 0}
+            >
+              Adjuntar documento
+              <input
+                type="file"
+                hidden
+                accept=".pdf"
+                onChange={(e) => setArchivo(e.target.files[0])}
+              />
+            </Button>
+          </Box>
           {archivo && (
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               📎 {archivo.name}
             </Typography>
           )}
-        </Grid>
-        <Grid item xs={12}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleAddGasto}
-            disabled={saldo && saldo.saldoRestante <= 0}
-          >
-            Agregar Gasto
-          </Button>
         </Grid>
       </Grid>
 
