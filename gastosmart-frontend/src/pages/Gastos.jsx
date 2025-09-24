@@ -241,9 +241,9 @@ function Gastos() {
         </Alert>
       )}
 
-      {/* Formulario y botón alineados */}
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={12} sm={4}>
+      {/* Formulario para agregar gasto */}
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
           <TextField
             label="Descripción"
             fullWidth
@@ -252,7 +252,7 @@ function Gastos() {
             disabled={saldo && saldo.saldoRestante <= 0}
           />
         </Grid>
-        <Grid item xs={6} sm={2}>
+        <Grid item xs={6} sm={3}>
           <TextField
             label="Monto"
             type="number"
@@ -278,24 +278,15 @@ function Gastos() {
             ))}
           </TextField>
         </Grid>
-        <Grid item xs={12} sm={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleAddGasto}
-            fullWidth
-            disabled={saldo && saldo.saldoRestante <= 0}
-          >
-            Agregar
-          </Button>
-        </Grid>
-        <Grid item xs={12} sm={1}>
+        <Grid item xs={12}>
           <Button
             variant="outlined"
             component="label"
             startIcon={<AttachFile />}
+            sx={{ mr: 2 }}
             disabled={saldo && saldo.saldoRestante <= 0}
           >
+            Adjuntar documento
             <input
               type="file"
               hidden
@@ -303,11 +294,26 @@ function Gastos() {
               onChange={(e) => setArchivo(e.target.files[0])}
             />
           </Button>
+          {archivo && (
+            <Typography variant="body2" color="text.secondary">
+              📎 {archivo.name}
+            </Typography>
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAddGasto}
+            disabled={saldo && saldo.saldoRestante <= 0}
+          >
+            Agregar Gasto
+          </Button>
         </Grid>
       </Grid>
 
       {/* Lista de gastos con paginación */}
-      <Box sx={{ mt: 3 }}>
+      <Box sx={{ mt: 2 }}>
         <GastosList
           gastos={gastos}
           onEdit={handleOpenEdit}
