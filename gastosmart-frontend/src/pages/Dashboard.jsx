@@ -116,7 +116,6 @@ function Dashboard() {
   // 🔹 Estilo de contenido
   const contentStyle = {
     p: isMobile ? 1 : 2,
-    textAlign: "center",
   };
 
   // 🔹 Tipografías responsivas
@@ -129,62 +128,43 @@ function Dashboard() {
         Bienvenido {user?.nombre || "al Dashboard de GastoSmart"}
       </Typography>
 
-      {/* 🔹 Bloque de indicadores externos arriba y visible */}
+      {/* 🔹 Indicadores pequeños en la parte superior */}
       {indicadores && (
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Indicadores Económicos (Chile)
-          </Typography>
-          <Grid
-            container
-            spacing={2}
-            sx={{
-              flexWrap: isMobile ? "nowrap" : "wrap",
-              overflowX: isMobile ? "auto" : "visible",
-              pb: isMobile ? 1 : 0,
-            }}
-          >
-            <Grid item xs={6} sm={3}>
-              <Card sx={{ ...cardStyle, bgcolor: "#1976d2", color: "white" }}>
-                <CardContent sx={contentStyle}>
-                  <Typography variant={titleVariant}>UF</Typography>
-                  <Typography variant={amountVariant}>
-                    ${indicadores.uf.toLocaleString("es-CL")}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={6} sm={3}>
-              <Card sx={{ ...cardStyle, bgcolor: "#388e3c", color: "white" }}>
-                <CardContent sx={contentStyle}>
-                  <Typography variant={titleVariant}>Dólar</Typography>
-                  <Typography variant={amountVariant}>
-                    ${indicadores.dolar.toLocaleString("es-CL")}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={6} sm={3}>
-              <Card sx={{ ...cardStyle, bgcolor: "#f57c00", color: "white" }}>
-                <CardContent sx={contentStyle}>
-                  <Typography variant={titleVariant}>IPC</Typography>
-                  <Typography variant={amountVariant}>
-                    {indicadores.ipc.toLocaleString("es-CL")}%
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={6} sm={3}>
-              <Card sx={{ ...cardStyle, bgcolor: "#6a1b9a", color: "white" }}>
-                <CardContent sx={contentStyle}>
-                  <Typography variant={titleVariant}>UTM</Typography>
-                  <Typography variant={amountVariant}>
-                    ${indicadores.utm.toLocaleString("es-CL")}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: isMobile ? "center" : "flex-end",
+            gap: 2,
+            mb: 3,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Typography variant="body2" sx={{ fontWeight: "bold", color: "#1976d2" }}>
+              UF:
+            </Typography>
+            <Typography variant="body2">
+              ${indicadores.uf.toLocaleString("es-CL")}
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Typography variant="body2" sx={{ fontWeight: "bold", color: "#388e3c" }}>
+              Dólar:
+            </Typography>
+            <Typography variant="body2">
+              ${indicadores.dolar.toLocaleString("es-CL")}
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Typography variant="body2" sx={{ fontWeight: "bold", color: "#6a1b9a" }}>
+              UTM:
+            </Typography>
+            <Typography variant="body2">
+              ${indicadores.utm.toLocaleString("es-CL")}
+            </Typography>
+          </Box>
         </Box>
       )}
 
@@ -260,8 +240,7 @@ function Dashboard() {
                 <Box>
                   <Typography variant={titleVariant}>Saldo Restante</Typography>
                   <Typography variant={amountVariant}>
-                    $
-                    {(
+                    ${(
                       Number(presupuesto.sueldo) - totalGeneral
                     ).toLocaleString("es-CL")}
                   </Typography>
