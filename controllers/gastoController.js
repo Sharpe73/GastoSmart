@@ -59,25 +59,15 @@ async function crearGasto(req, res) {
       });
     }
 
-    // 🔹 4. Calcular fecha local de Chile en Node
-    const hoyChile = new Date().toLocaleDateString("es-CL", {
-      timeZone: "America/Santiago",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-
-    // convertir de DD-MM-YYYY → YYYY-MM-DD
-    const [dia, mes, anio] = hoyChile.split("-");
-    const fechaFinal = `${anio}-${mes}-${dia}`;
-
-    // 🔹 5. Insertar el gasto con fecha correcta
+    // 🔹 4. Insertar el gasto con fecha local de Chile (ya normalizada)
     const nuevoGasto = await pool.query(
       `INSERT INTO gastos (usuario_id, descripcion, monto, categoria_id, archivo, fecha, creado_en)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW())
-       RETURNING id, descripcion, monto, categoria_id, fecha, creado_en,
+       VALUES ($1, $2, $3, $4, $5, (NOW() AT TIME ZONE 'America/Santiago')::date, NOW())
+       RETURNING id, descripcion, monto, categoria_id,
+                 TO_CHAR((fecha AT TIME ZONE 'UTC' AT TIME ZONE 'America/Santiago'), 'YYYY-MM-DD') AS fecha,
+                 TO_CHAR((creado_en AT TIME ZONE 'UTC' AT TIME ZONE 'America/Santiago'), 'YYYY-MM-DD HH24:MI:SS') AS creado_en,
                  (CASE WHEN archivo IS NOT NULL THEN true ELSE false END) AS tiene_archivo`,
-      [usuario_id, descripcion, monto, categoria_id || null, archivo, fechaFinal]
+      [usuario_id, descripcion, monto, categoria_id || null, archivo]
     );
 
     res.status(201).json({
@@ -96,7 +86,9 @@ async function listarGastos(req, res) {
     const usuario_id = req.user.id;
 
     const gastos = await pool.query(
-      `SELECT g.id, g.descripcion, g.monto, g.categoria_id, g.fecha, g.creado_en, 
+      `SELECT g.id, g.descripcion, g.monto, g.categoria_id, 
+              TO_CHAR((g.fecha AT TIME ZONE 'UTC' AT TIME ZONE 'America/Santiago'), 'YYYY-MM-DD') AS fecha,
+              TO_CHAR((g.creado_en AT TIME ZONE 'UTC' AT TIME ZONE 'America/Santiago'), 'YYYY-MM-DD HH24:MI:SS') AS creado_en,
               (CASE WHEN g.archivo IS NOT NULL THEN true ELSE false END) AS tiene_archivo,
               c.nombre AS categoria_nombre
        FROM gastos g
@@ -168,7 +160,9 @@ async function actualizarGasto(req, res) {
       `UPDATE gastos 
        SET descripcion = $1, monto = $2, categoria_id = $3, archivo = COALESCE($4, archivo)
        WHERE id = $5
-       RETURNING id, descripcion, monto, categoria_id, fecha, creado_en,
+       RETURNING id, descripcion, monto, categoria_id,
+                 TO_CHAR((fecha AT TIME ZONE 'UTC' AT TIME ZONE 'America/Santiago'), 'YYYY-MM-DD') AS fecha,
+                 TO_CHAR((creado_en AT TIME ZONE 'UTC' AT TIME ZONE 'America/Santiago'), 'YYYY-MM-DD HH24:MI:SS') AS creado_en,
                  (CASE WHEN archivo IS NOT NULL THEN true ELSE false END) AS tiene_archivo`,
       [descripcion, monto, categoria_id || null, archivo, id]
     );
