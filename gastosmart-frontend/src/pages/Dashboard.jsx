@@ -9,6 +9,8 @@ import {
   Avatar,
   Alert,
   CircularProgress,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import API from "../api";
@@ -26,6 +28,9 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   useEffect(() => {
     if (token) {
       try {
@@ -38,7 +43,7 @@ function Dashboard() {
 
     const fetchData = async () => {
       try {
-        // ✅ Presupuesto (con detección automática de cambio de mes)
+        // ✅ Presupuesto
         const preRes = await API.get("/presupuesto", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -96,9 +101,24 @@ function Dashboard() {
     "#FF5252",
   ];
 
+  // 🔹 Estilo base de tarjeta
+  const cardStyle = {
+    boxShadow: 4,
+    minHeight: isMobile ? 100 : 120,
+  };
+
+  // 🔹 Estilo de contenido
+  const contentStyle = {
+    p: isMobile ? 1.5 : 2,
+  };
+
+  // 🔹 Tipografías responsivas
+  const titleVariant = isMobile ? "body2" : "subtitle1";
+  const amountVariant = isMobile ? "h6" : "h5";
+
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
         Bienvenido {user?.nombre || "al Dashboard de GastoSmart"}
       </Typography>
 
@@ -108,7 +128,7 @@ function Dashboard() {
         severity="info"
         sx={{
           mb: 4,
-          fontSize: "1.1rem",
+          fontSize: isMobile ? "0.9rem" : "1rem",
           "& .MuiAlert-message": { width: "100%" },
         }}
       >
@@ -127,15 +147,15 @@ function Dashboard() {
       <Grid container spacing={3}>
         {/* Tarjeta presupuesto inicial */}
         <Grid item xs={12} sm={6} md={4}>
-          <Card sx={{ boxShadow: 4, bgcolor: "success.main", color: "white" }}>
-            <CardContent>
+          <Card sx={{ ...cardStyle, bgcolor: "success.main", color: "white" }}>
+            <CardContent sx={contentStyle}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <Avatar sx={{ bgcolor: "white", color: "success.main" }}>
                   <AttachMoneyIcon />
                 </Avatar>
                 <Box>
-                  <Typography variant="h6">Sueldo inicial</Typography>
-                  <Typography variant="h4">
+                  <Typography variant={titleVariant}>Sueldo inicial</Typography>
+                  <Typography variant={amountVariant}>
                     ${Number(presupuesto.sueldo).toLocaleString("es-CL")}
                   </Typography>
                 </Box>
@@ -146,15 +166,15 @@ function Dashboard() {
 
         {/* Tarjeta total gastado */}
         <Grid item xs={12} sm={6} md={4}>
-          <Card sx={{ boxShadow: 4, bgcolor: "primary.main", color: "white" }}>
-            <CardContent>
+          <Card sx={{ ...cardStyle, bgcolor: "primary.main", color: "white" }}>
+            <CardContent sx={contentStyle}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <Avatar sx={{ bgcolor: "white", color: "primary.main" }}>
                   <AttachMoneyIcon />
                 </Avatar>
                 <Box>
-                  <Typography variant="h6">Total Gastado</Typography>
-                  <Typography variant="h4">
+                  <Typography variant={titleVariant}>Total Gastado</Typography>
+                  <Typography variant={amountVariant}>
                     ${totalGeneral.toLocaleString("es-CL")}
                   </Typography>
                 </Box>
@@ -165,15 +185,15 @@ function Dashboard() {
 
         {/* Tarjeta saldo restante */}
         <Grid item xs={12} sm={6} md={4}>
-          <Card sx={{ boxShadow: 4, bgcolor: "error.main", color: "white" }}>
-            <CardContent>
+          <Card sx={{ ...cardStyle, bgcolor: "error.main", color: "white" }}>
+            <CardContent sx={contentStyle}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <Avatar sx={{ bgcolor: "white", color: "error.main" }}>
                   <AttachMoneyIcon />
                 </Avatar>
                 <Box>
-                  <Typography variant="h6">Saldo Restante</Typography>
-                  <Typography variant="h4">
+                  <Typography variant={titleVariant}>Saldo Restante</Typography>
+                  <Typography variant={amountVariant}>
                     $
                     {(
                       Number(presupuesto.sueldo) - totalGeneral
@@ -188,15 +208,15 @@ function Dashboard() {
         {/* Tarjetas por categoría */}
         {totalesPorCategoria.map((cat, index) => (
           <Grid item xs={12} sm={6} md={4} key={cat.id}>
-            <Card sx={{ boxShadow: 2 }}>
-              <CardContent>
+            <Card sx={{ ...cardStyle, boxShadow: 2 }}>
+              <CardContent sx={contentStyle}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                   <Avatar sx={{ bgcolor: COLORS[index % COLORS.length] }}>
                     <CategoryIcon />
                   </Avatar>
                   <Box>
-                    <Typography variant="h6">{cat.nombre}</Typography>
-                    <Typography variant="h5">
+                    <Typography variant={titleVariant}>{cat.nombre}</Typography>
+                    <Typography variant={amountVariant}>
                       ${cat.total.toLocaleString("es-CL")}
                     </Typography>
                   </Box>
