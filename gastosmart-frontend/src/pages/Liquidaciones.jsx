@@ -37,7 +37,7 @@ function Liquidaciones() {
 
   // 🔹 Subir nueva liquidación
   const subirLiquidacion = async () => {
-    if (!archivo || !mes || !anio) return alert("Completa mes, año y archivo");
+    if (!archivo || !mes || !anio) return alert("Selecciona mes, año y archivo");
 
     const formData = new FormData();
     formData.append("archivo", archivo);
@@ -50,7 +50,6 @@ function Liquidaciones() {
       });
       setArchivo(null);
       setMes("");
-      setAnio(new Date().getFullYear());
       cargarLiquidaciones(); // refrescar lista
     } catch (error) {
       console.error("❌ Error al subir liquidación:", error);
@@ -59,7 +58,7 @@ function Liquidaciones() {
 
   // 🔹 Descargar
   const descargarLiquidacion = (id) => {
-    window.open(`${process.env.REACT_APP_API_URL}/liquidaciones/${id}/descargar`);
+    window.open(`${API.defaults.baseURL}/liquidaciones/${id}/descargar`);
   };
 
   // Colores dinámicos por mes
@@ -76,27 +75,24 @@ function Liquidaciones() {
       </Typography>
 
       {/* Subir nueva */}
-      <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 4 }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 4, gap: 2 }}>
         <TextField
           select
           label="Mes"
           value={mes}
           onChange={(e) => setMes(e.target.value)}
-          sx={{ minWidth: 120 }}
+          sx={{ width: 120 }}
         >
-          {[
-            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-          ].map((nombre, index) => (
-            <MenuItem key={index + 1} value={index + 1}>
-              {nombre}
+          {Array.from({ length: 12 }, (_, i) => (
+            <MenuItem key={i + 1} value={i + 1}>
+              {i + 1}
             </MenuItem>
           ))}
         </TextField>
 
         <TextField
-          type="number"
           label="Año"
+          type="number"
           value={anio}
           onChange={(e) => setAnio(e.target.value)}
           sx={{ width: 100 }}
@@ -118,26 +114,30 @@ function Liquidaciones() {
       </Box>
 
       {/* Listado en tarjetas */}
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         {liquidaciones.map((liq) => {
           const color = coloresMes[(liq.mes - 1) % 12];
           return (
-            <Grid item xs={12} sm={6} md={4} key={liq.id}>
+            <Grid item xs={12} sm={6} md={3} key={liq.id}>
               <Card
                 sx={{
-                  boxShadow: 4,
-                  borderRadius: 3,
-                  transition: "0.3s",
-                  "&:hover": { transform: "translateY(-4px)", boxShadow: 6 },
+                  boxShadow: 3,
+                  borderRadius: 2,
+                  maxWidth: 220,
+                  mx: "auto",
+                  "&:hover": { transform: "translateY(-3px)", boxShadow: 5 },
                 }}
               >
                 <CardContent sx={{ textAlign: "center" }}>
-                  <PictureAsPdf sx={{ fontSize: 60, color: "red" }} />
+                  <PictureAsPdf sx={{ fontSize: 40, color: "red" }} />
                   <Typography variant="h6" sx={{ mt: 1, fontWeight: "bold", color }}>
                     {liq.mes}/{liq.anio}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Subida: {new Date(liq.creado_en).toLocaleDateString("es-CL")}
+                    Subida:{" "}
+                    {liq.creado_en
+                      ? new Date(liq.creado_en).toLocaleDateString("es-CL")
+                      : "Fecha no disponible"}
                   </Typography>
                 </CardContent>
                 <CardActions sx={{ justifyContent: "center" }}>
@@ -145,7 +145,7 @@ function Liquidaciones() {
                     color="primary"
                     onClick={() => descargarLiquidacion(liq.id)}
                   >
-                    <Download fontSize="large" />
+                    <Download fontSize="medium" />
                   </IconButton>
                 </CardActions>
               </Card>

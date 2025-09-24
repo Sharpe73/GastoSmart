@@ -21,9 +21,13 @@ const subirLiquidacion = async (req, res) => {
       [usuario_id, mes, anio, archivoBuffer]
     );
 
+    // Convertimos la fecha a ISO string
+    const liquidacion = result.rows[0];
+    liquidacion.created_at = new Date(liquidacion.created_at).toISOString();
+
     res.status(201).json({
       mensaje: "✅ Liquidación subida correctamente",
-      liquidacion: result.rows[0],
+      liquidacion,
     });
   } catch (error) {
     console.error("❌ Error al subir liquidación:", error);
@@ -44,9 +48,15 @@ const listarLiquidaciones = async (req, res) => {
       [usuario_id]
     );
 
+    // Convertimos todas las fechas a ISO
+    const liquidaciones = result.rows.map((row) => ({
+      ...row,
+      created_at: row.created_at ? new Date(row.created_at).toISOString() : null,
+    }));
+
     res.json({
       mensaje: "📋 Lista de liquidaciones obtenida correctamente",
-      liquidaciones: result.rows,
+      liquidaciones,
     });
   } catch (error) {
     console.error("❌ Error al listar liquidaciones:", error);
