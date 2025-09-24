@@ -321,7 +321,7 @@ function Gastos() {
             <Card
               sx={{
                 boxShadow: 3,
-                height: "100%", // 🔹 ocupa toda la altura disponible
+                height: "100%",
                 display: "flex",
                 flexDirection: "column",
               }}
@@ -335,7 +335,7 @@ function Gastos() {
                   📂 Categoría: {gasto.categoria_nombre}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-              📅 Fecha: {gasto.fecha}
+                  📅 Fecha: {new Date(gasto.fecha).toLocaleDateString("es-CL")}
                 </Typography>
                 {gasto.tiene_archivo && (
                   <IconButton
