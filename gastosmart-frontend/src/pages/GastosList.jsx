@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// src/pages/GastosList.jsx
+import React, { useState, useEffect } from "react";
 import {
   Grid,
   Card,
@@ -17,6 +18,13 @@ function GastosList({ gastos, onEdit, onDelete, onVerDocumento }) {
 
   // Calcular total de páginas
   const totalPages = Math.ceil(gastos.length / itemsPerPage);
+
+  // Resetear página cuando cambian los gastos
+  useEffect(() => {
+    setPage(1);
+    console.log("🔹 Total de gastos:", gastos.length);
+    console.log("🔹 Total de páginas:", totalPages);
+  }, [gastos, totalPages]);
 
   // Gastos que se muestran en la página actual
   const gastosPaginados = gastos.slice(

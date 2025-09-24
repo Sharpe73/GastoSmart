@@ -6,10 +6,6 @@ import {
   TextField,
   Button,
   Grid,
-  Card,
-  CardContent,
-  CardActions,
-  IconButton,
   MenuItem,
   Alert,
   Dialog,
@@ -17,10 +13,11 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import { Edit, Delete, PictureAsPdf, AttachFile } from "@mui/icons-material";
+import { AttachFile } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import API from "../api";
+import GastosList from "./GastosList";
 
 function Gastos() {
   const [gastos, setGastos] = useState([]);
@@ -314,55 +311,13 @@ function Gastos() {
         </Grid>
       </Grid>
 
-      {/* Lista de gastos */}
-      <Grid container spacing={3}>
-        {gastos.map((gasto) => (
-          <Grid item xs={12} sm={6} md={4} key={gasto.id}>
-            <Card
-              sx={{
-                boxShadow: 3,
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography variant="h6">{gasto.descripcion}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  💰 Monto: ${Number(gasto.monto).toLocaleString("es-CL")}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  📂 Categoría: {gasto.categoria_nombre}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  📅 Fecha: {new Date(gasto.fecha).toLocaleDateString("es-CL")}
-                </Typography>
-                {gasto.tiene_archivo && (
-                  <IconButton
-                    color="secondary"
-                    size="small"
-                    onClick={() => handleVerDocumento(gasto.id)}
-                    sx={{ mt: 1 }}
-                  >
-                    <PictureAsPdf fontSize="small" />
-                  </IconButton>
-                )}
-              </CardContent>
-              <CardActions>
-                <IconButton color="primary" onClick={() => handleOpenEdit(gasto)}>
-                  <Edit />
-                </IconButton>
-                <IconButton
-                  color="error"
-                  onClick={() => handleDeleteGasto(gasto.id)}
-                >
-                  <Delete />
-                </IconButton>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+      {/* Lista de gastos con paginación */}
+      <GastosList
+        gastos={gastos}
+        onEdit={handleOpenEdit}
+        onDelete={handleDeleteGasto}
+        onVerDocumento={handleVerDocumento}
+      />
 
       {/* Modal de edición */}
       <Dialog open={openEdit} onClose={handleCloseEdit}>
