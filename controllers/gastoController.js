@@ -59,16 +59,13 @@ async function crearGasto(req, res) {
       });
     }
 
-    // 🔹 4. Fecha sin desfase (solo YYYY-MM-DD)
-    const hoy = new Date().toISOString().split("T")[0];
-
-    // 🔹 5. Insertar el gasto
+    // 🔹 4. Insertar el gasto usando fecha local Chile
     const nuevoGasto = await pool.query(
-      `INSERT INTO gastos (usuario_id, descripcion, monto, categoria_id, archivo, fecha)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO gastos (usuario_id, descripcion, monto, categoria_id, archivo, fecha, creado_en)
+       VALUES ($1, $2, $3, $4, $5, (CURRENT_DATE AT TIME ZONE 'America/Santiago'), NOW())
        RETURNING id, descripcion, monto, categoria_id, fecha, creado_en,
                  (CASE WHEN archivo IS NOT NULL THEN true ELSE false END) AS tiene_archivo`,
-      [usuario_id, descripcion, monto, categoria_id || null, archivo, hoy]
+      [usuario_id, descripcion, monto, categoria_id || null, archivo]
     );
 
     res.status(201).json({
