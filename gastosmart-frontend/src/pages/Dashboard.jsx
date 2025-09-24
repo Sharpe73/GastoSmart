@@ -74,6 +74,19 @@ function Dashboard() {
     };
 
     fetchData();
+
+    // ⏱️ Actualizar indicadores cada 1 hora (3600000 ms)
+    const interval = setInterval(async () => {
+      try {
+        const indData = await obtenerIndicadores();
+        setIndicadores(indData);
+      } catch (err) {
+        console.error("❌ Error al refrescar indicadores:", err);
+      }
+    }, 3600000);
+
+    // 🧹 Limpiar intervalo al desmontar componente
+    return () => clearInterval(interval);
   }, [token]);
 
   if (loading) {
@@ -140,7 +153,10 @@ function Dashboard() {
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Typography variant="body2" sx={{ fontWeight: "bold", color: "#1976d2" }}>
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: "bold", color: "#1976d2" }}
+            >
               UF:
             </Typography>
             <Typography variant="body2">
@@ -149,7 +165,10 @@ function Dashboard() {
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Typography variant="body2" sx={{ fontWeight: "bold", color: "#388e3c" }}>
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: "bold", color: "#388e3c" }}
+            >
               Dólar:
             </Typography>
             <Typography variant="body2">
@@ -158,7 +177,10 @@ function Dashboard() {
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Typography variant="body2" sx={{ fontWeight: "bold", color: "#6a1b9a" }}>
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: "bold", color: "#6a1b9a" }}
+            >
               UTM:
             </Typography>
             <Typography variant="body2">
@@ -240,9 +262,9 @@ function Dashboard() {
                 <Box>
                   <Typography variant={titleVariant}>Saldo Restante</Typography>
                   <Typography variant={amountVariant}>
-                    ${(
-                      Number(presupuesto.sueldo) - totalGeneral
-                    ).toLocaleString("es-CL")}
+                    ${(Number(presupuesto.sueldo) - totalGeneral).toLocaleString(
+                      "es-CL"
+                    )}
                   </Typography>
                 </Box>
               </Box>
