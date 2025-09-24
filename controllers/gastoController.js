@@ -59,13 +59,25 @@ async function crearGasto(req, res) {
       });
     }
 
-    // 🔹 4. Insertar el gasto con fecha local Chile
+    // 🔹 4. Calcular fecha local Chile en Node
+    const hoyChile = new Date().toLocaleDateString("es-CL", {
+      timeZone: "America/Santiago",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+
+    // convertir de DD-MM-YYYY → YYYY-MM-DD
+    const [dia, mes, anio] = hoyChile.split("-");
+    const fechaFinal = `${anio}-${mes}-${dia}`;
+
+    // 🔹 5. Insertar el gasto con fecha local Chile
     const nuevoGasto = await pool.query(
       `INSERT INTO gastos (usuario_id, descripcion, monto, categoria_id, archivo, fecha, creado_en)
-       VALUES ($1, $2, $3, $4, $5, (NOW() AT TIME ZONE 'America/Santiago')::date, (NOW() AT TIME ZONE 'America/Santiago'))
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())
        RETURNING id, descripcion, monto, categoria_id, fecha, creado_en,
                  (CASE WHEN archivo IS NOT NULL THEN true ELSE false END) AS tiene_archivo`,
-      [usuario_id, descripcion, monto, categoria_id || null, archivo]
+      [usuario_id, descripcion, monto, categoria_id || null, archivo, fechaFinal]
     );
 
     res.status(201).json({
