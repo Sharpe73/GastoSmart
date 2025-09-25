@@ -2,19 +2,23 @@ const pool = require("../models/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const sendEmail = require("../utils/sendEmail"); // 👈 para enviar el correo con la clave temporal
+const sendEmail = require("../utils/sendEmail"); 
 
 // 🔹 Registrar usuario
 async function register(req, res) {
   try {
-    const { nombre, email, password } = req.body;
+    const { nombre, apellido, email, password } = req.body;
 
-    if (!nombre || !email || !password) {
-      return res.status(400).json({ mensaje: "Todos los campos son obligatorios" });
+    if (!nombre || !apellido || !email || !password) {
+      return res
+        .status(400)
+        .json({ mensaje: "Todos los campos son obligatorios" });
     }
 
     // Verificar si el email ya existe
-    const existe = await pool.query("SELECT * FROM usuarios WHERE email = $1", [email]);
+    const existe = await pool.query("SELECT * FROM usuarios WHERE email = $1", [
+      email,
+    ]);
     if (existe.rows.length > 0) {
       return res.status(400).json({ mensaje: "El email ya está registrado" });
     }
@@ -24,8 +28,8 @@ async function register(req, res) {
 
     // Insertar usuario
     const nuevoUsuario = await pool.query(
-      "INSERT INTO usuarios (nombre, email, password) VALUES ($1, $2, $3) RETURNING id, nombre, email, creado_en",
-      [nombre, email, hashedPassword]
+      "INSERT INTO usuarios (nombre, apellido, email, password) VALUES ($1, $2, $3, $4) RETURNING id, nombre, apellido, email, creado_en",
+      [nombre, apellido, email, hashedPassword]
     );
 
     res.status(201).json({
@@ -44,11 +48,15 @@ async function login(req, res) {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ mensaje: "Email y contraseña son obligatorios" });
+      return res
+        .status(400)
+        .json({ mensaje: "Email y contraseña son obligatorios" });
     }
 
     // Buscar usuario por email
-    const usuario = await pool.query("SELECT * FROM usuarios WHERE email = $1", [email]);
+    const usuario = await pool.query("SELECT * FROM usuarios WHERE email = $1", [
+      email,
+    ]);
     if (usuario.rows.length === 0) {
       return res.status(400).json({ mensaje: "Credenciales incorrectas" });
     }
@@ -70,9 +78,9 @@ async function login(req, res) {
       });
     }
 
-    // Generar token con nombre incluido
+    // Generar token con nombre y apellido incluidos
     const token = jwt.sign(
-      { id: user.id, email: user.email, nombre: user.nombre },
+      { id: user.id, email: user.email, nombre: user.nombre, apellido: user.apellido },
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
     );
@@ -83,6 +91,7 @@ async function login(req, res) {
       usuario: {
         id: user.id,
         nombre: user.nombre,
+        apellido: user.apellido,
         email: user.email,
       },
     });
@@ -102,9 +111,13 @@ async function solicitarClaveTemporal(req, res) {
     }
 
     // Buscar usuario
-    const usuario = await pool.query("SELECT * FROM usuarios WHERE email = $1", [email]);
+    const usuario = await pool.query("SELECT * FROM usuarios WHERE email = $1", [
+      email,
+    ]);
     if (usuario.rows.length === 0) {
-      return res.status(404).json({ mensaje: "No existe un usuario con ese correo" });
+      return res
+        .status(404)
+        .json({ mensaje: "No existe un usuario con ese correo" });
     }
 
     // Generar clave temporal (8 caracteres aleatorios)
@@ -137,26 +150,36 @@ async function resetPassword(req, res) {
     const { email, nuevaPassword } = req.body;
 
     if (!email || !nuevaPassword) {
-      return res.status(400).json({ mensaje: "Email y nueva contraseña son obligatorios" });
+      return res
+        .status(400)
+        .json({ mensaje: "Email y nueva contraseña son obligatorios" });
     }
 
     // Buscar usuario
-    const usuario = await pool.query("SELECT * FROM usuarios WHERE email = $1", [email]);
+    const usuario = await pool.query("SELECT * FROM usuarios WHERE email = $1", [
+      email,
+    ]);
     if (usuario.rows.length === 0) {
-      return res.status(404).json({ mensaje: "No existe un usuario con ese correo" });
+      return res
+        .status(404)
+        .json({ mensaje: "No existe un usuario con ese correo" });
     }
 
     const user = usuario.rows[0];
 
     // Verificar que el usuario tenga clave temporal activa
     if (!user.requiere_cambio) {
-      return res.status(400).json({ mensaje: "Este usuario no tiene una clave temporal activa" });
+      return res
+        .status(400)
+        .json({ mensaje: "Este usuario no tiene una clave temporal activa" });
     }
 
     // Evitar que use la misma clave temporal
     const esIgual = await bcrypt.compare(nuevaPassword, user.password);
     if (esIgual) {
-      return res.status(400).json({ mensaje: "La nueva contraseña no puede ser igual a la temporal" });
+      return res.status(400).json({
+        mensaje: "La nueva contraseña no puede ser igual a la temporal",
+      });
     }
 
     // Hashear y actualizar contraseña definitiva
@@ -166,7 +189,9 @@ async function resetPassword(req, res) {
       [hashed, email]
     );
 
-    res.json({ mensaje: "Contraseña actualizada correctamente, ahora puedes iniciar sesión." });
+    res.json({
+      mensaje: "Contraseña actualizada correctamente, ahora puedes iniciar sesión.",
+    });
   } catch (error) {
     console.error("❌ Error en resetPassword:", error);
     res.status(500).json({ mensaje: "Error al cambiar contraseña" });

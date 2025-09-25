@@ -1,6 +1,6 @@
+// src/pages/Register.jsx
 import React, { useState } from "react";
 import {
-  Container,
   TextField,
   Button,
   Typography,
@@ -18,6 +18,7 @@ import API from "../api";
 function Register() {
   const [formData, setFormData] = useState({
     nombre: "",
+    apellido: "",
     email: "",
     password: "",
   });
@@ -86,10 +87,18 @@ function Register() {
             sx={{ display: "flex", flexDirection: "column", gap: 2 }}
           >
             <TextField
-              label="Nombre completo"
+              label="Nombre"
               name="nombre"
               fullWidth
               value={formData.nombre}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              label="Apellido"
+              name="apellido"
+              fullWidth
+              value={formData.apellido}
               onChange={handleChange}
               required
             />
