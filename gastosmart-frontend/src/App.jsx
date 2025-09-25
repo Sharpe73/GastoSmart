@@ -18,7 +18,7 @@ import Historicos from "./pages/Historicos";
 import HistoricoDetalle from "./pages/HistoricoDetalle";
 import Liquidaciones from "./pages/Liquidaciones"; // 👈 NUEVO
 import CambiarPassword from "./pages/CambiarPassword"; // 👈 NUEVO
-import MetasAhorro from "./pages/MetasAhorro"; // 👈 NUEVO
+// import MetasAhorro from "./pages/MetasAhorro"; // ❌ Eliminado
 
 function App() {
   const handleLogout = () => {
@@ -145,7 +145,7 @@ function App() {
           }
         />
 
-        {/* Metas de Ahorro (PROTEGIDO) */}
+        {/* 🔹 Ruta eliminada:
         <Route
           path="/metas"
           element={
@@ -155,7 +155,7 @@ function App() {
               </AppLayout>
             </ProtectedRoute>
           }
-        />
+        /> */}
       </Routes>
     </Router>
   );
