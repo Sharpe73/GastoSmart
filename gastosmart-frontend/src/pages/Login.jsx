@@ -10,6 +10,10 @@ import {
   CardContent,
   IconButton,
   Link,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { AccountBalanceWallet } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -19,18 +23,45 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [mensaje, setMensaje] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+
   const navigate = useNavigate();
 
+  // 🔹 Login normal o con clave temporal
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setMensaje("");
 
     try {
       const res = await API.post("/auth/login", { email, password });
+
+      // ⚡ Si requiere cambio de contraseña
+      if (res.data.requiereCambio) {
+        navigate("/cambiar-password", { state: { email: res.data.email } });
+        return;
+      }
+
+      // Login normal
       localStorage.setItem("token", res.data.token);
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "❌ Error al iniciar sesión");
+      setError(err.response?.data?.mensaje || "❌ Error al iniciar sesión");
+    }
+  };
+
+  // 🔹 Recuperar contraseña
+  const handleRecover = async () => {
+    setError("");
+    setMensaje("");
+    try {
+      const res = await API.post("/auth/olvidar-password", { email: recoveryEmail });
+      setMensaje(res.data.mensaje);
+      setOpenDialog(false);
+    } catch (err) {
+      setError(err.response?.data?.mensaje || "❌ No se pudo enviar la clave temporal");
     }
   };
 
@@ -63,6 +94,11 @@ function Login() {
               {error}
             </Alert>
           )}
+          {mensaje && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {mensaje}
+            </Alert>
+          )}
 
           <Box
             component="form"
@@ -91,12 +127,39 @@ function Login() {
           </Box>
 
           <Box textAlign="center" mt={2}>
-            <Link href="#" underline="hover" sx={{ fontSize: "0.9rem" }}>
+            <Link
+              component="button"
+              underline="hover"
+              sx={{ fontSize: "0.9rem" }}
+              onClick={() => setOpenDialog(true)}
+            >
               ¿Olvidaste tu contraseña?
             </Link>
           </Box>
         </CardContent>
       </Card>
+
+      {/* 🔹 Dialog para recuperar contraseña */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Recuperar contraseña</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Correo registrado"
+            type="email"
+            fullWidth
+            value={recoveryEmail}
+            onChange={(e) => setRecoveryEmail(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>
+          <Button onClick={handleRecover} variant="contained">
+            Enviar clave
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

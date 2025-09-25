@@ -17,6 +17,7 @@ import Presupuesto from "./pages/Presupuesto";
 import Historicos from "./pages/Historicos";
 import HistoricoDetalle from "./pages/HistoricoDetalle";
 import Liquidaciones from "./pages/Liquidaciones"; // 👈 NUEVO
+import CambiarPassword from "./pages/CambiarPassword"; // 👈 NUEVO
 
 function App() {
   const handleLogout = () => {
@@ -30,9 +31,10 @@ function App() {
         {/* Landing page sin layout */}
         <Route path="/" element={<LandingPage />} />
 
-        {/* Login y Register sin sidebar */}
+        {/* Login, Register y CambiarPassword sin sidebar */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/cambiar-password" element={<CambiarPassword />} />
 
         {/* Dashboard con Sidebar (PROTEGIDO) */}
         <Route

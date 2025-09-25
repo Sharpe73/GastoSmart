@@ -1,6 +1,8 @@
 const pool = require("../models/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail"); // 👈 para enviar el correo con la clave temporal
 
 // 🔹 Registrar usuario
 async function register(req, res) {
@@ -59,11 +61,20 @@ async function login(req, res) {
       return res.status(400).json({ mensaje: "Credenciales incorrectas" });
     }
 
+    // ⚡ Si requiere cambiar la contraseña (clave temporal activa)
+    if (user.requiere_cambio) {
+      return res.json({
+        mensaje: "Debes cambiar tu contraseña antes de continuar",
+        requiereCambio: true,
+        email: user.email, // lo enviamos al frontend para identificar al usuario
+      });
+    }
+
     // Generar token con nombre incluido
     const token = jwt.sign(
-      { id: user.id, email: user.email, nombre: user.nombre }, // 👈 ahora incluye el nombre
-      process.env.JWT_SECRET,                                  // clave secreta
-      { expiresIn: "2h" }                                      // tiempo de expiración
+      { id: user.id, email: user.email, nombre: user.nombre },
+      process.env.JWT_SECRET,
+      { expiresIn: "2h" }
     );
 
     res.json({
@@ -81,4 +92,85 @@ async function login(req, res) {
   }
 }
 
-module.exports = { register, login };
+// 🔹 Solicitar clave temporal para recuperar contraseña
+async function solicitarClaveTemporal(req, res) {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ mensaje: "El correo es obligatorio" });
+    }
+
+    // Buscar usuario
+    const usuario = await pool.query("SELECT * FROM usuarios WHERE email = $1", [email]);
+    if (usuario.rows.length === 0) {
+      return res.status(404).json({ mensaje: "No existe un usuario con ese correo" });
+    }
+
+    // Generar clave temporal (8 caracteres aleatorios)
+    const claveTemporal = crypto.randomBytes(4).toString("hex");
+    const hashed = await bcrypt.hash(claveTemporal, 10);
+
+    // Guardar clave temporal en la BD y marcar que requiere cambio
+    await pool.query(
+      "UPDATE usuarios SET password = $1, requiere_cambio = true WHERE email = $2",
+      [hashed, email]
+    );
+
+    // Enviar correo con la clave temporal
+    await sendEmail(
+      email,
+      "Recuperación de contraseña - GastoSmart",
+      `Tu clave temporal es: ${claveTemporal}. Debes usarla para iniciar sesión y luego cambiarla.`
+    );
+
+    res.json({ mensaje: "Clave temporal enviada a tu correo" });
+  } catch (error) {
+    console.error("❌ Error en solicitarClaveTemporal:", error);
+    res.status(500).json({ mensaje: "Error al generar clave temporal" });
+  }
+}
+
+// 🔹 Cambiar contraseña después de clave temporal
+async function resetPassword(req, res) {
+  try {
+    const { email, nuevaPassword } = req.body;
+
+    if (!email || !nuevaPassword) {
+      return res.status(400).json({ mensaje: "Email y nueva contraseña son obligatorios" });
+    }
+
+    // Buscar usuario
+    const usuario = await pool.query("SELECT * FROM usuarios WHERE email = $1", [email]);
+    if (usuario.rows.length === 0) {
+      return res.status(404).json({ mensaje: "No existe un usuario con ese correo" });
+    }
+
+    const user = usuario.rows[0];
+
+    // Verificar que el usuario tenga clave temporal activa
+    if (!user.requiere_cambio) {
+      return res.status(400).json({ mensaje: "Este usuario no tiene una clave temporal activa" });
+    }
+
+    // Evitar que use la misma clave temporal
+    const esIgual = await bcrypt.compare(nuevaPassword, user.password);
+    if (esIgual) {
+      return res.status(400).json({ mensaje: "La nueva contraseña no puede ser igual a la temporal" });
+    }
+
+    // Hashear y actualizar contraseña definitiva
+    const hashed = await bcrypt.hash(nuevaPassword, 10);
+    await pool.query(
+      "UPDATE usuarios SET password = $1, requiere_cambio = false WHERE email = $2",
+      [hashed, email]
+    );
+
+    res.json({ mensaje: "Contraseña actualizada correctamente, ahora puedes iniciar sesión." });
+  } catch (error) {
+    console.error("❌ Error en resetPassword:", error);
+    res.status(500).json({ mensaje: "Error al cambiar contraseña" });
+  }
+}
+
+module.exports = { register, login, solicitarClaveTemporal, resetPassword };
