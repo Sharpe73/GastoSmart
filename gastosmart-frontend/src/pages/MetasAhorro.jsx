@@ -1,3 +1,4 @@
+// src/pages/MetasAhorro.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -117,33 +118,34 @@ function MetasAhorro() {
     }
   };
 
-  // 🔹 Aporte/retiro
+  // 🔹 Registrar aporte/retiro
   const actualizarAhorro = async (id, monto) => {
     if (!monto || monto === 0) return;
     try {
-      const res = await API.put(
-        `/metas/${id}`,
-        { monto },
+      // ✅ ahora se usa POST /aportes
+      await API.post(
+        "/aportes",
+        { meta_id: id, monto },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const meta = res.data;
-      const porcentaje = Math.min(
-        100,
-        Math.round((meta.ahorrado / meta.objetivo) * 100)
-      );
-      const estado = porcentaje >= 100 ? "Completada" : "En progreso";
-
-      setMetas(
-        metas.map((m) =>
-          m.id === id ? { ...meta, porcentaje, estado } : m
-        )
-      );
-      setMontoInputs({ ...montoInputs, [id]: 0 });
-
+      // refrescar aportes y metas
       fetchAportes(id);
+      const resMeta = await API.get("/metas", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const metasConCalculo = resMeta.data.map((m) => {
+        const porcentaje = Math.min(
+          100,
+          Math.round((m.ahorrado / m.objetivo) * 100)
+        );
+        const estado = porcentaje >= 100 ? "Completada" : "En progreso";
+        return { ...m, porcentaje, estado };
+      });
+      setMetas(metasConCalculo);
+      setMontoInputs({ ...montoInputs, [id]: 0 });
     } catch (err) {
-      console.error("❌ Error al actualizar ahorro:", err);
+      console.error("❌ Error al registrar aporte:", err);
     }
   };
 
