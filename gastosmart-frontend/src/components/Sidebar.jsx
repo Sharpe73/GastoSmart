@@ -27,7 +27,8 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet"; // Presupuesto
 import HistoryIcon from "@mui/icons-material/History"; // Históricos
-import DescriptionIcon from "@mui/icons-material/Description"; // 👈 NUEVO: Liquidaciones
+import DescriptionIcon from "@mui/icons-material/Description"; // Liquidaciones
+import SavingsIcon from "@mui/icons-material/Savings"; // Metas de Ahorro
 
 // Logo
 import logo from "../assets/gasto.png";
@@ -164,6 +165,23 @@ export default function Sidebar({ open, onClose, onLogout }) {
           <ListItemText primary="Presupuesto" />
         </ListItemButton>
 
+        {/* Metas de Ahorro */}
+        <ListItemButton
+          component={RouterLink}
+          to="/metas"
+          selected={location.pathname.startsWith("/metas")}
+          onClick={!isDesktop ? onClose : undefined}
+          sx={{
+            "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
+            "&:hover": { bgcolor: "primary.light", color: "white" },
+          }}
+        >
+          <ListItemIcon>
+            <SavingsIcon />
+          </ListItemIcon>
+          <ListItemText primary="Metas de Ahorro" />
+        </ListItemButton>
+
         {/* Reportes */}
         <ListItemButton
           component={RouterLink}
@@ -198,7 +216,7 @@ export default function Sidebar({ open, onClose, onLogout }) {
           <ListItemText primary="Históricos" />
         </ListItemButton>
 
-        {/* Liquidaciones 👈 NUEVO */}
+        {/* Liquidaciones */}
         <ListItemButton
           component={RouterLink}
           to="/liquidaciones"

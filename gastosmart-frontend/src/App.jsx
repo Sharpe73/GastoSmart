@@ -18,6 +18,7 @@ import Historicos from "./pages/Historicos";
 import HistoricoDetalle from "./pages/HistoricoDetalle";
 import Liquidaciones from "./pages/Liquidaciones"; // 👈 NUEVO
 import CambiarPassword from "./pages/CambiarPassword"; // 👈 NUEVO
+import MetasAhorro from "./pages/MetasAhorro"; // 👈 NUEVO
 
 function App() {
   const handleLogout = () => {
@@ -139,6 +140,18 @@ function App() {
             <ProtectedRoute>
               <AppLayout onLogout={handleLogout}>
                 <Liquidaciones />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Metas de Ahorro (PROTEGIDO) */}
+        <Route
+          path="/metas"
+          element={
+            <ProtectedRoute>
+              <AppLayout onLogout={handleLogout}>
+                <MetasAhorro />
               </AppLayout>
             </ProtectedRoute>
           }
