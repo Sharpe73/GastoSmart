@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import API from "../api";
-import { obtenerIndicadores } from "../api/indicadores";
+import { obtenerIndicadores } from "../api/indicadores"; // 👈 Importar función externa
 
 // Íconos de MUI
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
@@ -26,7 +26,7 @@ function Dashboard() {
   const [gastos, setGastos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [presupuesto, setPresupuesto] = useState(null);
-  const [indicadores, setIndicadores] = useState(null);
+  const [indicadores, setIndicadores] = useState(null); 
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
@@ -113,7 +113,7 @@ function Dashboard() {
 
   return (
     <Box>
-      {/* 🔹 Encabezado con saludo + indicadores */}
+      {/* 🔹 Encabezado con título + indicadores */}
       <Box
         sx={{
           display: "flex",
@@ -121,47 +121,12 @@ function Dashboard() {
           justifyContent: "space-between",
           alignItems: isMobile ? "flex-start" : "center",
           mb: 3,
-          gap: 2,
         }}
       >
-        {/* ✅ Encabezado estilizado */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Avatar
-            sx={{
-              bgcolor: "primary.main",
-              color: "white",
-              fontWeight: "bold",
-              width: 56,
-              height: 56,
-              fontSize: "1.2rem",
-            }}
-          >
-            {user?.nombre?.charAt(0)}
-            {user?.apellido?.charAt(0)}
-          </Avatar>
+        <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
+          Bienvenido {user ? `${user.nombre} ${user.apellido}` : "al Dashboard de GastoSmart"}
+        </Typography>
 
-          <Box>
-            <Typography
-              variant="subtitle1"
-              sx={{ color: "text.secondary", fontWeight: 500 }}
-            >
-              Bienvenido
-            </Typography>
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: "800",
-                background: "linear-gradient(90deg, #1976d2, #42a5f5)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              {user ? `${user.nombre} ${user.apellido}` : "Usuario"}
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* ✅ Indicadores externos */}
         {indicadores && (
           <Box
             sx={{
@@ -212,8 +177,8 @@ function Dashboard() {
           "& .MuiAlert-message": { width: "100%" },
         }}
       >
-        <strong>{user ? `${user.nombre} ${user.apellido}` : "Usuario"}</strong>, este es tu
-        resumen financiero actualizado. Actualmente tienes un total de{" "}
+        <strong>{user ? `${user.nombre} ${user.apellido}` : "Usuario"}</strong>, este es tu resumen financiero actualizado. 
+        Actualmente tienes un total de{" "}
         <strong>${totalGeneral.toLocaleString("es-CL")}</strong> en gastos
         distribuidos en <strong>{categorias.length}</strong> categorías.
         <br />
