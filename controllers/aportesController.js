@@ -10,9 +10,9 @@ async function crearAporte(req, res) {
       return res.status(400).json({ mensaje: "Meta y monto son obligatorios" });
     }
 
-    // Guardar aporte en la tabla
+    // Guardar aporte en la tabla con fecha actual
     const nuevoAporte = await pool.query(
-      "INSERT INTO aportes (meta_id, monto) VALUES ($1, $2) RETURNING *",
+      "INSERT INTO aportes (meta_id, monto, fecha) VALUES ($1, $2, NOW()) RETURNING *",
       [meta_id, monto]
     );
 
