@@ -26,7 +26,7 @@ function Dashboard() {
   const [gastos, setGastos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [presupuesto, setPresupuesto] = useState(null);
-  const [indicadores, setIndicadores] = useState(null); // 👈 Estado para indicadores
+  const [indicadores, setIndicadores] = useState(null); 
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
@@ -45,25 +45,21 @@ function Dashboard() {
 
     const fetchData = async () => {
       try {
-        // ✅ Presupuesto
         const preRes = await API.get("/presupuesto", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setPresupuesto(preRes.data);
 
-        // ✅ Gastos
         const gastoRes = await API.get("/gastos", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setGastos(gastoRes.data.gastos || gastoRes.data);
 
-        // ✅ Categorías
         const catRes = await API.get("/categorias", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCategorias(catRes.data.categorias || catRes.data);
 
-        // ✅ Indicadores externos
         const indData = await obtenerIndicadores();
         setIndicadores(indData);
       } catch (err) {
@@ -75,7 +71,6 @@ function Dashboard() {
 
     fetchData();
 
-    // ⏱️ Actualizar indicadores cada 1 hora (3600000 ms)
     const interval = setInterval(async () => {
       try {
         const indData = await obtenerIndicadores();
@@ -85,7 +80,6 @@ function Dashboard() {
       }
     }, 3600000);
 
-    // 🧹 Limpiar intervalo al desmontar componente
     return () => clearInterval(interval);
   }, [token]);
 
@@ -110,28 +104,10 @@ function Dashboard() {
     return { ...cat, total: totalCat };
   });
 
-  // 🔹 Colores para las tarjetas
-  const COLORS = [
-    "#0088FE",
-    "#00C49F",
-    "#FFBB28",
-    "#FF8042",
-    "#AB47BC",
-    "#FF5252",
-  ];
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AB47BC", "#FF5252"];
 
-  // 🔹 Estilo base de tarjeta
-  const cardStyle = {
-    boxShadow: 4,
-    minHeight: isMobile ? 90 : 110,
-  };
-
-  // 🔹 Estilo de contenido
-  const contentStyle = {
-    p: isMobile ? 1 : 2,
-  };
-
-  // 🔹 Tipografías responsivas
+  const cardStyle = { boxShadow: 4, minHeight: isMobile ? 90 : 110 };
+  const contentStyle = { p: isMobile ? 1 : 2 };
   const titleVariant = isMobile ? "caption" : "subtitle1";
   const amountVariant = isMobile ? "body1" : "h6";
 
@@ -148,7 +124,7 @@ function Dashboard() {
         }}
       >
         <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
-          Bienvenido {user?.nombre || "al Dashboard de GastoSmart"}
+          Bienvenido {user ? `${user.nombre} ${user.apellido}` : "al Dashboard de GastoSmart"}
         </Typography>
 
         {indicadores && (
@@ -162,10 +138,7 @@ function Dashboard() {
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: "bold", color: "#1976d2" }}
-              >
+              <Typography variant="body2" sx={{ fontWeight: "bold", color: "#1976d2" }}>
                 UF:
               </Typography>
               <Typography variant="body2">
@@ -174,10 +147,7 @@ function Dashboard() {
             </Box>
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: "bold", color: "#388e3c" }}
-              >
+              <Typography variant="body2" sx={{ fontWeight: "bold", color: "#388e3c" }}>
                 Dólar:
               </Typography>
               <Typography variant="body2">
@@ -186,10 +156,7 @@ function Dashboard() {
             </Box>
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: "bold", color: "#6a1b9a" }}
-              >
+              <Typography variant="body2" sx={{ fontWeight: "bold", color: "#6a1b9a" }}>
                 UTM:
               </Typography>
               <Typography variant="body2">
@@ -210,8 +177,8 @@ function Dashboard() {
           "& .MuiAlert-message": { width: "100%" },
         }}
       >
-        <strong>{user?.nombre}</strong>, este es tu resumen financiero
-        actualizado. Actualmente tienes un total de{" "}
+        <strong>{user ? `${user.nombre} ${user.apellido}` : "Usuario"}</strong>, este es tu resumen financiero actualizado. 
+        Actualmente tienes un total de{" "}
         <strong>${totalGeneral.toLocaleString("es-CL")}</strong> en gastos
         distribuidos en <strong>{categorias.length}</strong> categorías.
         <br />
@@ -272,9 +239,7 @@ function Dashboard() {
                 <Box>
                   <Typography variant={titleVariant}>Saldo Restante</Typography>
                   <Typography variant={amountVariant}>
-                    ${(Number(presupuesto.sueldo) - totalGeneral).toLocaleString(
-                      "es-CL"
-                    )}
+                    ${(Number(presupuesto.sueldo) - totalGeneral).toLocaleString("es-CL")}
                   </Typography>
                 </Box>
               </Box>

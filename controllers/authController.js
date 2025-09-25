@@ -74,13 +74,18 @@ async function login(req, res) {
       return res.json({
         mensaje: "Debes cambiar tu contraseña antes de continuar",
         requiereCambio: true,
-        email: user.email, // lo enviamos al frontend para identificar al usuario
+        email: user.email,
       });
     }
 
     // Generar token con nombre y apellido incluidos
     const token = jwt.sign(
-      { id: user.id, email: user.email, nombre: user.nombre, apellido: user.apellido },
+      { 
+        id: user.id, 
+        email: user.email, 
+        nombre: user.nombre, 
+        apellido: user.apellido 
+      },
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
     );
