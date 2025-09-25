@@ -113,7 +113,7 @@ function Dashboard() {
 
   return (
     <Box>
-      {/* 🔹 Encabezado con tarjeta de saludo + indicadores */}
+      {/* 🔹 Encabezado con saludo + indicadores */}
       <Box
         sx={{
           display: "flex",
@@ -124,19 +124,8 @@ function Dashboard() {
           gap: 2,
         }}
       >
-        {/* ✅ Tarjeta de bienvenida estilizada */}
-        <Card
-          sx={{
-            p: 2,
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-            boxShadow: 4,
-            borderRadius: 2,
-            background: "linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%)",
-            flexGrow: 1,
-          }}
-        >
+        {/* ✅ Encabezado estilizado */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Avatar
             sx={{
               bgcolor: "primary.main",
@@ -159,7 +148,7 @@ function Dashboard() {
               Bienvenido
             </Typography>
             <Typography
-              variant="h5"
+              variant="h4"
               sx={{
                 fontWeight: "800",
                 background: "linear-gradient(90deg, #1976d2, #42a5f5)",
@@ -170,7 +159,7 @@ function Dashboard() {
               {user ? `${user.nombre} ${user.apellido}` : "Usuario"}
             </Typography>
           </Box>
-        </Card>
+        </Box>
 
         {/* ✅ Indicadores externos */}
         {indicadores && (
