@@ -4,7 +4,7 @@ const SibApiV3Sdk = require("sib-api-v3-sdk");
 // 🔹 Configuración cliente Brevo
 const client = SibApiV3Sdk.ApiClient.instance;
 const apiKey = client.authentications["api-key"];
-apiKey.apiKey = process.env.BREVO_API_KEY; // 👈 Usa la API Key desde Railway
+apiKey.apiKey = process.env.BREVO_API_KEY; 
 
 // Instancia de la API de emails transaccionales
 const tranEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
