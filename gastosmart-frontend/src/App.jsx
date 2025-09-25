@@ -16,9 +16,9 @@ import Register from "./pages/Register";
 import Presupuesto from "./pages/Presupuesto";
 import Historicos from "./pages/Historicos";
 import HistoricoDetalle from "./pages/HistoricoDetalle";
-import Liquidaciones from "./pages/Liquidaciones"; // 👈 NUEVO
-import CambiarPassword from "./pages/CambiarPassword"; // 👈 NUEVO
-import MetasAhorro from "./pages/MetasAhorro.jsx";
+import Liquidaciones from "./pages/Liquidaciones";
+import CambiarPassword from "./pages/CambiarPassword";
+import MetasAhorro from "./pages/MetasAhorro";
 
 function App() {
   const handleLogout = () => {
