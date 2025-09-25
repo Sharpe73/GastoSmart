@@ -39,7 +39,7 @@ function MetasAhorro() {
   const token = localStorage.getItem("token");
   const user = token ? jwtDecode(token) : null;
 
-  // Cargar metas
+  // 🔹 Cargar metas
   useEffect(() => {
     const fetchMetas = async () => {
       try {
@@ -71,7 +71,7 @@ function MetasAhorro() {
     if (token) fetchMetas();
   }, [token]);
 
-  // Cargar aportes
+  // 🔹 Cargar aportes de una meta
   const fetchAportes = async (metaId) => {
     try {
       const res = await API.get(`/aportes/${metaId}`, {
@@ -83,14 +83,14 @@ function MetasAhorro() {
     }
   };
 
-  // Modal crear meta
+  // 🔹 Modal crear meta
   const handleOpen = () => setOpenDialog(true);
   const handleClose = () => {
     setOpenDialog(false);
     setNuevaMeta({ nombre: "", objetivo: "" });
   };
 
-  // Guardar meta
+  // 🔹 Guardar meta
   const handleGuardarMeta = async () => {
     if (!nuevaMeta.nombre || !nuevaMeta.objetivo) return;
     try {
@@ -116,37 +116,38 @@ function MetasAhorro() {
     }
   };
 
-  // Aporte o retiro
+  // 🔹 Aporte o retiro (guardar en tabla `aportes`)
   const actualizarAhorro = async (id, monto) => {
     if (!monto || monto === 0) return;
     try {
-      const res = await API.put(
-        `/metas/${id}`,
-        { monto },
+      // 👉 ahora se usa la ruta de aportes
+      await API.post(
+        "/aportes",
+        { meta_id: id, monto },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const meta = res.data;
-      const porcentaje = Math.min(
-        100,
-        Math.round((meta.ahorrado / meta.objetivo) * 100)
-      );
-      const estado = porcentaje >= 100 ? "Completada" : "En progreso";
-
-      setMetas(
-        metas.map((m) =>
-          m.id === id ? { ...meta, porcentaje, estado } : m
-        )
-      );
-      setMontoInputs({ ...montoInputs, [id]: 0 });
-
+      // Refrescar aportes y metas
       fetchAportes(id);
+      const resMeta = await API.get("/metas", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const metasConCalculo = resMeta.data.map((m) => {
+        const porcentaje = Math.min(
+          100,
+          Math.round((m.ahorrado / m.objetivo) * 100)
+        );
+        const estado = porcentaje >= 100 ? "Completada" : "En progreso";
+        return { ...m, porcentaje, estado };
+      });
+      setMetas(metasConCalculo);
+      setMontoInputs({ ...montoInputs, [id]: 0 });
     } catch (err) {
-      console.error("❌ Error al actualizar ahorro:", err);
+      console.error("❌ Error al registrar aporte:", err);
     }
   };
 
-  // Eliminar meta
+  // 🔹 Eliminar meta
   const eliminarMeta = async (id) => {
     try {
       await API.delete(`/metas/${id}`, {
@@ -165,13 +166,13 @@ function MetasAhorro() {
     }
   };
 
-  // Confirmar eliminar aporte
+  // 🔹 Preparar confirmación de eliminación de aporte
   const confirmarEliminarAporte = (aporteId, metaId) => {
     setAporteAEliminar({ id: aporteId, metaId });
     setOpenConfirm(true);
   };
 
-  // Eliminar aporte individual
+  // 🔹 Eliminar aporte individual
   const eliminarAporte = async () => {
     try {
       if (!aporteAEliminar) return;
@@ -275,7 +276,7 @@ function MetasAhorro() {
                     {meta.porcentaje}% — {meta.estado}
                   </Typography>
 
-                  {/* Lista de aportes */}
+                  {/* 🔹 Lista de aportes */}
                   <Divider sx={{ my: 2 }} />
                   <Typography variant="subtitle2">
                     Historial de aportes:
@@ -347,7 +348,7 @@ function MetasAhorro() {
         )}
       </Grid>
 
-      {/* Modal nueva meta */}
+      {/* 🔹 Modal nueva meta */}
       <Dialog open={openDialog} onClose={handleClose}>
         <DialogTitle>Nueva Meta de Ahorro</DialogTitle>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -377,7 +378,7 @@ function MetasAhorro() {
         </DialogActions>
       </Dialog>
 
-      {/* Modal confirmación de borrado */}
+      {/* 🔹 Modal confirmación de borrado de aporte */}
       <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle>Confirmar eliminación</DialogTitle>
         <DialogContent>
