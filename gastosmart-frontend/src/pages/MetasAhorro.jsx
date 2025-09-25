@@ -26,6 +26,8 @@ function MetasAhorro() {
   const [metas, setMetas] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [nuevaMeta, setNuevaMeta] = useState({ nombre: "", objetivo: "" });
+  const [montoInput, setMontoInput] = useState(0); // 👈 monto libre para aportes/retiros
+
   const token = localStorage.getItem("token");
   const user = token ? jwtDecode(token) : null;
 
@@ -36,7 +38,18 @@ function MetasAhorro() {
         const res = await API.get("/metas", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setMetas(res.data);
+
+        // Si el backend no manda porcentaje/estado, lo calculamos acá
+        const metasConCalculo = res.data.map((m) => {
+          const porcentaje = Math.min(
+            100,
+            Math.round((m.ahorrado / m.objetivo) * 100)
+          );
+          const estado = porcentaje >= 100 ? "Completada" : "En progreso";
+          return { ...m, porcentaje, estado };
+        });
+
+        setMetas(metasConCalculo);
       } catch (err) {
         console.error("❌ Error cargando metas:", err);
       }
@@ -44,7 +57,7 @@ function MetasAhorro() {
     if (token) fetchMetas();
   }, [token]);
 
-  // 🔹 Abrir modal
+  // 🔹 Abrir / cerrar modal
   const handleOpen = () => setOpenDialog(true);
   const handleClose = () => {
     setOpenDialog(false);
@@ -60,7 +73,15 @@ function MetasAhorro() {
         { nombre: nuevaMeta.nombre, objetivo: nuevaMeta.objetivo },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setMetas([res.data, ...metas]);
+
+      const meta = res.data;
+      const porcentaje = Math.min(
+        100,
+        Math.round((meta.ahorrado / meta.objetivo) * 100)
+      );
+      const estado = porcentaje >= 100 ? "Completada" : "En progreso";
+
+      setMetas([{ ...meta, porcentaje, estado }, ...metas]);
       handleClose();
     } catch (err) {
       console.error("❌ Error al guardar meta:", err);
@@ -69,13 +90,23 @@ function MetasAhorro() {
 
   // 🔹 Registrar aporte o retiro en backend
   const actualizarAhorro = async (id, monto) => {
+    if (!monto || monto === 0) return; // evitar valores vacíos
     try {
       const res = await API.put(
         `/metas/${id}`,
         { monto },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setMetas(metas.map((m) => (m.id === id ? res.data : m)));
+
+      const meta = res.data;
+      const porcentaje = Math.min(
+        100,
+        Math.round((meta.ahorrado / meta.objetivo) * 100)
+      );
+      const estado = porcentaje >= 100 ? "Completada" : "En progreso";
+
+      setMetas(metas.map((m) => (m.id === id ? { ...meta, porcentaje, estado } : m)));
+      setMontoInput(0); // reset input después de usarlo
     } catch (err) {
       console.error("❌ Error al actualizar ahorro:", err);
     }
@@ -167,18 +198,29 @@ function MetasAhorro() {
                 </CardContent>
 
                 <CardActions sx={{ justifyContent: "space-between" }}>
-                  <IconButton
-                    color="success"
-                    onClick={() => actualizarAhorro(meta.id, 10000)}
-                  >
-                    <AddCircleIcon />
-                  </IconButton>
-                  <IconButton
-                    color="error"
-                    onClick={() => actualizarAhorro(meta.id, -10000)}
-                  >
-                    <RemoveCircleIcon />
-                  </IconButton>
+                  {/* Campo monto libre */}
+                  <TextField
+                    type="number"
+                    size="small"
+                    label="Monto"
+                    value={montoInput}
+                    onChange={(e) => setMontoInput(Number(e.target.value))}
+                    sx={{ width: "120px" }}
+                  />
+                  <Box>
+                    <IconButton
+                      color="success"
+                      onClick={() => actualizarAhorro(meta.id, montoInput)}
+                    >
+                      <AddCircleIcon />
+                    </IconButton>
+                    <IconButton
+                      color="error"
+                      onClick={() => actualizarAhorro(meta.id, -montoInput)}
+                    >
+                      <RemoveCircleIcon />
+                    </IconButton>
+                  </Box>
                   <Button color="error" onClick={() => eliminarMeta(meta.id)}>
                     Eliminar
                   </Button>
