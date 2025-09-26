@@ -12,6 +12,7 @@ async function getUserById(req, res) {
         nombre, 
         apellido, 
         email, 
+        estado,       -- 👈 nuevo campo
         creado_en, 
         ultimo_login, 
         verificado

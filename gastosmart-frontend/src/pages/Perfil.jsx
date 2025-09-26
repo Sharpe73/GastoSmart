@@ -10,6 +10,7 @@ import {
   Avatar,
   Stack,
   Alert,
+  Chip,
 } from "@mui/material";
 import API from "../api";
 import { jwtDecode } from "jwt-decode";
@@ -17,6 +18,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import EmailIcon from "@mui/icons-material/Email";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import CircleIcon from "@mui/icons-material/Circle";
 
 export default function Perfil() {
   const [usuario, setUsuario] = useState(null);
@@ -96,11 +98,26 @@ export default function Perfil() {
                   <strong>Nombre:</strong> {usuario.nombre} {usuario.apellido}
                 </Typography>
               </Stack>
+
               <Stack direction="row" spacing={1} alignItems="center">
                 <EmailIcon color="primary" />
                 <Typography>
                   <strong>Correo:</strong> {usuario.email}
                 </Typography>
+              </Stack>
+
+              {/* Estado del usuario */}
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                <Typography>
+                  <strong>Estado:</strong>
+                </Typography>
+                <Chip
+                  label={usuario.estado === "activo" ? "Activo" : "Inactivo"}
+                  color={usuario.estado === "activo" ? "success" : "error"}
+                  size="small"
+                  icon={<CircleIcon sx={{ fontSize: "0.8rem" }} />}
+                  sx={{ fontWeight: "bold" }}
+                />
               </Stack>
 
               <Divider sx={{ my: 1 }} />
