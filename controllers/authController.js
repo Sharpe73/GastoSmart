@@ -1,8 +1,9 @@
+// controllers/authController.js
 const pool = require("../models/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const sendEmail = require("../utils/sendEmail"); 
+const sendEmail = require("../utils/sendEmail");
 
 // 🔹 Registrar usuario
 async function register(req, res) {
@@ -28,7 +29,9 @@ async function register(req, res) {
 
     // Insertar usuario
     const nuevoUsuario = await pool.query(
-      "INSERT INTO usuarios (nombre, apellido, email, password) VALUES ($1, $2, $3, $4) RETURNING id, nombre, apellido, email, creado_en",
+      `INSERT INTO usuarios (nombre, apellido, email, password) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING id, nombre, apellido, email, creado_en, verificado`,
       [nombre, apellido, email, hashedPassword]
     );
 
@@ -78,17 +81,35 @@ async function login(req, res) {
       });
     }
 
+    // 🔹 Actualizar último login
+    await pool.query("UPDATE usuarios SET ultimo_login = NOW() WHERE id = $1", [
+      user.id,
+    ]);
+
     // Generar token con nombre y apellido incluidos
     const token = jwt.sign(
-      { 
-        id: user.id, 
-        email: user.email, 
-        nombre: user.nombre, 
-        apellido: user.apellido 
+      {
+        id: user.id,
+        email: user.email,
+        nombre: user.nombre,
+        apellido: user.apellido,
       },
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
     );
+
+    // 🔹 Formatear fechas
+    const formatFecha = (fecha) => {
+      if (!fecha) return null;
+      const date = new Date(fecha);
+      return date.toLocaleString("es-CL", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    };
 
     res.json({
       mensaje: "Login exitoso",
@@ -98,6 +119,9 @@ async function login(req, res) {
         nombre: user.nombre,
         apellido: user.apellido,
         email: user.email,
+        creado_en: formatFecha(user.creado_en),
+        ultimo_login: formatFecha(new Date()), // actualizado al momento
+        verificado: user.verificado,
       },
     });
   } catch (error) {
@@ -195,7 +219,8 @@ async function resetPassword(req, res) {
     );
 
     res.json({
-      mensaje: "Contraseña actualizada correctamente, ahora puedes iniciar sesión.",
+      mensaje:
+        "Contraseña actualizada correctamente, ahora puedes iniciar sesión.",
     });
   } catch (error) {
     console.error("❌ Error en resetPassword:", error);
@@ -210,15 +235,21 @@ async function changePassword(req, res) {
     const userId = req.user.id; // viene del token (authMiddleware)
 
     if (!passwordActual || !nuevaPassword || !confirmarPassword) {
-      return res.status(400).json({ mensaje: "Todos los campos son obligatorios" });
+      return res
+        .status(400)
+        .json({ mensaje: "Todos los campos son obligatorios" });
     }
 
     if (nuevaPassword !== confirmarPassword) {
-      return res.status(400).json({ mensaje: "Las nuevas contraseñas no coinciden" });
+      return res
+        .status(400)
+        .json({ mensaje: "Las nuevas contraseñas no coinciden" });
     }
 
     // Buscar usuario
-    const usuario = await pool.query("SELECT * FROM usuarios WHERE id = $1", [userId]);
+    const usuario = await pool.query("SELECT * FROM usuarios WHERE id = $1", [
+      userId,
+    ]);
     if (usuario.rows.length === 0) {
       return res.status(404).json({ mensaje: "Usuario no encontrado" });
     }
@@ -228,13 +259,19 @@ async function changePassword(req, res) {
     // Validar contraseña actual
     const esValida = await bcrypt.compare(passwordActual, user.password);
     if (!esValida) {
-      return res.status(400).json({ mensaje: "La contraseña actual es incorrecta" });
+      return res
+        .status(400)
+        .json({ mensaje: "La contraseña actual es incorrecta" });
     }
 
     // Evitar que use la misma contraseña
     const esIgual = await bcrypt.compare(nuevaPassword, user.password);
     if (esIgual) {
-      return res.status(400).json({ mensaje: "La nueva contraseña no puede ser igual a la actual" });
+      return res
+        .status(400)
+        .json({
+          mensaje: "La nueva contraseña no puede ser igual a la actual",
+        });
     }
 
     // Guardar nueva contraseña
@@ -251,10 +288,10 @@ async function changePassword(req, res) {
   }
 }
 
-module.exports = { 
-  register, 
-  login, 
-  solicitarClaveTemporal, 
-  resetPassword, 
-  changePassword 
+module.exports = {
+  register,
+  login,
+  solicitarClaveTemporal,
+  resetPassword,
+  changePassword,
 };

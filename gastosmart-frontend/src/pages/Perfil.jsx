@@ -15,6 +15,8 @@ import API from "../api";
 import { jwtDecode } from "jwt-decode";
 import PersonIcon from "@mui/icons-material/Person";
 import EmailIcon from "@mui/icons-material/Email";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 export default function Perfil() {
   const [usuario, setUsuario] = useState(null);
@@ -98,6 +100,37 @@ export default function Perfil() {
                 <EmailIcon color="primary" />
                 <Typography>
                   <strong>Correo:</strong> {usuario.email}
+                </Typography>
+              </Stack>
+
+              <Divider sx={{ my: 1 }} />
+
+              {/* Datos de la cuenta */}
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  mt: 1,
+                  mb: 1,
+                  fontWeight: "bold",
+                  color: "text.secondary",
+                }}
+              >
+                Datos de la Cuenta
+              </Typography>
+
+              <Stack direction="row" spacing={1} alignItems="center">
+                <CalendarTodayIcon color="action" fontSize="small" />
+                <Typography>
+                  <strong>Creación:</strong>{" "}
+                  {usuario.creado_en || "No disponible"}
+                </Typography>
+              </Stack>
+
+              <Stack direction="row" spacing={1} alignItems="center">
+                <AccessTimeIcon color="action" fontSize="small" />
+                <Typography>
+                  <strong>Último inicio:</strong>{" "}
+                  {usuario.ultimo_login || "No disponible"}
                 </Typography>
               </Stack>
             </Box>
