@@ -5,7 +5,6 @@ import {
   Typography,
   Card,
   CardContent,
-  CardActions,
   Button,
   LinearProgress,
   Dialog,
@@ -35,6 +34,8 @@ function MetasAhorro() {
   const [montoInputs, setMontoInputs] = useState({});
   const [openConfirm, setOpenConfirm] = useState(false);
   const [aporteAEliminar, setAporteAEliminar] = useState(null);
+  const [openDetalle, setOpenDetalle] = useState(false);
+  const [metaSeleccionada, setMetaSeleccionada] = useState(null);
 
   const token = localStorage.getItem("token");
   const user = token ? jwtDecode(token) : null;
@@ -116,18 +117,16 @@ function MetasAhorro() {
     }
   };
 
-  // 🔹 Aporte o retiro (guardar en tabla `aportes`)
+  // 🔹 Aporte o retiro
   const actualizarAhorro = async (id, monto) => {
     if (!monto || monto === 0) return;
     try {
-      // 👉 ahora se usa la ruta de aportes
       await API.post(
         "/aportes",
         { meta_id: id, monto },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Refrescar aportes y metas
       fetchAportes(id);
       const resMeta = await API.get("/metas", {
         headers: { Authorization: `Bearer ${token}` },
@@ -154,54 +153,16 @@ function MetasAhorro() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMetas(metas.filter((m) => m.id !== id));
-      const newInputs = { ...montoInputs };
-      delete newInputs[id];
-      setMontoInputs(newInputs);
-
-      const newAportes = { ...aportes };
-      delete newAportes[id];
-      setAportes(newAportes);
     } catch (err) {
       console.error("❌ Error al eliminar meta:", err);
     }
   };
 
-  // 🔹 Preparar confirmación de eliminación de aporte
-  const confirmarEliminarAporte = (aporteId, metaId) => {
-    setAporteAEliminar({ id: aporteId, metaId });
-    setOpenConfirm(true);
-  };
-
-  // 🔹 Eliminar aporte individual
-  const eliminarAporte = async () => {
-    try {
-      if (!aporteAEliminar) return;
-
-      const { id, metaId } = aporteAEliminar;
-
-      await API.delete(`/aportes/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      fetchAportes(metaId);
-      const resMeta = await API.get("/metas", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const metasConCalculo = resMeta.data.map((m) => {
-        const porcentaje = Math.min(
-          100,
-          Math.round((m.ahorrado / m.objetivo) * 100)
-        );
-        const estado = porcentaje >= 100 ? "Completada" : "En progreso";
-        return { ...m, porcentaje, estado };
-      });
-      setMetas(metasConCalculo);
-    } catch (err) {
-      console.error("❌ Error al eliminar aporte:", err);
-    } finally {
-      setOpenConfirm(false);
-      setAporteAEliminar(null);
-    }
+  // 🔹 Abrir detalle de una meta
+  const abrirDetalle = (meta) => {
+    setMetaSeleccionada(meta);
+    setOpenDetalle(true);
+    fetchAportes(meta.id);
   };
 
   return (
@@ -276,72 +237,15 @@ function MetasAhorro() {
                     {meta.porcentaje}% — {meta.estado}
                   </Typography>
 
-                  {/* 🔹 Lista de aportes */}
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant="subtitle2">
-                    Historial de aportes:
-                  </Typography>
-                  <List dense>
-                    {(aportes[meta.id] || []).map((a) => (
-                      <ListItem
-                        key={a.id}
-                        secondaryAction={
-                          <IconButton
-                            edge="end"
-                            color="error"
-                            onClick={() =>
-                              confirmarEliminarAporte(a.id, meta.id)
-                            }
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        }
-                      >
-                        <ListItemText
-                          primary={`$${Number(a.monto).toLocaleString("es-CL")}`}
-                          secondary={new Date(a.fecha).toLocaleString("es-CL")}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </CardContent>
-
-                <CardActions sx={{ justifyContent: "space-between" }}>
-                  <TextField
-                    type="number"
+                  <Button
                     size="small"
-                    label="Monto"
-                    value={montoInputs[meta.id] || 0}
-                    onChange={(e) =>
-                      setMontoInputs({
-                        ...montoInputs,
-                        [meta.id]: Number(e.target.value),
-                      })
-                    }
-                    sx={{ width: "120px" }}
-                  />
-                  <Box>
-                    <IconButton
-                      color="success"
-                      onClick={() =>
-                        actualizarAhorro(meta.id, montoInputs[meta.id])
-                      }
-                    >
-                      <AddCircleIcon />
-                    </IconButton>
-                    <IconButton
-                      color="error"
-                      onClick={() =>
-                        actualizarAhorro(meta.id, -montoInputs[meta.id])
-                      }
-                    >
-                      <RemoveCircleIcon />
-                    </IconButton>
-                  </Box>
-                  <Button color="error" onClick={() => eliminarMeta(meta.id)}>
-                    Eliminar
+                    variant="outlined"
+                    sx={{ mt: 2 }}
+                    onClick={() => abrirDetalle(meta)}
+                  >
+                    Ver Detalle
                   </Button>
-                </CardActions>
+                </CardContent>
               </Card>
             </Grid>
           ))
@@ -378,19 +282,96 @@ function MetasAhorro() {
         </DialogActions>
       </Dialog>
 
-      {/* 🔹 Modal confirmación de borrado de aporte */}
-      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
-        <DialogTitle>Confirmar eliminación</DialogTitle>
-        <DialogContent>
-          ¿Estás seguro que deseas eliminar este aporte? Esta acción no se puede
-          deshacer.
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenConfirm(false)}>Cancelar</Button>
-          <Button color="error" variant="contained" onClick={eliminarAporte}>
-            Eliminar
-          </Button>
-        </DialogActions>
+      {/* 🔹 Modal detalle de meta */}
+      <Dialog
+        open={openDetalle}
+        onClose={() => setOpenDetalle(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        {metaSeleccionada && (
+          <>
+            <DialogTitle>{metaSeleccionada.nombre}</DialogTitle>
+            <DialogContent>
+              <Typography variant="subtitle1">
+                Objetivo: ${Number(metaSeleccionada.objetivo).toLocaleString("es-CL")}
+              </Typography>
+              <Typography variant="subtitle1">
+                Ahorrado: ${Number(metaSeleccionada.ahorrado).toLocaleString("es-CL")}
+              </Typography>
+
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="subtitle2">Historial de aportes:</Typography>
+              <List dense>
+                {(aportes[metaSeleccionada.id] || []).map((a) => (
+                  <ListItem
+                    key={a.id}
+                    secondaryAction={
+                      <IconButton
+                        edge="end"
+                        color="error"
+                        onClick={() =>
+                          setAporteAEliminar({ id: a.id, metaId: metaSeleccionada.id })
+                        }
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    }
+                  >
+                    <ListItemText
+                      primary={`$${Number(a.monto).toLocaleString("es-CL")}`}
+                      secondary={new Date(a.fecha).toLocaleString("es-CL")}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+
+              <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+                <TextField
+                  type="number"
+                  size="small"
+                  label="Monto"
+                  value={montoInputs[metaSeleccionada.id] || 0}
+                  onChange={(e) =>
+                    setMontoInputs({
+                      ...montoInputs,
+                      [metaSeleccionada.id]: Number(e.target.value),
+                    })
+                  }
+                  sx={{ flex: 1 }}
+                />
+                <IconButton
+                  color="success"
+                  onClick={() =>
+                    actualizarAhorro(
+                      metaSeleccionada.id,
+                      montoInputs[metaSeleccionada.id]
+                    )
+                  }
+                >
+                  <AddCircleIcon />
+                </IconButton>
+                <IconButton
+                  color="error"
+                  onClick={() =>
+                    actualizarAhorro(
+                      metaSeleccionada.id,
+                      -montoInputs[metaSeleccionada.id]
+                    )
+                  }
+                >
+                  <RemoveCircleIcon />
+                </IconButton>
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button color="error" onClick={() => eliminarMeta(metaSeleccionada.id)}>
+                Eliminar Meta
+              </Button>
+              <Button onClick={() => setOpenDetalle(false)}>Cerrar</Button>
+            </DialogActions>
+          </>
+        )}
       </Dialog>
     </Box>
   );
