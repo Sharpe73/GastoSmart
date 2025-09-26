@@ -39,8 +39,8 @@ function MetasAhorro() {
   const [metaSeleccionada, setMetaSeleccionada] = useState(null);
 
   // confirmaciones
-  const [openConfirmAporte, setOpenConfirmAporte] = useState(false);
   const [aporteAEliminar, setAporteAEliminar] = useState(null);
+  const [openConfirmAporte, setOpenConfirmAporte] = useState(false);
   const [openConfirmMeta, setOpenConfirmMeta] = useState(false);
 
   const token = localStorage.getItem("token");
@@ -90,6 +90,13 @@ function MetasAhorro() {
     }
   };
 
+  // 🔹 Modal crear meta
+  const handleOpen = () => setOpenDialog(true);
+  const handleClose = () => {
+    setOpenDialog(false);
+    setNuevaMeta({ nombre: "", objetivo: "" });
+  };
+
   // 🔹 Guardar meta
   const handleGuardarMeta = async () => {
     if (!nuevaMeta.nombre || !nuevaMeta.objetivo) return;
@@ -110,8 +117,7 @@ function MetasAhorro() {
       setMetas([{ ...meta, porcentaje, estado }, ...metas]);
       setMontoInputs({ ...montoInputs, [meta.id]: "" });
       fetchAportes(meta.id);
-      setOpenDialog(false);
-      setNuevaMeta({ nombre: "", objetivo: "" });
+      handleClose();
     } catch (err) {
       console.error("❌ Error al guardar meta:", err);
     }
@@ -198,7 +204,26 @@ function MetasAhorro() {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* listado de metas */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Typography variant="h4" fontWeight="bold" color="primary">
+          🎯 Metas de Ahorro
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<AddCircleIcon />}
+          onClick={handleOpen}
+        >
+          Nueva Meta
+        </Button>
+      </Box>
+
       <Grid container spacing={3}>
         {metas.length === 0 ? (
           <Typography variant="body1" color="text.secondary">
@@ -209,24 +234,46 @@ function MetasAhorro() {
             <Grid item xs={12} sm={6} md={4} key={meta.id}>
               <Card sx={{ boxShadow: 4, borderRadius: 3 }}>
                 <CardContent>
-                  <Typography variant="h6">{meta.nombre}</Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      mb: 2,
+                    }}
+                  >
+                    <Typography variant="h6">{meta.nombre}</Typography>
+                    <SavingsIcon color="primary" />
+                  </Box>
+
                   <Typography variant="body2" color="text.secondary">
                     Objetivo: ${Number(meta.objetivo).toLocaleString("es-CL")}
                   </Typography>
                   <Typography variant="body2">
                     Ahorrado: ${Number(meta.ahorrado).toLocaleString("es-CL")}
                   </Typography>
+
                   <LinearProgress
                     variant="determinate"
                     value={meta.porcentaje || 0}
-                    sx={{ height: 10, borderRadius: 5, mt: 2 }}
+                    sx={{
+                      height: 10,
+                      borderRadius: 5,
+                      mt: 2,
+                      backgroundColor: "#e0e0e0",
+                      "& .MuiLinearProgress-bar": {
+                        background: "linear-gradient(90deg, #1976d2, #42a5f5)",
+                      },
+                    }}
                   />
+
                   <Typography
                     variant="caption"
                     sx={{ display: "block", mt: 1, textAlign: "right" }}
                   >
                     {meta.porcentaje}% — {meta.estado}
                   </Typography>
+
                   <Button
                     size="small"
                     variant="outlined"
@@ -242,6 +289,36 @@ function MetasAhorro() {
         )}
       </Grid>
 
+      {/* 🔹 Modal nueva meta */}
+      <Dialog open={openDialog} onClose={handleClose}>
+        <DialogTitle>Nueva Meta de Ahorro</DialogTitle>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <TextField
+            label="Nombre de la meta"
+            fullWidth
+            value={nuevaMeta.nombre}
+            onChange={(e) =>
+              setNuevaMeta({ ...nuevaMeta, nombre: e.target.value })
+            }
+          />
+          <TextField
+            label="Monto objetivo"
+            type="number"
+            fullWidth
+            value={nuevaMeta.objetivo}
+            onChange={(e) =>
+              setNuevaMeta({ ...nuevaMeta, objetivo: e.target.value })
+            }
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancelar</Button>
+          <Button variant="contained" onClick={handleGuardarMeta}>
+            Guardar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* 🔹 Modal detalle de meta */}
       <Dialog
         open={openDetalle}
@@ -253,18 +330,57 @@ function MetasAhorro() {
           <>
             <DialogTitle>{metaSeleccionada.nombre}</DialogTitle>
             <DialogContent>
-              <Typography variant="subtitle1">
-                Objetivo: ${Number(metaSeleccionada.objetivo).toLocaleString("es-CL")}
-              </Typography>
-              <Typography variant="subtitle1">
-                Ahorrado: ${Number(metaSeleccionada.ahorrado).toLocaleString("es-CL")}
-              </Typography>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle1">
+                  Objetivo: $
+                  {Number(metaSeleccionada.objetivo).toLocaleString("es-CL")}
+                </Typography>
+                <Typography variant="subtitle1">
+                  Ahorrado: $
+                  {Number(metaSeleccionada.ahorrado).toLocaleString("es-CL")}
+                </Typography>
+
+                <LinearProgress
+                  variant="determinate"
+                  value={metaSeleccionada.porcentaje || 0}
+                  sx={{
+                    height: 10,
+                    borderRadius: 5,
+                    mt: 1,
+                    backgroundColor: "#e0e0e0",
+                    "& .MuiLinearProgress-bar": {
+                      background: "linear-gradient(90deg, #1976d2, #42a5f5)",
+                    },
+                  }}
+                />
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mt: 1,
+                  }}
+                >
+                  <Typography variant="caption">
+                    {metaSeleccionada.porcentaje}% completado
+                  </Typography>
+                  <Chip
+                    label={metaSeleccionada.estado}
+                    color={
+                      metaSeleccionada.estado === "Completada"
+                        ? "success"
+                        : "primary"
+                    }
+                    size="small"
+                  />
+                </Box>
+              </Box>
 
               <Divider sx={{ my: 2 }} />
               <Typography variant="subtitle2" sx={{ mb: 1 }}>
                 Historial de aportes:
               </Typography>
 
+              {/* Scroll interno */}
               <Box sx={{ maxHeight: 250, overflowY: "auto" }}>
                 <Table size="small">
                   <TableHead>
@@ -288,7 +404,10 @@ function MetasAhorro() {
                             edge="end"
                             color="error"
                             onClick={() => {
-                              setAporteAEliminar({ id: a.id, metaId: metaSeleccionada.id });
+                              setAporteAEliminar({
+                                id: a.id,
+                                metaId: metaSeleccionada.id,
+                              });
                               setOpenConfirmAporte(true);
                             }}
                           >
@@ -301,7 +420,6 @@ function MetasAhorro() {
                 </Table>
               </Box>
 
-              {/* input para nuevos aportes */}
               <Box sx={{ display: "flex", gap: 1, mt: 3 }}>
                 <TextField
                   type="number"
@@ -357,7 +475,10 @@ function MetasAhorro() {
       </Dialog>
 
       {/* 🔹 Confirmación eliminar aporte */}
-      <Dialog open={openConfirmAporte} onClose={() => setOpenConfirmAporte(false)}>
+      <Dialog
+        open={openConfirmAporte}
+        onClose={() => setOpenConfirmAporte(false)}
+      >
         <DialogTitle>Confirmar eliminación</DialogTitle>
         <DialogContent>¿Seguro que deseas eliminar este aporte?</DialogContent>
         <DialogActions>
@@ -369,9 +490,14 @@ function MetasAhorro() {
       </Dialog>
 
       {/* 🔹 Confirmación eliminar meta */}
-      <Dialog open={openConfirmMeta} onClose={() => setOpenConfirmMeta(false)}>
+      <Dialog
+        open={openConfirmMeta}
+        onClose={() => setOpenConfirmMeta(false)}
+      >
         <DialogTitle>Confirmar eliminación</DialogTitle>
-        <DialogContent>¿Seguro que deseas eliminar esta meta completa?</DialogContent>
+        <DialogContent>
+          ¿Seguro que deseas eliminar esta meta completa?
+        </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenConfirmMeta(false)}>Cancelar</Button>
           <Button color="error" onClick={eliminarMeta}>
