@@ -64,7 +64,8 @@ function Liquidaciones() {
         responseType: "blob",
       });
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const file = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(file);
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", `liquidacion-${id}.pdf`);
@@ -86,7 +87,9 @@ function Liquidaciones() {
         responseType: "blob",
       });
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const file = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(file);
+
       window.open(url, "_blank"); // 👁️ abre el PDF en otra pestaña
     } catch (error) {
       console.error("❌ Error al visualizar liquidación:", error);
