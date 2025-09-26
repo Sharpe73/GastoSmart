@@ -14,10 +14,13 @@ import {
   TextField,
   Grid,
   IconButton,
-  List,
-  ListItem,
-  ListItemText,
   Divider,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import SavingsIcon from "@mui/icons-material/Savings";
@@ -32,7 +35,6 @@ function MetasAhorro() {
   const [openDialog, setOpenDialog] = useState(false);
   const [nuevaMeta, setNuevaMeta] = useState({ nombre: "", objetivo: "" });
   const [montoInputs, setMontoInputs] = useState({});
-  const [openConfirm, setOpenConfirm] = useState(false);
   const [aporteAEliminar, setAporteAEliminar] = useState(null);
   const [openDetalle, setOpenDetalle] = useState(false);
   const [metaSeleccionada, setMetaSeleccionada] = useState(null);
@@ -293,40 +295,73 @@ function MetasAhorro() {
           <>
             <DialogTitle>{metaSeleccionada.nombre}</DialogTitle>
             <DialogContent>
-              <Typography variant="subtitle1">
-                Objetivo: ${Number(metaSeleccionada.objetivo).toLocaleString("es-CL")}
-              </Typography>
-              <Typography variant="subtitle1">
-                Ahorrado: ${Number(metaSeleccionada.ahorrado).toLocaleString("es-CL")}
-              </Typography>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle1">
+                  Objetivo: ${Number(metaSeleccionada.objetivo).toLocaleString("es-CL")}
+                </Typography>
+                <Typography variant="subtitle1">
+                  Ahorrado: ${Number(metaSeleccionada.ahorrado).toLocaleString("es-CL")}
+                </Typography>
+
+                <LinearProgress
+                  variant="determinate"
+                  value={metaSeleccionada.porcentaje || 0}
+                  sx={{
+                    height: 10,
+                    borderRadius: 5,
+                    mt: 1,
+                    backgroundColor: "#e0e0e0",
+                    "& .MuiLinearProgress-bar": {
+                      background: "linear-gradient(90deg, #1976d2, #42a5f5)",
+                    },
+                  }}
+                />
+                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}>
+                  <Typography variant="caption">
+                    {metaSeleccionada.porcentaje}% completado
+                  </Typography>
+                  <Chip
+                    label={metaSeleccionada.estado}
+                    color={metaSeleccionada.estado === "Completada" ? "success" : "primary"}
+                    size="small"
+                  />
+                </Box>
+              </Box>
 
               <Divider sx={{ my: 2 }} />
-              <Typography variant="subtitle2">Historial de aportes:</Typography>
-              <List dense>
-                {(aportes[metaSeleccionada.id] || []).map((a) => (
-                  <ListItem
-                    key={a.id}
-                    secondaryAction={
-                      <IconButton
-                        edge="end"
-                        color="error"
-                        onClick={() =>
-                          setAporteAEliminar({ id: a.id, metaId: metaSeleccionada.id })
-                        }
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    }
-                  >
-                    <ListItemText
-                      primary={`$${Number(a.monto).toLocaleString("es-CL")}`}
-                      secondary={new Date(a.fecha).toLocaleString("es-CL")}
-                    />
-                  </ListItem>
-                ))}
-              </List>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                Historial de aportes:
+              </Typography>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Monto</TableCell>
+                    <TableCell>Fecha</TableCell>
+                    <TableCell align="right">Acción</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {(aportes[metaSeleccionada.id] || []).map((a) => (
+                    <TableRow key={a.id}>
+                      <TableCell>${Number(a.monto).toLocaleString("es-CL")}</TableCell>
+                      <TableCell>{new Date(a.fecha).toLocaleString("es-CL")}</TableCell>
+                      <TableCell align="right">
+                        <IconButton
+                          edge="end"
+                          color="error"
+                          onClick={() =>
+                            setAporteAEliminar({ id: a.id, metaId: metaSeleccionada.id })
+                          }
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
 
-              <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+              <Box sx={{ display: "flex", gap: 1, mt: 3 }}>
                 <TextField
                   type="number"
                   size="small"
@@ -365,7 +400,11 @@ function MetasAhorro() {
               </Box>
             </DialogContent>
             <DialogActions>
-              <Button color="error" onClick={() => eliminarMeta(metaSeleccionada.id)}>
+              <Button
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={() => eliminarMeta(metaSeleccionada.id)}
+              >
                 Eliminar Meta
               </Button>
               <Button onClick={() => setOpenDetalle(false)}>Cerrar</Button>
