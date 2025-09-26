@@ -1,4 +1,3 @@
-// src/pages/Liquidaciones.jsx
 import React, { useEffect, useState } from "react";
 import {
   Container,
@@ -12,7 +11,7 @@ import {
   MenuItem,
   TextField,
 } from "@mui/material";
-import { CloudUpload, Download, PictureAsPdf } from "@mui/icons-material";
+import { CloudUpload, Download, PictureAsPdf, Visibility } from "@mui/icons-material";
 import API from "../api";
 
 function Liquidaciones() {
@@ -75,6 +74,23 @@ function Liquidaciones() {
     } catch (error) {
       console.error("❌ Error al descargar liquidación:", error);
       alert("No se pudo descargar la liquidación.");
+    }
+  };
+
+  // 🔹 Ver PDF en navegador
+  const verLiquidacion = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await API.get(`/liquidaciones/${id}/descargar`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      window.open(url, "_blank"); // 👁️ abre el PDF en otra pestaña
+    } catch (error) {
+      console.error("❌ Error al visualizar liquidación:", error);
+      alert("No se pudo abrir la liquidación.");
     }
   };
 
@@ -168,9 +184,18 @@ function Liquidaciones() {
                       : "Fecha no disponible"}
                   </Typography>
                 </CardContent>
-                <CardActions sx={{ justifyContent: "center", pb: 1 }}>
+                <CardActions sx={{ justifyContent: "center", pb: 1, gap: 1 }}>
+                  {/* 👁️ Ver PDF */}
                   <IconButton
                     color="primary"
+                    onClick={() => verLiquidacion(liq.id)}
+                  >
+                    <Visibility fontSize="small" />
+                  </IconButton>
+
+                  {/* ⬇️ Descargar PDF */}
+                  <IconButton
+                    color="secondary"
                     onClick={() => descargarLiquidacion(liq.id)}
                   >
                     <Download fontSize="small" />
