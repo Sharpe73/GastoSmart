@@ -85,8 +85,7 @@ export default function Perfil() {
     } catch (err) {
       setMensaje({
         tipo: "error",
-        texto:
-          err.response?.data?.mensaje || "❌ Contraseña actual inválida",
+        texto: err.response?.data?.mensaje || "❌ Contraseña actual inválida",
       });
     }
   };
@@ -156,6 +155,22 @@ export default function Perfil() {
 
           <Divider sx={{ my: 2 }} />
 
+          {/* 👇 Mensaje compacto arriba del formulario */}
+          {mensaje.texto && (
+            <Alert
+              severity={mensaje.tipo}
+              variant="outlined"
+              sx={{
+                mb: 2,
+                borderRadius: 2,
+                fontSize: "0.85rem",
+                p: 1,
+              }}
+            >
+              {mensaje.texto}
+            </Alert>
+          )}
+
           {/* Cambiar contraseña */}
           <Typography
             variant="subtitle1"
@@ -207,17 +222,6 @@ export default function Perfil() {
           </Box>
         </CardContent>
       </Card>
-
-      {/* Mensajes con Material UI mejorados */}
-      {mensaje.texto && (
-        <Alert
-          severity={mensaje.tipo}
-          variant="filled"
-          sx={{ mt: 3, borderRadius: 2, fontSize: "1rem" }}
-        >
-          {mensaje.texto}
-        </Alert>
-      )}
     </Container>
   );
 }
