@@ -1,3 +1,4 @@
+// src/pages/MetasAhorro.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -120,7 +121,7 @@ function MetasAhorro() {
 
   // 🔹 Aporte o retiro
   const actualizarAhorro = async (id, monto) => {
-    if (!monto || monto === 0) return;
+    if (!monto || isNaN(monto)) return;
     try {
       await API.post(
         "/aportes",
@@ -369,19 +370,18 @@ function MetasAhorro() {
                   type="number"
                   size="small"
                   label="Monto"
-                  value={montoInputs[metaSeleccionada.id] ?? ""} // 👈 vacío si no hay valor
+                  value={montoInputs[metaSeleccionada.id] ?? ""}
                   onChange={(e) =>
                     setMontoInputs({
                       ...montoInputs,
-                      [metaSeleccionada.id]:
-                        e.target.value === "" ? "" : Number(e.target.value),
+                      [metaSeleccionada.id]: e.target.value, // 👈 siempre string
                     })
                   }
                   sx={{ flex: 1 }}
                 />
                 <IconButton
                   color="success"
-                  disabled={montoInputs[metaSeleccionada.id] === ""} // 👈 no permite usar vacío
+                  disabled={!montoInputs[metaSeleccionada.id]}
                   onClick={() =>
                     actualizarAhorro(
                       metaSeleccionada.id,
@@ -393,7 +393,7 @@ function MetasAhorro() {
                 </IconButton>
                 <IconButton
                   color="error"
-                  disabled={montoInputs[metaSeleccionada.id] === ""}
+                  disabled={!montoInputs[metaSeleccionada.id]}
                   onClick={() =>
                     actualizarAhorro(
                       metaSeleccionada.id,
