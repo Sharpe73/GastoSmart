@@ -5,17 +5,14 @@ import {
   Container,
   Card,
   CardContent,
-  Button,
-  TextField,
   Box,
   Divider,
-  Alert,
   Avatar,
   Stack,
+  Alert,
 } from "@mui/material";
 import API from "../api";
 import { jwtDecode } from "jwt-decode";
-import LockIcon from "@mui/icons-material/Lock";
 import PersonIcon from "@mui/icons-material/Person";
 import EmailIcon from "@mui/icons-material/Email";
 
@@ -23,11 +20,6 @@ export default function Perfil() {
   const [usuario, setUsuario] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mensaje, setMensaje] = useState({ tipo: "", texto: "" });
-
-  // campos para cambiar contraseña
-  const [passwordActual, setPasswordActual] = useState("");
-  const [nuevaPassword, setNuevaPassword] = useState("");
-  const [confirmarPassword, setConfirmarPassword] = useState("");
 
   const token = localStorage.getItem("token");
 
@@ -52,49 +44,11 @@ export default function Perfil() {
     if (token) fetchUser();
   }, [token]);
 
-  // manejar cambio de contraseña
-  const handleChangePassword = async () => {
-    if (!passwordActual || !nuevaPassword || !confirmarPassword) {
-      setMensaje({
-        tipo: "error",
-        texto: "⚠️ Todos los campos son obligatorios",
-      });
-      return;
-    }
-    if (nuevaPassword !== confirmarPassword) {
-      setMensaje({
-        tipo: "error",
-        texto: "⚠️ La nueva contraseña y la confirmación no coinciden",
-      });
-      return;
-    }
-
-    try {
-      await API.post(
-        "/auth/change-password",
-        { passwordActual, nuevaPassword, confirmarPassword },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setMensaje({
-        tipo: "success",
-        texto: "✅ Contraseña actualizada correctamente",
-      });
-      setPasswordActual("");
-      setNuevaPassword("");
-      setConfirmarPassword("");
-    } catch (err) {
-      setMensaje({
-        tipo: "error",
-        texto: err.response?.data?.mensaje || "❌ Contraseña actual inválida",
-      });
-    }
-  };
-
   return (
-    <Container sx={{ mt: 2 }}> {/* 👈 bajamos el margen top */}
+    <Container sx={{ mt: 2 }}>
       <Card
         sx={{
-          maxWidth: 600, // 👈 más compacto
+          maxWidth: 600,
           borderRadius: 3,
           boxShadow: 4,
           p: 2,
@@ -102,7 +56,7 @@ export default function Perfil() {
           background: "linear-gradient(135deg, #f0f4ff, #ffffff)",
         }}
       >
-        <CardContent sx={{ p: 2 }}> {/* 👈 menos padding interno */}
+        <CardContent sx={{ p: 2 }}>
           {/* Avatar + título */}
           <Stack alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
             <Avatar
@@ -155,7 +109,7 @@ export default function Perfil() {
 
           <Divider sx={{ my: 1.5 }} />
 
-          {/* 👇 Mensaje compacto arriba del formulario */}
+          {/* Mensaje de error compacto */}
           {mensaje.texto && (
             <Alert
               severity={mensaje.tipo}
@@ -170,56 +124,6 @@ export default function Perfil() {
               {mensaje.texto}
             </Alert>
           )}
-
-          {/* Cambiar contraseña */}
-          <Typography
-            variant="subtitle2"
-            sx={{
-              mb: 1.5,
-              fontWeight: "bold",
-              color: "text.secondary",
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <LockIcon fontSize="small" /> Cambiar Contraseña
-          </Typography>
-          <TextField
-            label="Contraseña Actual"
-            type="password"
-            fullWidth
-            margin="dense"
-            value={passwordActual}
-            onChange={(e) => setPasswordActual(e.target.value)}
-          />
-          <TextField
-            label="Nueva Contraseña"
-            type="password"
-            fullWidth
-            margin="dense"
-            value={nuevaPassword}
-            onChange={(e) => setNuevaPassword(e.target.value)}
-          />
-          <TextField
-            label="Confirmar Nueva Contraseña"
-            type="password"
-            fullWidth
-            margin="dense"
-            value={confirmarPassword}
-            onChange={(e) => setConfirmarPassword(e.target.value)}
-          />
-
-          <Box sx={{ mt: 2, textAlign: "right" }}>
-            <Button
-              variant="contained"
-              color="primary"
-              size="medium"
-              onClick={handleChangePassword}
-            >
-              Guardar Cambios
-            </Button>
-          </Box>
         </CardContent>
       </Card>
     </Container>
