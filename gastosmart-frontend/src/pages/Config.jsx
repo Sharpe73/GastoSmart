@@ -7,23 +7,17 @@ import {
   AccordionSummary,
   AccordionDetails,
   Button,
-  TextField,
   Box,
-  Alert,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useNavigate } from "react-router-dom";
 import API from "../api";
 import { jwtDecode } from "jwt-decode";
 
 export default function Config() {
   const [usuario, setUsuario] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [mensaje, setMensaje] = useState({ tipo: "", texto: "" });
-
-  // campos para cambiar contraseña
-  const [passwordActual, setPasswordActual] = useState("");
-  const [nuevaPassword, setNuevaPassword] = useState("");
-  const [confirmarPassword, setConfirmarPassword] = useState("");
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
 
@@ -37,10 +31,7 @@ export default function Config() {
         });
         setUsuario(res.data);
       } catch (err) {
-        setMensaje({
-          tipo: "error",
-          texto: "❌ No se pudieron cargar los datos del perfil",
-        });
+        console.error("❌ No se pudieron cargar los datos del perfil");
       } finally {
         setLoading(false);
       }
@@ -48,120 +39,66 @@ export default function Config() {
     if (token) fetchUser();
   }, [token]);
 
-  // manejar cambio de contraseña
-  const handleChangePassword = async () => {
-    if (!passwordActual || !nuevaPassword || !confirmarPassword) {
-      setMensaje({
-        tipo: "error",
-        texto: "⚠️ Todos los campos son obligatorios",
-      });
-      return;
-    }
-    if (nuevaPassword !== confirmarPassword) {
-      setMensaje({
-        tipo: "error",
-        texto:
-          "⚠️ La nueva contraseña y la confirmación no coinciden",
-      });
-      return;
-    }
-
-    try {
-      await API.post(
-        "/auth/change-password",
-        { passwordActual, nuevaPassword, confirmarPassword },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setMensaje({
-        tipo: "success",
-        texto: "✅ Contraseña actualizada correctamente",
-      });
-      setPasswordActual("");
-      setNuevaPassword("");
-      setConfirmarPassword("");
-    } catch (err) {
-      setMensaje({
-        tipo: "error",
-        texto:
-          err.response?.data?.mensaje || "❌ Contraseña actual inválida",
-      });
-    }
-  };
-
   return (
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Configuración
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{ fontWeight: "bold", color: "primary.main" }}
+      >
+        Configuración ⚙️
       </Typography>
-      <Typography sx={{ mb: 3 }}>
-        Aquí podrás configurar tu aplicación ⚙️
+      <Typography sx={{ mb: 3, color: "text.secondary" }}>
+        Administra tu perfil y seguridad
       </Typography>
 
-      {/* Tarjeta de perfil como acordeón */}
-      <Accordion sx={{ maxWidth: 600, mb: 3 }}>
+      {/* Tarjeta de perfil como acordeón con navegación */}
+      <Accordion
+        sx={{
+          maxWidth: 650,
+          mb: 3,
+          borderRadius: 3,
+          boxShadow: 3,
+          background: "linear-gradient(135deg, #f5f5f5, #fafafa)",
+        }}
+      >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">Perfil</Typography>
+          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            👤 Perfil
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           {loading ? (
             <Typography>Cargando datos...</Typography>
           ) : usuario ? (
             <Box sx={{ mb: 2 }}>
-              <Typography>👤 Nombre: {usuario.nombre}</Typography>
-              <Typography>👤 Apellido: {usuario.apellido}</Typography>
-              <Typography>📧 Correo: {usuario.email}</Typography>
+              <Typography>
+                <strong>Nombre:</strong> {usuario.nombre}
+              </Typography>
+              <Typography>
+                <strong>Apellido:</strong> {usuario.apellido}
+              </Typography>
+              <Typography>
+                <strong>Correo:</strong> {usuario.email}
+              </Typography>
             </Box>
           ) : (
-            <Typography>
+            <Typography color="error">
               No se pudieron cargar los datos del usuario.
             </Typography>
           )}
 
-          <Typography variant="subtitle1" sx={{ mt: 2 }}>
-            Cambiar Contraseña
-          </Typography>
-          <TextField
-            label="Contraseña Actual"
-            type="password"
-            fullWidth
-            margin="dense"
-            value={passwordActual}
-            onChange={(e) => setPasswordActual(e.target.value)}
-          />
-          <TextField
-            label="Nueva Contraseña"
-            type="password"
-            fullWidth
-            margin="dense"
-            value={nuevaPassword}
-            onChange={(e) => setNuevaPassword(e.target.value)}
-          />
-          <TextField
-            label="Confirmar Nueva Contraseña"
-            type="password"
-            fullWidth
-            margin="dense"
-            value={confirmarPassword}
-            onChange={(e) => setConfirmarPassword(e.target.value)}
-          />
-          <Box sx={{ mt: 2 }}>
+          <Box sx={{ textAlign: "right" }}>
             <Button
               variant="contained"
               color="primary"
-              onClick={handleChangePassword}
+              onClick={() => navigate("/perfil")}
             >
-              Guardar Cambios
+              Ver Perfil Completo
             </Button>
           </Box>
         </AccordionDetails>
       </Accordion>
-
-      {/* Mensajes */}
-      {mensaje.texto && (
-        <Alert severity={mensaje.tipo} sx={{ mt: 2 }}>
-          {mensaje.texto}
-        </Alert>
-      )}
     </Container>
   );
 }
