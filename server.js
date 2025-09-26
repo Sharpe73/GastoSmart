@@ -51,6 +51,7 @@ const historicosRoutes = require("./routes/historicosRoutes");
 const liquidacionesRoutes = require("./routes/liquidacionesRoutes");
 const metasRoutes = require("./routes/metasRoutes");
 const aportesRoutes = require("./routes/aportesRoutes");
+const userRoutes = require("./routes/userRoutes"); 
 
 // 🔹 Usar rutas
 app.use("/auth", authRoutes);
@@ -62,6 +63,7 @@ app.use("/historicos", historicosRoutes);
 app.use("/liquidaciones", liquidacionesRoutes);
 app.use("/metas", metasRoutes);
 app.use("/aportes", aportesRoutes);
+app.use("/usuarios", userRoutes); 
 
 // 🔹 Iniciar servidor
 const PORT = process.env.PORT || 3000;
@@ -73,4 +75,5 @@ app.listen(PORT, () => {
   console.log(`📑 Liquidaciones disponibles en http://localhost:${PORT}/liquidaciones`);
   console.log(`💰 Metas de Ahorro disponibles en http://localhost:${PORT}/metas`);
   console.log(`➕ Aportes disponibles en http://localhost:${PORT}/aportes`);
+  console.log(`👤 Usuarios disponibles en http://localhost:${PORT}/usuarios`);
 });

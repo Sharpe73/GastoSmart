@@ -3,14 +3,15 @@ import React, { useState, useEffect } from "react";
 import {
   Typography,
   Container,
-  Card,
-  CardContent,
-  CardActions,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   Button,
   TextField,
   Box,
   Alert,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import API from "../api";
 import { jwtDecode } from "jwt-decode";
 
@@ -50,11 +51,18 @@ export default function Config() {
   // manejar cambio de contraseña
   const handleChangePassword = async () => {
     if (!passwordActual || !nuevaPassword || !confirmarPassword) {
-      setMensaje({ tipo: "error", texto: "⚠️ Todos los campos son obligatorios" });
+      setMensaje({
+        tipo: "error",
+        texto: "⚠️ Todos los campos son obligatorios",
+      });
       return;
     }
     if (nuevaPassword !== confirmarPassword) {
-      setMensaje({ tipo: "error", texto: "⚠️ La nueva contraseña y la confirmación no coinciden" });
+      setMensaje({
+        tipo: "error",
+        texto:
+          "⚠️ La nueva contraseña y la confirmación no coinciden",
+      });
       return;
     }
 
@@ -64,14 +72,18 @@ export default function Config() {
         { passwordActual, nuevaPassword, confirmarPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setMensaje({ tipo: "success", texto: "✅ Contraseña actualizada correctamente" });
+      setMensaje({
+        tipo: "success",
+        texto: "✅ Contraseña actualizada correctamente",
+      });
       setPasswordActual("");
       setNuevaPassword("");
       setConfirmarPassword("");
     } catch (err) {
       setMensaje({
         tipo: "error",
-        texto: err.response?.data?.mensaje || "❌ Contraseña actual inválida",
+        texto:
+          err.response?.data?.mensaje || "❌ Contraseña actual inválida",
       });
     }
   };
@@ -81,14 +93,16 @@ export default function Config() {
       <Typography variant="h4" gutterBottom>
         Configuración
       </Typography>
-      <Typography sx={{ mb: 3 }}>Aquí podrás configurar tu aplicación ⚙️</Typography>
+      <Typography sx={{ mb: 3 }}>
+        Aquí podrás configurar tu aplicación ⚙️
+      </Typography>
 
-      {/* Tarjeta de perfil */}
-      <Card sx={{ maxWidth: 600, mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Perfil
-          </Typography>
+      {/* Tarjeta de perfil como acordeón */}
+      <Accordion sx={{ maxWidth: 600, mb: 3 }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6">Perfil</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
           {loading ? (
             <Typography>Cargando datos...</Typography>
           ) : usuario ? (
@@ -98,7 +112,9 @@ export default function Config() {
               <Typography>📧 Correo: {usuario.email}</Typography>
             </Box>
           ) : (
-            <Typography>No se pudieron cargar los datos del usuario.</Typography>
+            <Typography>
+              No se pudieron cargar los datos del usuario.
+            </Typography>
           )}
 
           <Typography variant="subtitle1" sx={{ mt: 2 }}>
@@ -128,13 +144,17 @@ export default function Config() {
             value={confirmarPassword}
             onChange={(e) => setConfirmarPassword(e.target.value)}
           />
-        </CardContent>
-        <CardActions>
-          <Button variant="contained" color="primary" onClick={handleChangePassword}>
-            Guardar Cambios
-          </Button>
-        </CardActions>
-      </Card>
+          <Box sx={{ mt: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleChangePassword}
+            >
+              Guardar Cambios
+            </Button>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
 
       {/* Mensajes */}
       {mensaje.texto && (
