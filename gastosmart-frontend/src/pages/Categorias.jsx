@@ -1,4 +1,3 @@
-// src/pages/Categorias.jsx
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -32,6 +31,10 @@ function Categorias() {
   const [editando, setEditando] = useState(null);
   const [error, setError] = useState("");
 
+  // 🔹 confirmación eliminación
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [categoriaAEliminar, setCategoriaAEliminar] = useState(null);
+
   const navigate = useNavigate();
 
   // 🔹 Obtener categorías reales al cargar
@@ -47,7 +50,7 @@ function Categorias() {
     fetchCategorias();
   }, []);
 
-  // 🔹 Abrir/Cerrar modal
+  // 🔹 Abrir/Cerrar modal crear/editar
   const handleOpen = (categoria = null) => {
     setEditando(categoria);
     setNuevaCategoria(categoria ? categoria.nombre : "");
@@ -81,11 +84,15 @@ function Categorias() {
     }
   };
 
-  // 🔹 Eliminar categoría
-  const handleDeleteCategoria = async (id) => {
+  // 🔹 Eliminar categoría con confirmación
+  const handleDeleteCategoria = async () => {
+    if (!categoriaAEliminar) return;
+
     try {
-      await deleteCategoria(id);
-      setCategorias(categorias.filter((cat) => cat.id !== id));
+      await deleteCategoria(categoriaAEliminar.id);
+      setCategorias(categorias.filter((cat) => cat.id !== categoriaAEliminar.id));
+      setCategoriaAEliminar(null);
+      setOpenConfirm(false);
     } catch (err) {
       setError("Error al eliminar categoría");
     }
@@ -138,7 +145,8 @@ function Categorias() {
                   color="error"
                   onClick={(e) => {
                     e.stopPropagation(); // 👈 evita que dispare el navigate
-                    handleDeleteCategoria(cat.id);
+                    setCategoriaAEliminar(cat); // guardamos la categoría
+                    setOpenConfirm(true); // abrimos confirmación
                   }}
                 >
                   <Delete />
@@ -174,6 +182,29 @@ function Categorias() {
             color="primary"
           >
             Guardar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal de confirmación eliminación */}
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Estás seguro que deseas eliminar la categoría{" "}
+            <strong>{categoriaAEliminar?.nombre}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)} color="secondary">
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleDeleteCategoria}
+            variant="contained"
+            color="error"
+          >
+            Eliminar
           </Button>
         </DialogActions>
       </Dialog>

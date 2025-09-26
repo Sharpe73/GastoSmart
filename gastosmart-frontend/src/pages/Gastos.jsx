@@ -36,6 +36,10 @@ function Gastos() {
   const [gastoEdit, setGastoEdit] = useState(null);
   const [archivoEdit, setArchivoEdit] = useState(null);
 
+  // 🔹 confirmación eliminación
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [gastoAEliminar, setGastoAEliminar] = useState(null);
+
   const token = localStorage.getItem("token");
   const location = useLocation();
   const categoriaSeleccionada = location.state?.categoriaId || "";
@@ -166,21 +170,28 @@ function Gastos() {
     }
   };
 
-  const handleDeleteGasto = async (id) => {
+  // 🔹 Eliminar gasto con confirmación
+  const handleConfirmDelete = async () => {
+    if (!gastoAEliminar) return;
+
     try {
-      await API.delete(`/gastos/${id}`, {
+      await API.delete(`/gastos/${gastoAEliminar.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setGastos(gastos.filter((g) => g.id !== id));
+      setGastos(gastos.filter((g) => g.id !== gastoAEliminar.id));
 
       const saldoRes = await API.get("/presupuesto/saldo");
       setSaldo(saldoRes.data);
+
       setMensaje({ tipo: "info", texto: "🗑️ Gasto eliminado correctamente." });
     } catch (err) {
       setMensaje({
         tipo: "error",
         texto: "❌ Error al intentar eliminar gasto.",
       });
+    } finally {
+      setOpenConfirm(false);
+      setGastoAEliminar(null);
     }
   };
 
@@ -334,7 +345,10 @@ function Gastos() {
         <GastosList
           gastos={gastos}
           onEdit={handleOpenEdit}
-          onDelete={handleDeleteGasto}
+          onDelete={(gasto) => {
+            setGastoAEliminar(gasto);
+            setOpenConfirm(true);
+          }}
           onVerDocumento={handleVerDocumento}
         />
       </Box>
@@ -411,6 +425,29 @@ function Gastos() {
             color="primary"
           >
             Guardar Cambios
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal de confirmación eliminación */}
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Estás seguro que deseas eliminar el gasto{" "}
+            <strong>{gastoAEliminar?.descripcion}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)} color="secondary">
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            color="error"
+          >
+            Eliminar
           </Button>
         </DialogActions>
       </Dialog>
