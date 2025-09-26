@@ -133,7 +133,7 @@ function MetasAhorro() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      fetchAportes(id);
+      await fetchAportes(id);
       const resMeta = await API.get("/metas", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -146,6 +146,13 @@ function MetasAhorro() {
         return { ...m, porcentaje, estado };
       });
       setMetas(metasConCalculo);
+
+      // 🔹 actualizar la meta seleccionada en el modal
+      if (metaSeleccionada) {
+        const actualizada = metasConCalculo.find((m) => m.id === id);
+        if (actualizada) setMetaSeleccionada(actualizada);
+      }
+
       setMontoInputs({ ...montoInputs, [id]: "" });
     } catch (err) {
       console.error("❌ Error al registrar aporte:", err);
@@ -173,7 +180,7 @@ function MetasAhorro() {
       await API.delete(`/aportes/${aporteAEliminar.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchAportes(aporteAEliminar.metaId);
+      await fetchAportes(aporteAEliminar.metaId);
 
       const resMeta = await API.get("/metas", {
         headers: { Authorization: `Bearer ${token}` },
@@ -187,6 +194,14 @@ function MetasAhorro() {
         return { ...m, porcentaje, estado };
       });
       setMetas(metasConCalculo);
+
+      // 🔹 actualizar la meta seleccionada en el modal
+      if (metaSeleccionada) {
+        const actualizada = metasConCalculo.find(
+          (m) => m.id === aporteAEliminar.metaId
+        );
+        if (actualizada) setMetaSeleccionada(actualizada);
+      }
 
       setOpenConfirmAporte(false);
       setAporteAEliminar(null);
