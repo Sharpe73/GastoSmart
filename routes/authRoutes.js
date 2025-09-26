@@ -1,6 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const { register, login, solicitarClaveTemporal, resetPassword } = require("../controllers/authController");
+const { 
+  register, 
+  login, 
+  solicitarClaveTemporal, 
+  resetPassword, 
+  changePassword 
+} = require("../controllers/authController");
+const authMiddleware = require("../middleware/authMiddleware");
 
 /**
  * @swagger
@@ -24,7 +31,10 @@ const { register, login, solicitarClaveTemporal, resetPassword } = require("../c
  *             properties:
  *               nombre:
  *                 type: string
- *                 example: Juan Pérez
+ *                 example: Juan
+ *               apellido:
+ *                 type: string
+ *                 example: Pérez
  *               email:
  *                 type: string
  *                 example: juan@example.com
@@ -116,5 +126,39 @@ router.post("/olvidar-password", solicitarClaveTemporal);
  *         description: Error al cambiar contraseña
  */
 router.post("/reset-password", resetPassword);
+
+/**
+ * @swagger
+ * /auth/change-password:
+ *   post:
+ *     summary: Cambiar la contraseña desde el perfil del usuario
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               passwordActual:
+ *                 type: string
+ *                 example: ClaveVieja123
+ *               nuevaPassword:
+ *                 type: string
+ *                 example: ClaveNueva123
+ *               confirmarPassword:
+ *                 type: string
+ *                 example: ClaveNueva123
+ *     responses:
+ *       200:
+ *         description: Contraseña cambiada correctamente
+ *       400:
+ *         description: Error en validación de contraseñas
+ *       401:
+ *         description: No autorizado
+ */
+router.post("/change-password", authMiddleware, changePassword);
 
 module.exports = router;

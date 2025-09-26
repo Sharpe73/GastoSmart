@@ -203,4 +203,58 @@ async function resetPassword(req, res) {
   }
 }
 
-module.exports = { register, login, solicitarClaveTemporal, resetPassword };
+// 🔹 Cambiar contraseña desde Configuración (perfil)
+async function changePassword(req, res) {
+  try {
+    const { passwordActual, nuevaPassword, confirmarPassword } = req.body;
+    const userId = req.user.id; // viene del token (authMiddleware)
+
+    if (!passwordActual || !nuevaPassword || !confirmarPassword) {
+      return res.status(400).json({ mensaje: "Todos los campos son obligatorios" });
+    }
+
+    if (nuevaPassword !== confirmarPassword) {
+      return res.status(400).json({ mensaje: "Las nuevas contraseñas no coinciden" });
+    }
+
+    // Buscar usuario
+    const usuario = await pool.query("SELECT * FROM usuarios WHERE id = $1", [userId]);
+    if (usuario.rows.length === 0) {
+      return res.status(404).json({ mensaje: "Usuario no encontrado" });
+    }
+
+    const user = usuario.rows[0];
+
+    // Validar contraseña actual
+    const esValida = await bcrypt.compare(passwordActual, user.password);
+    if (!esValida) {
+      return res.status(400).json({ mensaje: "La contraseña actual es incorrecta" });
+    }
+
+    // Evitar que use la misma contraseña
+    const esIgual = await bcrypt.compare(nuevaPassword, user.password);
+    if (esIgual) {
+      return res.status(400).json({ mensaje: "La nueva contraseña no puede ser igual a la actual" });
+    }
+
+    // Guardar nueva contraseña
+    const hashed = await bcrypt.hash(nuevaPassword, 10);
+    await pool.query("UPDATE usuarios SET password = $1 WHERE id = $2", [
+      hashed,
+      userId,
+    ]);
+
+    res.json({ mensaje: "Contraseña cambiada correctamente" });
+  } catch (error) {
+    console.error("❌ Error en changePassword:", error);
+    res.status(500).json({ mensaje: "Error al cambiar contraseña" });
+  }
+}
+
+module.exports = { 
+  register, 
+  login, 
+  solicitarClaveTemporal, 
+  resetPassword, 
+  changePassword 
+};
