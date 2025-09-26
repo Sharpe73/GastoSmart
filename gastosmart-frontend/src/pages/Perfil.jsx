@@ -91,32 +91,32 @@ export default function Perfil() {
   };
 
   return (
-    <Container sx={{ mt: 4 }}>
+    <Container sx={{ mt: 2 }}> {/* 👈 bajamos el margen top */}
       <Card
         sx={{
-          maxWidth: 700,
-          borderRadius: 4,
-          boxShadow: 6,
-          p: 3,
+          maxWidth: 600, // 👈 más compacto
+          borderRadius: 3,
+          boxShadow: 4,
+          p: 2,
           mx: "auto",
           background: "linear-gradient(135deg, #f0f4ff, #ffffff)",
         }}
       >
-        <CardContent>
+        <CardContent sx={{ p: 2 }}> {/* 👈 menos padding interno */}
           {/* Avatar + título */}
-          <Stack alignItems="center" spacing={2} sx={{ mb: 3 }}>
+          <Stack alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
             <Avatar
               sx={{
                 bgcolor: "primary.main",
-                width: 80,
-                height: 80,
-                fontSize: "2rem",
+                width: 70,
+                height: 70,
+                fontSize: "1.8rem",
               }}
             >
               {usuario?.nombre?.[0] || "U"}
             </Avatar>
             <Typography
-              variant="h5"
+              variant="h6"
               sx={{ fontWeight: "bold", color: "primary.main" }}
             >
               Perfil del Usuario
@@ -128,8 +128,8 @@ export default function Perfil() {
           ) : usuario ? (
             <Box
               sx={{
-                mb: 3,
-                p: 2,
+                mb: 2,
+                p: 1.5,
                 borderRadius: 2,
                 bgcolor: "#f9f9f9",
               }}
@@ -153,7 +153,7 @@ export default function Perfil() {
             </Typography>
           )}
 
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 1.5 }} />
 
           {/* 👇 Mensaje compacto arriba del formulario */}
           {mensaje.texto && (
@@ -163,7 +163,7 @@ export default function Perfil() {
               sx={{
                 mb: 2,
                 borderRadius: 2,
-                fontSize: "0.85rem",
+                fontSize: "0.8rem",
                 p: 1,
               }}
             >
@@ -173,9 +173,9 @@ export default function Perfil() {
 
           {/* Cambiar contraseña */}
           <Typography
-            variant="subtitle1"
+            variant="subtitle2"
             sx={{
-              mb: 2,
+              mb: 1.5,
               fontWeight: "bold",
               color: "text.secondary",
               display: "flex",
@@ -183,7 +183,7 @@ export default function Perfil() {
               gap: 1,
             }}
           >
-            <LockIcon /> Cambiar Contraseña
+            <LockIcon fontSize="small" /> Cambiar Contraseña
           </Typography>
           <TextField
             label="Contraseña Actual"
@@ -210,11 +210,11 @@ export default function Perfil() {
             onChange={(e) => setConfirmarPassword(e.target.value)}
           />
 
-          <Box sx={{ mt: 3, textAlign: "right" }}>
+          <Box sx={{ mt: 2, textAlign: "right" }}>
             <Button
               variant="contained"
               color="primary"
-              size="large"
+              size="medium"
               onClick={handleChangePassword}
             >
               Guardar Cambios
