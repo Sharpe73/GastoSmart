@@ -13,8 +13,10 @@ import {
   DialogContent,
   DialogActions,
   Box,
+  useMediaQuery,
 } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
 import { useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import API from "../api";
@@ -38,6 +40,10 @@ function Gastos() {
   const location = useLocation();
   const categoriaSeleccionada = location.state?.categoriaId || "";
   const [categoriaNombre, setCategoriaNombre] = useState("");
+
+  // 📱 detectar si es móvil
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     const fetchData = async () => {
@@ -252,7 +258,7 @@ function Gastos() {
             disabled={saldo && saldo.saldoRestante <= 0}
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={12} sm={3}>
           <TextField
             label="Monto"
             type="number"
@@ -262,7 +268,7 @@ function Gastos() {
             disabled={saldo && saldo.saldoRestante <= 0}
           />
         </Grid>
-        <Grid item xs={6} sm={3}>
+        <Grid item xs={12} sm={3}>
           <TextField
             select
             label="Categoría"
@@ -279,15 +285,22 @@ function Gastos() {
           </TextField>
         </Grid>
 
-        {/* Botones en la misma fila, armonizados */}
+        {/* Botones adaptados */}
         <Grid item xs={12}>
-          <Box sx={{ display: "flex", gap: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              gap: 2,
+            }}
+          >
             <Button
               variant="contained"
               color="primary"
               onClick={handleAddGasto}
               disabled={saldo && saldo.saldoRestante <= 0}
-              sx={{ height: 40, minWidth: 180 }}
+              sx={{ height: 40, flex: isMobile ? "1" : "unset" }}
+              fullWidth={isMobile}
             >
               Agregar Gasto
             </Button>
@@ -296,7 +309,8 @@ function Gastos() {
               component="label"
               startIcon={<AttachFile />}
               disabled={saldo && saldo.saldoRestante <= 0}
-              sx={{ height: 40, minWidth: 180 }}
+              sx={{ height: 40, flex: isMobile ? "1" : "unset" }}
+              fullWidth={isMobile}
             >
               Adjuntar documento
               <input
