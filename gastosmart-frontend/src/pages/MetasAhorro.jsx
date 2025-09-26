@@ -332,34 +332,38 @@ function MetasAhorro() {
               <Typography variant="subtitle2" sx={{ mb: 1 }}>
                 Historial de aportes:
               </Typography>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Monto</TableCell>
-                    <TableCell>Fecha</TableCell>
-                    <TableCell align="right">Acción</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {(aportes[metaSeleccionada.id] || []).map((a) => (
-                    <TableRow key={a.id}>
-                      <TableCell>${Number(a.monto).toLocaleString("es-CL")}</TableCell>
-                      <TableCell>{new Date(a.fecha).toLocaleString("es-CL")}</TableCell>
-                      <TableCell align="right">
-                        <IconButton
-                          edge="end"
-                          color="error"
-                          onClick={() =>
-                            setAporteAEliminar({ id: a.id, metaId: metaSeleccionada.id })
-                          }
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
+
+              {/* Scroll interno */}
+              <Box sx={{ maxHeight: 250, overflowY: "auto" }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Monto</TableCell>
+                      <TableCell>Fecha</TableCell>
+                      <TableCell align="right">Acción</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHead>
+                  <TableBody>
+                    {(aportes[metaSeleccionada.id] || []).map((a) => (
+                      <TableRow key={a.id}>
+                        <TableCell>${Number(a.monto).toLocaleString("es-CL")}</TableCell>
+                        <TableCell>{new Date(a.fecha).toLocaleString("es-CL")}</TableCell>
+                        <TableCell align="right">
+                          <IconButton
+                            edge="end"
+                            color="error"
+                            onClick={() =>
+                              setAporteAEliminar({ id: a.id, metaId: metaSeleccionada.id })
+                            }
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
 
               <Box sx={{ display: "flex", gap: 1, mt: 3 }}>
                 <TextField
