@@ -1,4 +1,3 @@
-// src/pages/MetasAhorro.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -63,7 +62,7 @@ function MetasAhorro() {
 
         const inicialInputs = {};
         metasConCalculo.forEach((m) => {
-          inicialInputs[m.id] = 0;
+          inicialInputs[m.id] = ""; // 👈 iniciar vacío
           fetchAportes(m.id);
         });
         setMontoInputs(inicialInputs);
@@ -111,7 +110,7 @@ function MetasAhorro() {
       const estado = porcentaje >= 100 ? "Completada" : "En progreso";
 
       setMetas([{ ...meta, porcentaje, estado }, ...metas]);
-      setMontoInputs({ ...montoInputs, [meta.id]: 0 });
+      setMontoInputs({ ...montoInputs, [meta.id]: "" }); // 👈 iniciar vacío
       fetchAportes(meta.id);
       handleClose();
     } catch (err) {
@@ -142,7 +141,7 @@ function MetasAhorro() {
         return { ...m, porcentaje, estado };
       });
       setMetas(metasConCalculo);
-      setMontoInputs({ ...montoInputs, [id]: 0 });
+      setMontoInputs({ ...montoInputs, [id]: "" }); // 👈 reset vacío
     } catch (err) {
       console.error("❌ Error al registrar aporte:", err);
     }
@@ -370,21 +369,23 @@ function MetasAhorro() {
                   type="number"
                   size="small"
                   label="Monto"
-                  value={montoInputs[metaSeleccionada.id] || 0}
+                  value={montoInputs[metaSeleccionada.id] ?? ""} // 👈 vacío si no hay valor
                   onChange={(e) =>
                     setMontoInputs({
                       ...montoInputs,
-                      [metaSeleccionada.id]: Number(e.target.value),
+                      [metaSeleccionada.id]:
+                        e.target.value === "" ? "" : Number(e.target.value),
                     })
                   }
                   sx={{ flex: 1 }}
                 />
                 <IconButton
                   color="success"
+                  disabled={montoInputs[metaSeleccionada.id] === ""} // 👈 no permite usar vacío
                   onClick={() =>
                     actualizarAhorro(
                       metaSeleccionada.id,
-                      montoInputs[metaSeleccionada.id]
+                      Number(montoInputs[metaSeleccionada.id])
                     )
                   }
                 >
@@ -392,10 +393,11 @@ function MetasAhorro() {
                 </IconButton>
                 <IconButton
                   color="error"
+                  disabled={montoInputs[metaSeleccionada.id] === ""}
                   onClick={() =>
                     actualizarAhorro(
                       metaSeleccionada.id,
-                      -montoInputs[metaSeleccionada.id]
+                      -Number(montoInputs[metaSeleccionada.id])
                     )
                   }
                 >
