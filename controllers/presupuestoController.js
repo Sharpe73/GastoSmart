@@ -1,19 +1,5 @@
 const pool = require("../models/db"); // 👈 conexión a la BD
 
-// Utilidad para formatear fechas a YYYY-MM-DD
-const formatDate = (date) => {
-  if (!date) return null;
-  // 👇 Si es objeto Date, lo pasamos a YYYY-MM-DD
-  if (date instanceof Date) {
-    return date.toISOString().split("T")[0];
-  }
-  // 👇 Si ya es string (ej: '2025-09-01'), lo devolvemos directo
-  if (typeof date === "string") {
-    return date;
-  }
-  return String(date);
-};
-
 // Crear un nuevo presupuesto
 const crearPresupuesto = async (req, res) => {
   try {
@@ -45,13 +31,7 @@ const crearPresupuesto = async (req, res) => {
         "UPDATE presupuestos SET sueldo = $1, fecha_inicio = $2, fecha_fin = $3, created_at = NOW() WHERE id = $4 RETURNING *",
         [sueldo, fecha_inicio, fecha_fin, existe.rows[0].id]
       );
-
-      const row = result.rows[0];
-      return res.json({
-        ...row,
-        fecha_inicio: formatDate(row.fecha_inicio),
-        fecha_fin: formatDate(row.fecha_fin),
-      });
+      return res.json(result.rows[0]);
     }
 
     // Si no existe, crear uno nuevo
@@ -60,12 +40,7 @@ const crearPresupuesto = async (req, res) => {
       [usuario_id, sueldo, fecha_inicio, fecha_fin]
     );
 
-    const row = result.rows[0];
-    res.json({
-      ...row,
-      fecha_inicio: formatDate(row.fecha_inicio),
-      fecha_fin: formatDate(row.fecha_fin),
-    });
+    res.json(result.rows[0]);
   } catch (error) {
     console.error("❌ Error al crear presupuesto:", error);
     res.status(500).json({ error: "Error al guardar presupuesto" });
@@ -93,12 +68,7 @@ const obtenerPresupuesto = async (req, res) => {
         [usuario_id, 0, fechaInicioNueva, fechaFinNueva] // sueldo inicial = 0
       );
 
-      const row = nuevo.rows[0];
-      return res.json({
-        ...row,
-        fecha_inicio: formatDate(row.fecha_inicio),
-        fecha_fin: formatDate(row.fecha_fin),
-      });
+      return res.json(nuevo.rows[0]);
     }
 
     let presupuesto = result.rows[0];
@@ -162,11 +132,7 @@ const obtenerPresupuesto = async (req, res) => {
       presupuesto = nuevoRes.rows[0]; // el que se devuelve al frontend
     }
 
-    res.json({
-      ...presupuesto,
-      fecha_inicio: formatDate(presupuesto.fecha_inicio),
-      fecha_fin: formatDate(presupuesto.fecha_fin),
-    });
+    res.json(presupuesto);
   } catch (error) {
     console.error("❌ Error al obtener presupuesto:", error);
     res.status(500).json({ error: "Error al obtener presupuesto" });
@@ -203,8 +169,8 @@ const obtenerSaldo = async (req, res) => {
       sueldo: parseFloat(presupuesto.sueldo),
       totalGastos,
       saldoRestante,
-      fecha_inicio: formatDate(presupuesto.fecha_inicio),
-      fecha_fin: formatDate(presupuesto.fecha_fin),
+      fecha_inicio: presupuesto.fecha_inicio,
+      fecha_fin: presupuesto.fecha_fin,
     });
   } catch (error) {
     console.error("❌ Error al obtener saldo:", error);
