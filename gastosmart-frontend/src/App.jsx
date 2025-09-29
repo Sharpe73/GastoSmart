@@ -20,7 +20,6 @@ import Liquidaciones from "./pages/Liquidaciones";
 import CambiarPassword from "./pages/CambiarPassword";
 import MetasAhorro from "./pages/MetasAhorro";
 import Perfil from "./pages/Perfil";
-import Combustible from "./pages/Combustible"; // 👈 nuevo import
 
 function App() {
   const handleLogout = () => {
@@ -166,18 +165,6 @@ function App() {
             <ProtectedRoute>
               <AppLayout onLogout={handleLogout}>
                 <MetasAhorro />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Combustible (PROTEGIDO) */}
-        <Route
-          path="/combustible"
-          element={
-            <ProtectedRoute>
-              <AppLayout onLogout={handleLogout}>
-                <Combustible />
               </AppLayout>
             </ProtectedRoute>
           }
