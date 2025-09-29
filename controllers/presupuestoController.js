@@ -73,9 +73,9 @@ const obtenerPresupuesto = async (req, res) => {
 
     let presupuesto = result.rows[0];
 
-    // Si ya terminó el periodo → mover a históricos y crear nuevo
+    // Si ya terminó el periodo → mover a históricos y actualizar con nuevas fechas
     if (new Date(presupuesto.fecha_fin) < hoy) {
-      console.log("📌 Presupuesto finalizado, revisando para mover a históricos...");
+      console.log("📌 Presupuesto finalizado, moviendo a históricos...");
 
       // Calcular total de gastos del periodo
       const gastosRes = await pool.query(
@@ -102,7 +102,7 @@ const obtenerPresupuesto = async (req, res) => {
         [usuario_id]
       );
 
-      // Guardar SIEMPRE en historicos, aunque no haya gastos
+      // Guardar SIEMPRE en historicos
       await pool.query(
         `INSERT INTO historicos 
           (usuario_id, mes, anio, sueldo, total_gastado, saldo_restante, categorias, gastos)
@@ -118,21 +118,18 @@ const obtenerPresupuesto = async (req, res) => {
           JSON.stringify(gastosDetalle.rows),
         ]
       );
-      console.log("✅ Histórico guardado correctamente (incluyendo sin movimientos).");
+      console.log("✅ Histórico guardado correctamente.");
 
-      // 👇 ELIMINAR presupuesto anterior antes de crear el nuevo
-      await pool.query("DELETE FROM presupuestos WHERE id = $1", [presupuesto.id]);
-
-      // Crear nuevo presupuesto del mes actual
+      // 👉 En vez de insertar, actualizar el mismo presupuesto
       const fechaInicioNueva = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
       const fechaFinNueva = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
 
-      const nuevoRes = await pool.query(
-        "INSERT INTO presupuestos (usuario_id, sueldo, fecha_inicio, fecha_fin) VALUES ($1,$2,$3,$4) RETURNING *",
-        [usuario_id, presupuesto.sueldo, fechaInicioNueva, fechaFinNueva]
+      const actualizadoRes = await pool.query(
+        "UPDATE presupuestos SET fecha_inicio = $1, fecha_fin = $2, created_at = NOW() WHERE id = $3 RETURNING *",
+        [fechaInicioNueva, fechaFinNueva, presupuesto.id]
       );
 
-      presupuesto = nuevoRes.rows[0]; // el que se devuelve al frontend
+      presupuesto = actualizadoRes.rows[0]; // mismo presupuesto actualizado
     }
 
     res.json(presupuesto);
