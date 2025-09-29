@@ -100,7 +100,8 @@ function GastosList({ gastos, onEdit, onDelete, onVerDocumento }) {
                 <IconButton color="primary" onClick={() => onEdit(gasto)}>
                   <Edit />
                 </IconButton>
-                <IconButton color="error" onClick={() => onDelete(gasto.id)}>
+                {/* 🔹 Ahora se pasa el objeto gasto completo */}
+                <IconButton color="error" onClick={() => onDelete(gasto)}>
                   <Delete />
                 </IconButton>
               </CardActions>
