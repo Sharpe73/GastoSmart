@@ -63,24 +63,24 @@ export default function Perfil() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // limpiar sesión
-      localStorage.removeItem("token");
+      // Cerrar modal y mostrar mensaje
+      setOpenConfirm(false);
       setMensaje({
         tipo: "success",
-        texto: "✅ Tu cuenta ha sido eliminada correctamente.",
+        texto: "✅ Tu cuenta ha sido eliminada correctamente. Serás redirigido al login...",
       });
 
-      // redirigir (opcional)
+      // limpiar sesión y redirigir después de 2.5s
       setTimeout(() => {
+        localStorage.removeItem("token");
         window.location.href = "/login";
-      }, 2000);
+      }, 2500);
     } catch (err) {
+      setOpenConfirm(false);
       setMensaje({
         tipo: "error",
         texto: "❌ Error al intentar eliminar la cuenta.",
       });
-    } finally {
-      setOpenConfirm(false);
     }
   };
 
@@ -200,7 +200,7 @@ export default function Perfil() {
 
           <Divider sx={{ my: 1.5 }} />
 
-          {/* Mensaje de error compacto */}
+          {/* Mensaje compacto */}
           {mensaje.texto && (
             <Alert
               severity={mensaje.tipo}
@@ -231,10 +231,7 @@ export default function Perfil() {
       </Card>
 
       {/* Modal confirmación */}
-      <Dialog
-        open={openConfirm}
-        onClose={() => setOpenConfirm(false)}
-      >
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle>Confirmar eliminación</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -248,7 +245,11 @@ export default function Perfil() {
           <Button onClick={() => setOpenConfirm(false)} color="secondary">
             Cancelar
           </Button>
-          <Button onClick={handleDeleteAccount} color="error" variant="contained">
+          <Button
+            onClick={handleDeleteAccount}
+            color="error"
+            variant="contained"
+          >
             Eliminar
           </Button>
         </DialogActions>
