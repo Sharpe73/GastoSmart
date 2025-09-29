@@ -58,10 +58,11 @@ async function login(req, res) {
 
     // Buscar usuario por email
     const usuario = await pool.query("SELECT * FROM usuarios WHERE email = $1", [
-      email,
+      email.toLowerCase(),
     ]);
+
     if (usuario.rows.length === 0) {
-      return res.status(400).json({ mensaje: "Credenciales incorrectas" });
+      return res.status(404).json({ mensaje: "❌ Usuario no existe" });
     }
 
     const user = usuario.rows[0];
@@ -69,7 +70,7 @@ async function login(req, res) {
     // Verificar contraseña
     const esValida = await bcrypt.compare(password, user.password);
     if (!esValida) {
-      return res.status(400).json({ mensaje: "Credenciales incorrectas" });
+      return res.status(401).json({ mensaje: "❌ Contraseña incorrecta" });
     }
 
     // ⚡ Si requiere cambiar la contraseña (clave temporal activa)
@@ -267,11 +268,9 @@ async function changePassword(req, res) {
     // Evitar que use la misma contraseña
     const esIgual = await bcrypt.compare(nuevaPassword, user.password);
     if (esIgual) {
-      return res
-        .status(400)
-        .json({
-          mensaje: "La nueva contraseña no puede ser igual a la actual",
-        });
+      return res.status(400).json({
+        mensaje: "La nueva contraseña no puede ser igual a la actual",
+      });
     }
 
     // Guardar nueva contraseña
