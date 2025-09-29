@@ -48,11 +48,19 @@ export default function Config() {
       );
       setMensaje({
         tipo: "success",
-        texto: "✅ Contraseña actualizada correctamente",
+        texto: "✅ Contraseña actualizada correctamente. Serás redirigido al login...",
       });
+
+      // limpiar campos
       setPasswordActual("");
       setNuevaPassword("");
       setConfirmarPassword("");
+
+      // 🔹 Cerrar sesión y redirigir después de 2.5 segundos
+      setTimeout(() => {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      }, 2500);
     } catch (err) {
       setMensaje({
         tipo: "error",
