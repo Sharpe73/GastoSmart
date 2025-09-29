@@ -73,9 +73,9 @@ const obtenerPresupuesto = async (req, res) => {
 
     let presupuesto = result.rows[0];
 
-    // Si ya terminó el periodo → mover a históricos y actualizar con nuevas fechas
+    // Si ya terminó el periodo → mover a históricos y crear nuevo
     if (new Date(presupuesto.fecha_fin) < hoy) {
-      console.log("📌 Presupuesto finalizado, moviendo a históricos...");
+      console.log("📌 Presupuesto finalizado, revisando para mover a históricos...");
 
       // Calcular total de gastos del periodo
       const gastosRes = await pool.query(
@@ -102,7 +102,7 @@ const obtenerPresupuesto = async (req, res) => {
         [usuario_id]
       );
 
-      // Guardar SIEMPRE en historicos
+      // Guardar SIEMPRE en historicos, aunque no haya gastos
       await pool.query(
         `INSERT INTO historicos 
           (usuario_id, mes, anio, sueldo, total_gastado, saldo_restante, categorias, gastos)
@@ -118,18 +118,18 @@ const obtenerPresupuesto = async (req, res) => {
           JSON.stringify(gastosDetalle.rows),
         ]
       );
-      console.log("✅ Histórico guardado correctamente.");
+      console.log("✅ Histórico guardado correctamente (incluyendo sin movimientos).");
 
-      // 👉 En vez de insertar, actualizar el mismo presupuesto
+      // Crear nuevo presupuesto del mes actual
       const fechaInicioNueva = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
       const fechaFinNueva = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
 
-      const actualizadoRes = await pool.query(
-        "UPDATE presupuestos SET fecha_inicio = $1, fecha_fin = $2, created_at = NOW() WHERE id = $3 RETURNING *",
-        [fechaInicioNueva, fechaFinNueva, presupuesto.id]
+      const nuevoRes = await pool.query(
+        "INSERT INTO presupuestos (usuario_id, sueldo, fecha_inicio, fecha_fin) VALUES ($1,$2,$3,$4) RETURNING *",
+        [usuario_id, presupuesto.sueldo, fechaInicioNueva, fechaFinNueva]
       );
 
-      presupuesto = actualizadoRes.rows[0]; // mismo presupuesto actualizado
+      presupuesto = nuevoRes.rows[0]; // el que se devuelve al frontend
     }
 
     res.json(presupuesto);
