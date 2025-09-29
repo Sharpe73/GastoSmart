@@ -19,13 +19,15 @@ import { obtenerIndicadores } from "../api/indicadores";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import CategoryIcon from "@mui/icons-material/Category";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
   const [gastos, setGastos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [presupuesto, setPresupuesto] = useState(null);
-  const [indicadores, setIndicadores] = useState(null); 
+  const [indicadores, setIndicadores] = useState(null);
+  const [combustible, setCombustible] = useState(null);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
@@ -61,6 +63,27 @@ function Dashboard() {
 
         const indData = await obtenerIndicadores();
         setIndicadores(indData);
+
+        // 📍 Obtener ubicación y consultar backend
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(async (pos) => {
+            try {
+              const lat = pos.coords.latitude;
+              const lon = pos.coords.longitude;
+
+              // 🔹 Ahora usamos nuestro backend en lugar de la API pública
+              const res = await API.get(`/combustible?lat=${lat}&lng=${lon}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+
+              if (res.data) {
+                setCombustible(res.data);
+              }
+            } catch (err) {
+              console.error("❌ Error al obtener precios de combustible:", err);
+            }
+          });
+        }
       } catch (err) {
         console.error("❌ Error al cargar datos del Dashboard:", err);
       } finally {
@@ -70,6 +93,7 @@ function Dashboard() {
 
     fetchData();
 
+    // 🔄 Refrescar indicadores cada hora
     const interval = setInterval(async () => {
       try {
         const indData = await obtenerIndicadores();
@@ -166,7 +190,7 @@ function Dashboard() {
         )}
       </Box>
 
-      {/* ✅ Alert con información financiera + periodo */}
+      {/* ✅ Alert con información financiera */}
       <Alert
         icon={<TrendingUpIcon fontSize="inherit" />}
         severity="info"
@@ -240,6 +264,32 @@ function Dashboard() {
                   <Typography variant={amountVariant}>
                     ${(Number(presupuesto.sueldo) - totalGeneral).toLocaleString("es-CL")}
                   </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* 🔹 Tarjeta de Combustible */}
+        <Grid item xs={12} sm={6} md={4}>
+          <Card sx={{ ...cardStyle, bgcolor: "#FFA726", color: "white" }}>
+            <CardContent sx={contentStyle}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar sx={{ bgcolor: "white", color: "#FB8C00" }}>
+                  <LocalGasStationIcon />
+                </Avatar>
+                <Box>
+                  <Typography variant={titleVariant}>Combustible</Typography>
+                  {combustible ? (
+                    <Box>
+                      <Typography variant={amountVariant}>93: ${combustible.b93 || "-"}</Typography>
+                      <Typography variant={amountVariant}>95: ${combustible.b95 || "-"}</Typography>
+                      <Typography variant={amountVariant}>97: ${combustible.b97 || "-"}</Typography>
+                      <Typography variant={amountVariant}>Diésel: ${combustible.diesel || "-"}</Typography>
+                    </Box>
+                  ) : (
+                    <Typography variant={amountVariant}>Cargando precios ⛽...</Typography>
+                  )}
                 </Box>
               </Box>
             </CardContent>
