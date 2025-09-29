@@ -1,6 +1,5 @@
 // routes/combustibleRoutes.js
 const express = require("express");
-const fetch = require("node-fetch");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -10,12 +9,13 @@ router.get("/", async (req, res) => {
       return res.status(400).json({ error: "Se requieren lat y lng" });
     }
 
+    // 🔹 Llamada a la API pública con fetch nativo de Node 18+
     const response = await fetch(
       `https://api.bencinaenlinea.cl/v1/estaciones?lat=${lat}&lng=${lng}&limit=5`
     );
     const data = await response.json();
 
-    // 🔹 Precios mínimos por combustible
+    // 🔹 Precios mínimos por tipo de combustible
     const precios = { b93: null, b95: null, b97: null, diesel: null };
 
     data.forEach((est) => {
