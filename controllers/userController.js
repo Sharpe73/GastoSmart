@@ -49,14 +49,14 @@ async function getUserById(req, res) {
   }
 }
 
-// 🔹 Actualizar usuario (nombre, apellido, correo)
+// 🔹 Actualizar usuario (solo nombre y apellido)
 async function updateUser(req, res) {
   try {
     const { id } = req.params;
-    const { nombre, apellido, email } = req.body;
+    const { nombre, apellido } = req.body;
 
-    if (!nombre || !apellido || !email) {
-      return res.status(400).json({ mensaje: "Todos los campos son obligatorios" });
+    if (!nombre || !apellido) {
+      return res.status(400).json({ mensaje: "Nombre y apellido son obligatorios" });
     }
 
     // Verificar si el usuario existe
@@ -65,13 +65,13 @@ async function updateUser(req, res) {
       return res.status(404).json({ mensaje: "Usuario no encontrado" });
     }
 
-    // Actualizar datos
+    // Actualizar solo nombre y apellido
     const actualizado = await pool.query(
       `UPDATE usuarios 
-       SET nombre = $1, apellido = $2, email = $3
-       WHERE id = $4
+       SET nombre = $1, apellido = $2
+       WHERE id = $3
        RETURNING id, nombre, apellido, email, estado, creado_en, ultimo_login, verificado`,
-      [nombre, apellido, email, id]
+      [nombre, apellido, id]
     );
 
     res.json({

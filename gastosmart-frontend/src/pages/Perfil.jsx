@@ -172,7 +172,7 @@ export default function Perfil() {
                     value={usuario.email}
                     fullWidth
                     margin="dense"
-                    InputProps={{ readOnly: true }}
+                    disabled // 👈 ahora SI bloqueado
                   />
                   <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
                     <Button variant="contained" onClick={handleSaveChanges}>
