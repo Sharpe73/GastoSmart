@@ -1,4 +1,3 @@
-// controllers/userController.js
 const pool = require("../models/db");
 
 // 🔹 Obtener usuario por ID (sin contraseña)
@@ -50,4 +49,28 @@ async function getUserById(req, res) {
   }
 }
 
-module.exports = { getUserById };
+// 🔹 Eliminar usuario por ID
+async function deleteUser(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Verificar si el usuario existe
+    const result = await pool.query("SELECT id FROM usuarios WHERE id = $1", [
+      id,
+    ]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ mensaje: "Usuario no encontrado" });
+    }
+
+    // Eliminar usuario (ON DELETE CASCADE se encarga de categorías y gastos)
+    await pool.query("DELETE FROM usuarios WHERE id = $1", [id]);
+
+    res.json({ mensaje: "✅ Usuario eliminado correctamente" });
+  } catch (error) {
+    console.error("❌ Error en deleteUser:", error);
+    res.status(500).json({ mensaje: "Error al eliminar usuario" });
+  }
+}
+
+module.exports = { getUserById, deleteUser };

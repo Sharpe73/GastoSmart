@@ -11,6 +11,12 @@ import {
   Stack,
   Alert,
   Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import API from "../api";
 import { jwtDecode } from "jwt-decode";
@@ -24,6 +30,7 @@ export default function Perfil() {
   const [usuario, setUsuario] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mensaje, setMensaje] = useState({ tipo: "", texto: "" });
+  const [openConfirm, setOpenConfirm] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -47,6 +54,35 @@ export default function Perfil() {
     };
     if (token) fetchUser();
   }, [token]);
+
+  // 🔹 Eliminar cuenta
+  const handleDeleteAccount = async () => {
+    try {
+      const decoded = jwtDecode(token);
+      await API.delete(`/usuarios/${decoded.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // limpiar sesión
+      localStorage.removeItem("token");
+      setMensaje({
+        tipo: "success",
+        texto: "✅ Tu cuenta ha sido eliminada correctamente.",
+      });
+
+      // redirigir (opcional)
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 2000);
+    } catch (err) {
+      setMensaje({
+        tipo: "error",
+        texto: "❌ Error al intentar eliminar la cuenta.",
+      });
+    } finally {
+      setOpenConfirm(false);
+    }
+  };
 
   return (
     <Container sx={{ mt: 2 }}>
@@ -107,7 +143,12 @@ export default function Perfil() {
               </Stack>
 
               {/* Estado del usuario */}
-              <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+              <Stack
+                direction="row"
+                spacing={1}
+                alignItems="center"
+                sx={{ mt: 1 }}
+              >
                 <Typography>
                   <strong>Estado:</strong>
                 </Typography>
@@ -174,8 +215,44 @@ export default function Perfil() {
               {mensaje.texto}
             </Alert>
           )}
+
+          {/* 🔹 Botón eliminar cuenta */}
+          <Box sx={{ mt: 2 }}>
+            <Button
+              variant="outlined"
+              color="error"
+              fullWidth
+              onClick={() => setOpenConfirm(true)}
+            >
+              Eliminar mi cuenta
+            </Button>
+          </Box>
         </CardContent>
       </Card>
+
+      {/* Modal confirmación */}
+      <Dialog
+        open={openConfirm}
+        onClose={() => setOpenConfirm(false)}
+      >
+        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Estás seguro que deseas eliminar tu cuenta?
+            <br />
+            Esta acción es <strong>irreversible</strong> y borrará todos tus datos
+            (categorías, gastos, etc.).
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)} color="secondary">
+            Cancelar
+          </Button>
+          <Button onClick={handleDeleteAccount} color="error" variant="contained">
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }
