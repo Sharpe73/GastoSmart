@@ -120,6 +120,9 @@ const obtenerPresupuesto = async (req, res) => {
       );
       console.log("✅ Histórico guardado correctamente (incluyendo sin movimientos).");
 
+      // 👇 ELIMINAR presupuesto anterior antes de crear el nuevo
+      await pool.query("DELETE FROM presupuestos WHERE id = $1", [presupuesto.id]);
+
       // Crear nuevo presupuesto del mes actual
       const fechaInicioNueva = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
       const fechaFinNueva = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
