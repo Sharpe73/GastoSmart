@@ -1,7 +1,7 @@
 // routes/userRoutes.js
 const express = require("express");
 const router = express.Router();
-const { getUserById, deleteUser } = require("../controllers/userController");
+const { getUserById, deleteUser, updateUser } = require("../controllers/userController");
 const authMiddleware = require("../middleware/authMiddleware");
 
 /**
@@ -33,6 +33,44 @@ const authMiddleware = require("../middleware/authMiddleware");
  *         description: Usuario no encontrado
  */
 router.get("/:id", authMiddleware, getUserById);
+
+/**
+ * @swagger
+ * /usuarios/{id}:
+ *   put:
+ *     summary: Actualizar datos básicos de un usuario
+ *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *               apellido:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Usuario actualizado correctamente
+ *       400:
+ *         description: Datos inválidos
+ *       403:
+ *         description: No autorizado
+ *       404:
+ *         description: Usuario no encontrado
+ */
+router.put("/:id", authMiddleware, updateUser);
 
 /**
  * @swagger
