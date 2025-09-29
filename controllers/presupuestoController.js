@@ -3,7 +3,15 @@ const pool = require("../models/db"); // 👈 conexión a la BD
 // Utilidad para formatear fechas a YYYY-MM-DD
 const formatDate = (date) => {
   if (!date) return null;
-  return new Date(date).toISOString().split("T")[0];
+  // 👇 Si es objeto Date, lo pasamos a YYYY-MM-DD
+  if (date instanceof Date) {
+    return date.toISOString().split("T")[0];
+  }
+  // 👇 Si ya es string (ej: '2025-09-01'), lo devolvemos directo
+  if (typeof date === "string") {
+    return date;
+  }
+  return String(date);
 };
 
 // Crear un nuevo presupuesto
