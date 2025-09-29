@@ -29,7 +29,8 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import HistoryIcon from "@mui/icons-material/History"; // Históricos
 import DescriptionIcon from "@mui/icons-material/Description"; // Liquidaciones
 import SavingsIcon from "@mui/icons-material/Savings"; // Metas de Ahorro
-import AccountCircleIcon from "@mui/icons-material/AccountCircle"; // Perfil 👈
+import AccountCircleIcon from "@mui/icons-material/AccountCircle"; // Perfil
+import LocalGasStationIcon from "@mui/icons-material/LocalGasStation"; // 🚗 Combustible
 
 // Logo
 import logo from "../assets/gasto.png";
@@ -232,6 +233,23 @@ export default function Sidebar({ open, onClose, onLogout }) {
             <DescriptionIcon />
           </ListItemIcon>
           <ListItemText primary="Liquidaciones" />
+        </ListItemButton>
+
+        {/* 🚗 Combustible */}
+        <ListItemButton
+          component={RouterLink}
+          to="/combustible"
+          selected={location.pathname.startsWith("/combustible")}
+          onClick={!isDesktop ? onClose : undefined}
+          sx={{
+            "&.Mui-selected": { bgcolor: "primary.light", color: "white" },
+            "&:hover": { bgcolor: "primary.light", color: "white" },
+          }}
+        >
+          <ListItemIcon>
+            <LocalGasStationIcon />
+          </ListItemIcon>
+          <ListItemText primary="Combustible" />
         </ListItemButton>
 
         {/* Perfil 👤 */}

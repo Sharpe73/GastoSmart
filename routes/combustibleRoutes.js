@@ -20,11 +20,13 @@ router.get("/", async (req, res) => {
 
     data.forEach((est) => {
       est.combustibles.forEach((c) => {
+        const nombre = c.nombre.toLowerCase(); // normalizamos a minúsculas
         let key = null;
-        if (c.nombre.includes("93")) key = "b93";
-        if (c.nombre.includes("95")) key = "b95";
-        if (c.nombre.includes("97")) key = "b97";
-        if (c.nombre.toLowerCase().includes("diesel")) key = "diesel";
+
+        if (nombre.includes("93")) key = "b93";
+        if (nombre.includes("95")) key = "b95";
+        if (nombre.includes("97")) key = "b97";
+        if (nombre.includes("diesel")) key = "diesel";
 
         if (key) {
           if (precios[key] === null || c.precio < precios[key]) {
