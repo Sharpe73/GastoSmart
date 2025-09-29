@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import {
   Typography,
@@ -11,10 +10,6 @@ import {
   CircularProgress,
   useMediaQuery,
   useTheme,
-  TextField,
-  Select,
-  MenuItem,
-  Button,
 } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import API from "../api";
@@ -30,15 +25,10 @@ function Dashboard() {
   const [gastos, setGastos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [presupuesto, setPresupuesto] = useState(null);
-  const [indicadores, setIndicadores] = useState(null);
+  const [indicadores, setIndicadores] = useState(null); 
   const [loading, setLoading] = useState(true);
-
-  // 🔹 Estado para convertidor de monedas
-  const [amount, setAmount] = useState(1000);
-  const [toCurrency, setToCurrency] = useState("USD");
-  const [conversion, setConversion] = useState(null);
-
   const token = localStorage.getItem("token");
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -92,21 +82,6 @@ function Dashboard() {
     return () => clearInterval(interval);
   }, [token]);
 
-  // 🔹 Función para convertir moneda
-  const handleConvert = async () => {
-    try {
-      const res = await fetch(
-        `https://api.exchangerate.host/convert?from=CLP&to=${toCurrency}&amount=${amount}`
-      );
-      const data = await res.json();
-      if (data.success) {
-        setConversion(data.result);
-      }
-    } catch (error) {
-      console.error("❌ Error al convertir moneda:", error);
-    }
-  };
-
   if (loading) {
     return (
       <Box sx={{ mt: 6, textAlign: "center" }}>
@@ -137,12 +112,13 @@ function Dashboard() {
 
   return (
     <Box>
-      {/* 🔹 Encabezado con título + indicadores + convertidor */}
+      {/* 🔹 Encabezado con título + indicadores */}
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
-          gap: 2,
+          flexDirection: isMobile ? "column" : "row",
+          justifyContent: "space-between",
+          alignItems: isMobile ? "flex-start" : "center",
           mb: 3,
         }}
       >
@@ -155,8 +131,9 @@ function Dashboard() {
             sx={{
               display: "flex",
               flexWrap: "wrap",
-              justifyContent: "flex-start",
-              gap: 3,
+              justifyContent: isMobile ? "flex-start" : "flex-end",
+              gap: 2,
+              mt: isMobile ? 1 : 0,
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
@@ -187,50 +164,6 @@ function Dashboard() {
             </Box>
           </Box>
         )}
-
-        {/* 🔹 Convertidor de Monedas */}
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 1.5,
-            alignItems: "center",
-            bgcolor: "#f9f9f9",
-            p: 2,
-            borderRadius: 2,
-            boxShadow: 2,
-          }}
-        >
-          <Typography variant="body2" sx={{ fontWeight: "bold", mr: 1 }}>
-            💱 Convertidor CLP →
-          </Typography>
-          <TextField
-            size="small"
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            sx={{ width: 120 }}
-          />
-          <Select
-            size="small"
-            value={toCurrency}
-            onChange={(e) => setToCurrency(e.target.value)}
-            sx={{ width: 100 }}
-          >
-            <MenuItem value="USD">USD</MenuItem>
-            <MenuItem value="EUR">EUR</MenuItem>
-            <MenuItem value="ARS">ARS</MenuItem>
-            <MenuItem value="BRL">BRL</MenuItem>
-          </Select>
-          <Button variant="contained" size="small" onClick={handleConvert}>
-            Convertir
-          </Button>
-          {conversion && (
-            <Typography variant="body2" sx={{ ml: 2, fontWeight: "bold" }}>
-              = {conversion.toLocaleString("es-CL")} {toCurrency}
-            </Typography>
-          )}
-        </Box>
       </Box>
 
       {/* ✅ Alert con información financiera + periodo */}
@@ -243,10 +176,10 @@ function Dashboard() {
           "& .MuiAlert-message": { width: "100%" },
         }}
       >
-        <strong>{user ? `${user.nombre} ${user.apellido}` : "Usuario"}</strong>, este es tu
-        resumen financiero actualizado. Actualmente tienes un total de{" "}
-        <strong>${totalGeneral.toLocaleString("es-CL")}</strong> en gastos distribuidos en{" "}
-        <strong>{categorias.length}</strong> categorías.
+        <strong>{user ? `${user.nombre} ${user.apellido}` : "Usuario"}</strong>, este es tu resumen financiero actualizado. 
+        Actualmente tienes un total de{" "}
+        <strong>${totalGeneral.toLocaleString("es-CL")}</strong> en gastos
+        distribuidos en <strong>{categorias.length}</strong> categorías.
         <br />
         📅 Período:{" "}
         <strong>
@@ -255,7 +188,6 @@ function Dashboard() {
         </strong>
       </Alert>
 
-      {/* 🔹 Tarjetas financieras */}
       <Grid container spacing={3}>
         {/* Tarjeta presupuesto inicial */}
         <Grid item xs={12} sm={6} md={4}>
