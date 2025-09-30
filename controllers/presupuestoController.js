@@ -137,6 +137,22 @@ const obtenerPresupuesto = async (req, res) => {
         console.log("⚠️ Histórico ya existía, no se insertó duplicado.");
       }
 
+      // 🔹 Mover gastos a tabla de históricos
+      await pool.query(
+        `INSERT INTO gastos_historicos (usuario_id, descripcion, monto, fecha, categoria_id)
+         SELECT usuario_id, descripcion, monto, fecha, categoria_id
+         FROM gastos
+         WHERE usuario_id = $1 AND fecha BETWEEN $2 AND $3`,
+        [usuario_id, presupuesto.fecha_inicio, presupuesto.fecha_fin]
+      );
+
+      // 🔹 Eliminar esos gastos de la tabla principal
+      await pool.query(
+        "DELETE FROM gastos WHERE usuario_id = $1 AND fecha BETWEEN $2 AND $3",
+        [usuario_id, presupuesto.fecha_inicio, presupuesto.fecha_fin]
+      );
+      console.log("🗑️ Gastos movidos a históricos y limpiados de la tabla principal.");
+
       // 🔹 Eliminar presupuesto viejo
       await pool.query("DELETE FROM presupuestos WHERE id = $1", [presupuesto.id]);
 
