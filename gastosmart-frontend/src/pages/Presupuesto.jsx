@@ -37,7 +37,15 @@ function Presupuesto() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // 🔹 formatea fecha a dd-mm-yyyy para mostrar bonito
+  // 🔹 Normalizar fecha a YYYY-MM-DD sin desfase horario
+  const normalizarFecha = (fecha) => {
+    if (!fecha) return null;
+    const d = new Date(fecha);
+    d.setMinutes(d.getMinutes() + d.getTimezoneOffset());
+    return d.toISOString().split("T")[0];
+  };
+
+  // 🔹 Formato bonito dd-mm-yyyy
   const formatFechaBonita = (fecha) => {
     if (!fecha) return "";
     const d = new Date(fecha);
@@ -48,7 +56,7 @@ function Presupuesto() {
     });
   };
 
-  // 🔹 formatea fecha a yyyy-mm-dd para el input type=date
+  // 🔹 Formato para inputs
   const formatFechaInput = (fecha) => {
     if (!fecha) return "";
     const d = new Date(fecha);
@@ -91,8 +99,8 @@ function Presupuesto() {
     try {
       await API.post("/presupuesto", {
         sueldo,
-        fecha_inicio: fechaInicio,
-        fecha_fin: fechaFin,
+        fecha_inicio: normalizarFecha(fechaInicio),
+        fecha_fin: normalizarFecha(fechaFin),
       });
       setMensaje("✅ Presupuesto guardado correctamente");
 

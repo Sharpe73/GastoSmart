@@ -21,14 +21,21 @@ const crearPresupuesto = async (req, res) => {
 
     // Verificar si ya existe un presupuesto activo para el usuario
     const existe = await pool.query(
-      "SELECT * FROM presupuestos WHERE usuario_id = $1 ORDER BY created_at DESC LIMIT 1",
+      `SELECT id, usuario_id, sueldo, 
+              fecha_inicio::date, fecha_fin::date, created_at
+       FROM presupuestos 
+       WHERE usuario_id = $1 
+       ORDER BY created_at DESC LIMIT 1`,
       [usuario_id]
     );
 
     if (existe.rows.length > 0) {
       // actualizar el presupuesto más reciente
       const result = await pool.query(
-        "UPDATE presupuestos SET sueldo = $1, fecha_inicio = $2, fecha_fin = $3, created_at = NOW() WHERE id = $4 RETURNING *",
+        `UPDATE presupuestos 
+         SET sueldo = $1, fecha_inicio = $2::date, fecha_fin = $3::date, created_at = NOW() 
+         WHERE id = $4 RETURNING 
+            id, usuario_id, sueldo, fecha_inicio::date, fecha_fin::date, created_at`,
         [sueldo, fecha_inicio, fecha_fin, existe.rows[0].id]
       );
       return res.json(result.rows[0]);
@@ -36,7 +43,9 @@ const crearPresupuesto = async (req, res) => {
 
     // Si no existe, crear uno nuevo
     const result = await pool.query(
-      "INSERT INTO presupuestos (usuario_id, sueldo, fecha_inicio, fecha_fin) VALUES ($1, $2, $3, $4) RETURNING *",
+      `INSERT INTO presupuestos (usuario_id, sueldo, fecha_inicio, fecha_fin) 
+       VALUES ($1, $2, $3::date, $4::date) 
+       RETURNING id, usuario_id, sueldo, fecha_inicio::date, fecha_fin::date, created_at`,
       [usuario_id, sueldo, fecha_inicio, fecha_fin]
     );
 
@@ -54,7 +63,11 @@ const obtenerPresupuesto = async (req, res) => {
     const hoy = new Date();
 
     const result = await pool.query(
-      "SELECT * FROM presupuestos WHERE usuario_id = $1 ORDER BY created_at DESC LIMIT 1",
+      `SELECT id, usuario_id, sueldo, 
+              fecha_inicio::date, fecha_fin::date, created_at
+       FROM presupuestos 
+       WHERE usuario_id = $1 
+       ORDER BY created_at DESC LIMIT 1`,
       [usuario_id]
     );
 
@@ -64,7 +77,9 @@ const obtenerPresupuesto = async (req, res) => {
       const fechaFinNueva = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
 
       const nuevo = await pool.query(
-        "INSERT INTO presupuestos (usuario_id, sueldo, fecha_inicio, fecha_fin) VALUES ($1,$2,$3,$4) RETURNING *",
+        `INSERT INTO presupuestos (usuario_id, sueldo, fecha_inicio, fecha_fin) 
+         VALUES ($1,$2,$3::date,$4::date) 
+         RETURNING id, usuario_id, sueldo, fecha_inicio::date, fecha_fin::date, created_at`,
         [usuario_id, 0, fechaInicioNueva, fechaFinNueva] // sueldo inicial = 0
       );
 
@@ -79,8 +94,6 @@ const obtenerPresupuesto = async (req, res) => {
 
       return res.json({
         ...nuevo.rows[0],
-        fecha_inicio: fechaInicioNueva.toISOString().split("T")[0],
-        fecha_fin: fechaFinNueva.toISOString().split("T")[0],
         totalGastos,
         saldoRestante,
       });
@@ -171,7 +184,9 @@ const obtenerPresupuesto = async (req, res) => {
       );
 
       const nuevoRes = await pool.query(
-        "INSERT INTO presupuestos (usuario_id, sueldo, fecha_inicio, fecha_fin) VALUES ($1,$2,$3,$4) RETURNING *",
+        `INSERT INTO presupuestos (usuario_id, sueldo, fecha_inicio, fecha_fin) 
+         VALUES ($1,$2,$3::date,$4::date) 
+         RETURNING id, usuario_id, sueldo, fecha_inicio::date, fecha_fin::date, created_at`,
         [usuario_id, presupuesto.sueldo, fechaInicioNueva, fechaFinNueva]
       );
 
@@ -186,8 +201,6 @@ const obtenerPresupuesto = async (req, res) => {
 
       presupuesto = {
         ...nuevoRes.rows[0],
-        fecha_inicio: fechaInicioNueva.toISOString().split("T")[0],
-        fecha_fin: fechaFinNueva.toISOString().split("T")[0],
         totalGastos: totalGastosNuevo,
         saldoRestante: saldoRestanteNuevo,
       };
@@ -207,8 +220,6 @@ const obtenerPresupuesto = async (req, res) => {
 
     res.json({
       ...presupuesto,
-      fecha_inicio: new Date(presupuesto.fecha_inicio).toISOString().split("T")[0],
-      fecha_fin: new Date(presupuesto.fecha_fin).toISOString().split("T")[0],
       totalGastos: presupuesto.totalGastos || 0,
       saldoRestante: presupuesto.saldoRestante || presupuesto.sueldo,
     });
@@ -225,7 +236,11 @@ const obtenerSaldo = async (req, res) => {
 
     // Traer el presupuesto más reciente
     const presupuestoRes = await pool.query(
-      "SELECT * FROM presupuestos WHERE usuario_id = $1 ORDER BY created_at DESC LIMIT 1",
+      `SELECT id, usuario_id, sueldo, 
+              fecha_inicio::date, fecha_fin::date, created_at
+       FROM presupuestos 
+       WHERE usuario_id = $1 
+       ORDER BY created_at DESC LIMIT 1`,
       [usuario_id]
     );
 
@@ -248,8 +263,8 @@ const obtenerSaldo = async (req, res) => {
       sueldo: parseFloat(presupuesto.sueldo),
       totalGastos,
       saldoRestante,
-      fecha_inicio: new Date(presupuesto.fecha_inicio).toISOString().split("T")[0],
-      fecha_fin: new Date(presupuesto.fecha_fin).toISOString().split("T")[0],
+      fecha_inicio: presupuesto.fecha_inicio,
+      fecha_fin: presupuesto.fecha_fin,
     });
   } catch (error) {
     console.error("❌ Error al obtener saldo:", error);
