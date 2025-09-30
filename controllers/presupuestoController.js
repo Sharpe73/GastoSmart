@@ -68,14 +68,18 @@ const obtenerPresupuesto = async (req, res) => {
         [usuario_id, 0, fechaInicioNueva, fechaFinNueva] // sueldo inicial = 0
       );
 
-      return res.json(nuevo.rows[0]);
+      return res.json({
+        ...nuevo.rows[0],
+        totalGastos: 0,
+        saldoRestante: 0,
+      });
     }
 
     let presupuesto = result.rows[0];
 
-    // Si ya terminó el periodo → mover a históricos y crear nuevo
+    // Si ya terminó el periodo → mover a históricos y crear nuevo limpio
     if (new Date(presupuesto.fecha_fin) < hoy) {
-      console.log("📌 Presupuesto finalizado, revisando para mover a históricos...");
+      console.log("📌 Presupuesto finalizado, guardando en históricos...");
 
       // Calcular total de gastos del periodo
       const gastosRes = await pool.query(
@@ -102,7 +106,7 @@ const obtenerPresupuesto = async (req, res) => {
         [usuario_id]
       );
 
-      // Guardar SIEMPRE en historicos, aunque no haya gastos
+      // Guardar en historicos
       await pool.query(
         `INSERT INTO historicos 
           (usuario_id, mes, anio, sueldo, total_gastado, saldo_restante, categorias, gastos)
@@ -118,9 +122,12 @@ const obtenerPresupuesto = async (req, res) => {
           JSON.stringify(gastosDetalle.rows),
         ]
       );
-      console.log("✅ Histórico guardado correctamente (incluyendo sin movimientos).");
+      console.log("✅ Histórico guardado correctamente.");
 
-      // Crear nuevo presupuesto del mes actual
+      // 🔹 Eliminar presupuesto viejo
+      await pool.query("DELETE FROM presupuestos WHERE id = $1", [presupuesto.id]);
+
+      // 🔹 Crear nuevo presupuesto del mes actual
       const fechaInicioNueva = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
       const fechaFinNueva = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
 
@@ -129,10 +136,18 @@ const obtenerPresupuesto = async (req, res) => {
         [usuario_id, presupuesto.sueldo, fechaInicioNueva, fechaFinNueva]
       );
 
-      presupuesto = nuevoRes.rows[0]; // el que se devuelve al frontend
+      presupuesto = {
+        ...nuevoRes.rows[0],
+        totalGastos: 0,
+        saldoRestante: nuevoRes.rows[0].sueldo, // saldo = sueldo inicial
+      };
     }
 
-    res.json(presupuesto);
+    res.json({
+      ...presupuesto,
+      totalGastos: presupuesto.totalGastos || 0,
+      saldoRestante: presupuesto.saldoRestante || presupuesto.sueldo,
+    });
   } catch (error) {
     console.error("❌ Error al obtener presupuesto:", error);
     res.status(500).json({ error: "Error al obtener presupuesto" });
