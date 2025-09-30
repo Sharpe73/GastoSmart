@@ -79,6 +79,8 @@ const obtenerPresupuesto = async (req, res) => {
 
       return res.json({
         ...nuevo.rows[0],
+        fecha_inicio: fechaInicioNueva.toISOString().split("T")[0],
+        fecha_fin: fechaFinNueva.toISOString().split("T")[0],
         totalGastos,
         saldoRestante,
       });
@@ -184,6 +186,8 @@ const obtenerPresupuesto = async (req, res) => {
 
       presupuesto = {
         ...nuevoRes.rows[0],
+        fecha_inicio: fechaInicioNueva.toISOString().split("T")[0],
+        fecha_fin: fechaFinNueva.toISOString().split("T")[0],
         totalGastos: totalGastosNuevo,
         saldoRestante: saldoRestanteNuevo,
       };
@@ -203,6 +207,8 @@ const obtenerPresupuesto = async (req, res) => {
 
     res.json({
       ...presupuesto,
+      fecha_inicio: new Date(presupuesto.fecha_inicio).toISOString().split("T")[0],
+      fecha_fin: new Date(presupuesto.fecha_fin).toISOString().split("T")[0],
       totalGastos: presupuesto.totalGastos || 0,
       saldoRestante: presupuesto.saldoRestante || presupuesto.sueldo,
     });
@@ -242,8 +248,8 @@ const obtenerSaldo = async (req, res) => {
       sueldo: parseFloat(presupuesto.sueldo),
       totalGastos,
       saldoRestante,
-      fecha_inicio: presupuesto.fecha_inicio,
-      fecha_fin: presupuesto.fecha_fin,
+      fecha_inicio: new Date(presupuesto.fecha_inicio).toISOString().split("T")[0],
+      fecha_fin: new Date(presupuesto.fecha_fin).toISOString().split("T")[0],
     });
   } catch (error) {
     console.error("❌ Error al obtener saldo:", error);
