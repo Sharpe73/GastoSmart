@@ -56,43 +56,37 @@ function Presupuesto() {
     }).format(valor);
   };
 
+  // 🔹 Cargar siempre desde /presupuesto/saldo
   useEffect(() => {
-    const fetchPresupuesto = async () => {
+    const fetchSaldo = async () => {
       try {
-        const res = await API.get("/presupuesto");
+        const res = await API.get("/presupuesto/saldo");
+        setSaldo(res.data);
+
+        // llenar inputs desde saldo
         if (res.data) {
           setSueldo(res.data.sueldo);
           setFechaInicio(res.data.fecha_inicio);
           setFechaFin(res.data.fecha_fin);
         }
       } catch (error) {
-        console.error("Error al cargar presupuesto:", error);
-      }
-    };
-
-    const fetchSaldo = async () => {
-      try {
-        const res = await API.get("/presupuesto/saldo");
-        setSaldo(res.data);
-      } catch (error) {
         console.error("Error al obtener saldo:", error);
       }
     };
 
-    fetchPresupuesto();
     fetchSaldo();
   }, []);
 
   const handleGuardar = async () => {
     try {
-      const res = await API.post("/presupuesto", {
+      await API.post("/presupuesto", {
         sueldo,
         fecha_inicio: fechaInicio,
         fecha_fin: fechaFin,
       });
       setMensaje("✅ Presupuesto guardado correctamente");
-      console.log("Presupuesto guardado:", res.data);
 
+      // refrescar datos
       const saldoRes = await API.get("/presupuesto/saldo");
       setSaldo(saldoRes.data);
     } catch (error) {
@@ -185,7 +179,7 @@ function Presupuesto() {
 
       {saldo && saldo.sueldo && (
         <Grid container spacing={2} sx={{ mt: 3 }} alignItems="stretch">
-          {[ 
+          {[
             {
               titulo: "Sueldo inicial",
               valor: formatCLP(saldo.sueldo),
