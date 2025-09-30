@@ -53,10 +53,9 @@ const obtenerPresupuesto = async (req, res) => {
     const usuario_id = req.user.id;
     const hoy = new Date();
 
-    // ✅ Buscar el presupuesto vigente del mes actual (no solo el último creado)
     const result = await pool.query(
-      "SELECT * FROM presupuestos WHERE usuario_id = $1 AND fecha_inicio <= $2 AND fecha_fin >= $2 ORDER BY created_at DESC LIMIT 1",
-      [usuario_id, hoy]
+      "SELECT * FROM presupuestos WHERE usuario_id = $1 ORDER BY created_at DESC LIMIT 1",
+      [usuario_id]
     );
 
     // 🚀 Si no hay presupuesto → crear uno inicial vacío automáticamente
@@ -199,12 +198,11 @@ const obtenerPresupuesto = async (req, res) => {
 const obtenerSaldo = async (req, res) => {
   try {
     const usuario_id = req.user.id;
-    const hoy = new Date();
 
-    // ✅ Buscar el presupuesto vigente del mes actual
+    // Traer el presupuesto más reciente
     const presupuestoRes = await pool.query(
-      "SELECT * FROM presupuestos WHERE usuario_id = $1 AND fecha_inicio <= $2 AND fecha_fin >= $2 ORDER BY created_at DESC LIMIT 1",
-      [usuario_id, hoy]
+      "SELECT * FROM presupuestos WHERE usuario_id = $1 ORDER BY created_at DESC LIMIT 1",
+      [usuario_id]
     );
 
     if (presupuestoRes.rows.length === 0) {
@@ -215,7 +213,7 @@ const obtenerSaldo = async (req, res) => {
 
     // Calcular gastos dentro del rango de fechas del presupuesto
     const gastosRes = await pool.query(
-      "SELECT COALESCE(SUM(monto), 0) AS total_gastos FROM gastos WHERE usuario_id = $1 AND fecha BETWEEN $2 AND $3",
+      "SELECT COALESCE(SUM(monto), 0) AS total_gastos FROM gastos WHERE usuario_id = $1 AND fecha >= $2 AND fecha <= $3",
       [usuario_id, presupuesto.fecha_inicio, presupuesto.fecha_fin]
     );
 
