@@ -37,16 +37,8 @@ function Presupuesto() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // 🔹 Normalizar fecha para inputs tipo date (evita desfase por zona horaria)
-  const normalizeDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const offset = date.getTimezoneOffset();
-    date.setMinutes(date.getMinutes() - offset);
-    return date.toISOString().split("T")[0];
-  };
-
-  const formatFecha = (fecha) => {
+  // 🔹 formatea fecha a dd-mm-yyyy para mostrar bonito
+  const formatFechaBonita = (fecha) => {
     if (!fecha) return "";
     const d = new Date(fecha);
     return d.toLocaleDateString("es-CL", {
@@ -54,6 +46,16 @@ function Presupuesto() {
       month: "2-digit",
       day: "2-digit",
     });
+  };
+
+  // 🔹 formatea fecha a yyyy-mm-dd para el input type=date
+  const formatFechaInput = (fecha) => {
+    if (!fecha) return "";
+    const d = new Date(fecha);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   const formatCLP = (valor) => {
@@ -72,11 +74,10 @@ function Presupuesto() {
         const res = await API.get("/presupuesto/saldo");
         setSaldo(res.data);
 
-        // llenar inputs desde saldo
         if (res.data) {
           setSueldo(res.data.sueldo);
-          setFechaInicio(normalizeDate(res.data.fecha_inicio));
-          setFechaFin(normalizeDate(res.data.fecha_fin));
+          setFechaInicio(formatFechaInput(res.data.fecha_inicio));
+          setFechaFin(formatFechaInput(res.data.fecha_fin));
         }
       } catch (error) {
         console.error("Error al obtener saldo:", error);
@@ -213,7 +214,7 @@ function Presupuesto() {
             },
             {
               titulo: "Período",
-              valor: `${formatFecha(saldo.fecha_inicio)} → ${formatFecha(
+              valor: `${formatFechaBonita(saldo.fecha_inicio)} → ${formatFechaBonita(
                 saldo.fecha_fin
               )}`,
               color: "gray",
