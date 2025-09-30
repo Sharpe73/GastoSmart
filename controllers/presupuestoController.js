@@ -106,30 +106,51 @@ const obtenerPresupuesto = async (req, res) => {
         [usuario_id]
       );
 
-      // Guardar en historicos
-      await pool.query(
-        `INSERT INTO historicos 
-          (usuario_id, mes, anio, sueldo, total_gastado, saldo_restante, categorias, gastos)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      // 📌 Validar que no exista ya un histórico duplicado
+      const existeHistorico = await pool.query(
+        `SELECT 1 FROM historicos WHERE usuario_id=$1 AND mes=$2 AND anio=$3`,
         [
           usuario_id,
-          new Date(presupuesto.fecha_fin).getMonth() + 1, // mes
-          new Date(presupuesto.fecha_fin).getFullYear(), // año
-          presupuesto.sueldo,
-          totalGastos,
-          saldoRestante,
-          JSON.stringify(categoriasDetalle.rows),
-          JSON.stringify(gastosDetalle.rows),
+          new Date(presupuesto.fecha_fin).getMonth() + 1,
+          new Date(presupuesto.fecha_fin).getFullYear(),
         ]
       );
-      console.log("✅ Histórico guardado correctamente.");
+
+      if (existeHistorico.rows.length === 0) {
+        await pool.query(
+          `INSERT INTO historicos 
+            (usuario_id, mes, anio, sueldo, total_gastado, saldo_restante, categorias, gastos)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+          [
+            usuario_id,
+            new Date(presupuesto.fecha_fin).getMonth() + 1, // mes
+            new Date(presupuesto.fecha_fin).getFullYear(), // año
+            presupuesto.sueldo,
+            totalGastos,
+            saldoRestante,
+            JSON.stringify(categoriasDetalle.rows),
+            JSON.stringify(gastosDetalle.rows),
+          ]
+        );
+        console.log("✅ Histórico guardado correctamente.");
+      } else {
+        console.log("⚠️ Histórico ya existía, no se insertó duplicado.");
+      }
 
       // 🔹 Eliminar presupuesto viejo
       await pool.query("DELETE FROM presupuestos WHERE id = $1", [presupuesto.id]);
 
-      // 🔹 Crear nuevo presupuesto del mes actual
-      const fechaInicioNueva = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-      const fechaFinNueva = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+      // 🔹 Crear nuevo presupuesto basado en la fecha fin anterior
+      const finAnterior = new Date(presupuesto.fecha_fin);
+
+      const fechaInicioNueva = new Date(finAnterior);
+      fechaInicioNueva.setDate(fechaInicioNueva.getDate() + 1);
+
+      const fechaFinNueva = new Date(
+        fechaInicioNueva.getFullYear(),
+        fechaInicioNueva.getMonth() + 1,
+        0
+      );
 
       const nuevoRes = await pool.query(
         "INSERT INTO presupuestos (usuario_id, sueldo, fecha_inicio, fecha_fin) VALUES ($1,$2,$3,$4) RETURNING *",
