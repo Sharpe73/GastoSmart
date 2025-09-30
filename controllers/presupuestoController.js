@@ -4,7 +4,7 @@ const pool = require("../models/db");
 const crearPresupuesto = async (req, res) => {
   try {
     const { sueldo, fecha_inicio, fecha_fin } = req.body;
-    const usuario_id = req.user.id; // tomado desde el token
+    const usuario_id = req.user.id;
 
     console.log("📌 Datos recibidos en crearPresupuesto:", {
       sueldo,
