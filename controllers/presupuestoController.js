@@ -68,10 +68,19 @@ const obtenerPresupuesto = async (req, res) => {
         [usuario_id, 0, fechaInicioNueva, fechaFinNueva] // sueldo inicial = 0
       );
 
+      // calcular gastos de inmediato
+      const gastosRes = await pool.query(
+        "SELECT COALESCE(SUM(monto),0) as total FROM gastos WHERE usuario_id=$1 AND fecha BETWEEN $2 AND $3",
+        [usuario_id, fechaInicioNueva, fechaFinNueva]
+      );
+
+      const totalGastos = parseFloat(gastosRes.rows[0].total) || 0;
+      const saldoRestante = 0 - totalGastos;
+
       return res.json({
         ...nuevo.rows[0],
-        totalGastos: 0,
-        saldoRestante: 0,
+        totalGastos,
+        saldoRestante,
       });
     }
 
@@ -164,10 +173,19 @@ const obtenerPresupuesto = async (req, res) => {
         [usuario_id, presupuesto.sueldo, fechaInicioNueva, fechaFinNueva]
       );
 
+      // 📌 recalcular gastos del nuevo periodo
+      const gastosNuevoRes = await pool.query(
+        "SELECT COALESCE(SUM(monto),0) as total FROM gastos WHERE usuario_id=$1 AND fecha BETWEEN $2 AND $3",
+        [usuario_id, fechaInicioNueva, fechaFinNueva]
+      );
+
+      const totalGastosNuevo = parseFloat(gastosNuevoRes.rows[0].total) || 0;
+      const saldoRestanteNuevo = parseFloat(nuevoRes.rows[0].sueldo) - totalGastosNuevo;
+
       presupuesto = {
         ...nuevoRes.rows[0],
-        totalGastos: 0,
-        saldoRestante: nuevoRes.rows[0].sueldo, // saldo = sueldo inicial
+        totalGastos: totalGastosNuevo,
+        saldoRestante: saldoRestanteNuevo,
       };
     } else {
       // 📌 Si el presupuesto sigue vigente → calcular gastos en tiempo real
