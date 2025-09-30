@@ -169,6 +169,18 @@ const obtenerPresupuesto = async (req, res) => {
         totalGastos: 0,
         saldoRestante: nuevoRes.rows[0].sueldo, // saldo = sueldo inicial
       };
+    } else {
+      // 📌 Si el presupuesto sigue vigente → calcular gastos en tiempo real
+      const gastosRes = await pool.query(
+        "SELECT COALESCE(SUM(monto), 0) AS total_gastos FROM gastos WHERE usuario_id = $1 AND fecha BETWEEN $2 AND $3",
+        [usuario_id, presupuesto.fecha_inicio, presupuesto.fecha_fin]
+      );
+
+      const totalGastos = parseFloat(gastosRes.rows[0].total_gastos);
+      const saldoRestante = parseFloat(presupuesto.sueldo) - totalGastos;
+
+      presupuesto.totalGastos = totalGastos;
+      presupuesto.saldoRestante = saldoRestante;
     }
 
     res.json({
