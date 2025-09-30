@@ -1,4 +1,4 @@
-const pool = require("../models/db"); // 👈 conexión a la BD
+const pool = require("../models/db");
 
 // Crear un nuevo presupuesto
 const crearPresupuesto = async (req, res) => {
